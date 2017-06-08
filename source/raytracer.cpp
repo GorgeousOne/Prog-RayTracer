@@ -22,11 +22,7 @@ int main(int argc, char* argv[])
     if (win.get_key(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
       win.close();
     }
-
-    glDrawPixels( width, height, GL_RGB, GL_FLOAT
-                , app.colorbuffer().data());
-
-    win.update();
+    win.show(app.colorbuffer());
   }
 
   thr.join();

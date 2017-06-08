@@ -14,6 +14,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <vector>
 
 #define GLM_FORCE_RADIANS
 #include <glm/vec2.hpp>
@@ -70,12 +71,16 @@ public:
   // time elapsed since GLFW was initialized
   float get_time() const;
 
+  void show(std::vector<Color> const& colorbuffer);
+
 private:
   GLFWwindow* m_window;
   glm::ivec2 m_windowSize;
   glm::ivec2 m_framebufferSize;
   std::string const m_title;
-
+  GLuint m_vao = 0;
+  GLuint m_program = 0;
+  GLuint m_texture = 0;
 };
 
 #endif // define BUW_WINDOW_HPP
