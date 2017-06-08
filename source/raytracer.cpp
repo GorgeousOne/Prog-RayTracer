@@ -1,6 +1,10 @@
-#include <thread>
 #include <renderer.hpp>
-#include <fensterchen.hpp>
+#include <window.hpp>
+
+#include <GLFW/glfw3.h>
+#include <thread>
+#include <utility>
+#include <cmath>
 
 int main(int argc, char* argv[])
 {
@@ -8,15 +12,15 @@ int main(int argc, char* argv[])
   unsigned const height = 600;
   std::string const filename = "./checkerboard.ppm";
 
-  Renderer app(width, height, filename);
+  Renderer app{width, height, filename};
 
   std::thread thr([&app]() { app.render(); });
 
-  Window win(glm::ivec2(width,height));
+  Window win{glm::ivec2{width,height}};
 
-  while (!win.shouldClose()) {
-    if (win.isKeyPressed(GLFW_KEY_ESCAPE)) {
-      win.stop();
+  while (!win.should_close()) {
+    if (win.get_key(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+      win.close();
     }
 
     glDrawPixels( width, height, GL_RGB, GL_FLOAT

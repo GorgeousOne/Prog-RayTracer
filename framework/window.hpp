@@ -23,6 +23,7 @@
 #include <array>
 #include <string>
 
+struct GLFWwindow;
 class Window
 {
 public:
@@ -44,43 +45,37 @@ public:
     KEY_REPEAT  = GLFW_REPEAT
   };
 
-  void drawLine(glm::vec2 const& start,
-                glm::vec2 const& end,
-                Color const& color
-                ) const;
 
-  void drawLine(float startX, float startY,
-                float endX, float endY,
-                float r, float g, float b
-                ) const;
+  glm::vec2 mouse_position() const;
 
+  // is closed flag set
+  bool should_close() const;
 
+  // close window
+  void close();
 
-  void drawPoint(glm::vec2 const& p, Color const& col) const;
-
-  void drawPoint(float x, float y, float r, float g, float b) const;
-
-  glm::vec2 mousePosition() const;
-
-  bool shouldClose() const;
-  void stop();
+  // update window
   void update();
-  inline bool isKeyPressed(int key) const { return m_keypressed[key]; }
-  glm::ivec2 windowSize() const;
-  float getTime() const;
+
+  // test if given key is pressed
+  // See here for key codes:
+  // http://www.glfw.org/docs/latest/group__keys.html
+  int get_key(int key) const;
+  int get_mouse_button(int button) const;
+
+
+  // current window size
+  glm::ivec2 window_size() const;
+
+  // time elapsed since GLFW was initialized
+  float get_time() const;
 
 private:
   GLFWwindow* m_window;
-  glm::ivec2 m_size;
+  glm::ivec2 m_windowSize;
+  glm::ivec2 m_framebufferSize;
   std::string const m_title;
-  glm::vec2 m_mousePosition;
 
-  int m_mouseButtonFlags;
-  std::array<bool, 512> m_keypressed;
-
-  static void cursorPositionCallback(GLFWwindow* win, double x, double y);
-  static void mouseButtonCallback(GLFWwindow* win, int button, int action, int mods);
-  static void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods);
 };
 
 #endif // define BUW_WINDOW_HPP

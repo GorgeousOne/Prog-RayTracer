@@ -10,3 +10,7 @@ add_library(${FRAMEWORK_NAME} STATIC glew.c
   ${FRAMEWORK_SOURCE}
   ${FRAMEWORK_INLINE}
   ${FRAMEWORK_HEADER})
+target_link_libraries(${FRAMEWORK_NAME}
+  ${OPENGL_LIBRARIES}
+  ${GLFW_LIBRARIES}
+  )
