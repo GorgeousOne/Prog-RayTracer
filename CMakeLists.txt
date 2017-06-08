@@ -48,6 +48,9 @@ endif()
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/external/${NANOVG_DIRECTORY}/example/Roboto-Regular.ttf DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/external/${NANOVG_DIRECTORY}/example/Roboto-Regular.ttf DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/source/)
 
+# Use catch for testing
+set(CATCH_DIRECTORY catch-1.5)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/${CATCH_DIRECTORY})
 
 set(GLM_DIRECTORY glm-0.9.5.3)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/${GLM_DIRECTORY})
@@ -56,13 +59,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/${GLM_DIRECTORY})
 # Add libraries to executables
 
 set(LIBRARIES glfw ${GLFW_LIBRARIES})
-set(CATCH_DIRECTORY catch-1.5)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/${CATCH_DIRECTORY})
-
-option(FENSTERCHEN_AUTOMATED_TESTS "FENSTERCHEN_AUTOMATED_TESTS" OFF)
-if(FENSTERCHEN_AUTOMATED_TESTS)
-  add_definitions(-DAUTOMATED_TESTS)
-endif()
 
 if(MSVC)
   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
