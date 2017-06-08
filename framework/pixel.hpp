@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------
-// Copyright  : (C) 2014 Andre Schollmeyer and Andreas-C. Bernstein
+// Copyright  : (C) 2014-2017 Andre Schollmeyer and Andreas-C. Bernstein
 // License    : MIT (see the file LICENSE)
 // Maintainer : Andreas-C. Bernstein <andreas.bernstein@uni-weimar.de>
 // Stability  : experimental
