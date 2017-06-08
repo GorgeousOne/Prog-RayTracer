@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------
-// Copyright  : (C) 2014 Andreas-C. Bernstein
+// Copyright  : (C) 2014-17 Andreas-C. Bernstein
 // License    : MIT (see the file LICENSE)
 // Maintainer : Andreas-C. Bernstein <andreas.bernstein@uni-weimar.de>
 // Stability  : experimental
