@@ -211,10 +211,10 @@ void Window::show(std::vector<Color> const& colorbuffer)
   glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_windowSize.x, m_windowSize.y, GL_RGB, GL_FLOAT, colorbuffer.data());
   glBindVertexArray(m_vao);
   glUseProgram(m_program);
-  //glBindTexture(GL_TEXTURE_2D, image);
+  glBindTexture(GL_TEXTURE_2D, m_texture);
   glDrawArrays(GL_TRIANGLES, 0, 3);
   glBindVertexArray(0);
-  //glBindTexture(GL_TEXTURE_2D, 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
   glUseProgram(0);
   update();
 }
