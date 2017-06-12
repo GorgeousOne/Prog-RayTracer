@@ -36,7 +36,7 @@ out vec4 FragColor;
 
 void main()
 {
-  vec4 color = texture2D(image, v_texCoord).rgba;
+  vec4 color = texture(image, v_texCoord).rgba;
   FragColor = color;
 }
 )";
