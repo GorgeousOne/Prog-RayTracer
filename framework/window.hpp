@@ -28,7 +28,7 @@ struct GLFWwindow;
 class Window
 {
 public:
-  Window(glm::ivec2 const& windowsize = glm::ivec2(640, 480));
+  Window(glm::ivec2 const& window_size = {640, 480});
   ~Window();
 
   enum MouseButton
@@ -64,23 +64,22 @@ public:
   int get_key(int key) const;
   int get_mouse_button(int button) const;
 
-
   // current window size
   glm::ivec2 window_size() const;
 
   // time elapsed since GLFW was initialized
   float get_time() const;
 
-  void show(std::vector<Color> const& colorbuffer);
+  void show(std::vector<Color> const& color_buffer);
 
 private:
-  GLFWwindow* m_window;
-  glm::ivec2 m_windowSize;
-  glm::ivec2 m_framebufferSize;
-  std::string const m_title;
-  GLuint m_vao = 0;
-  GLuint m_program = 0;
-  GLuint m_texture = 0;
+  GLFWwindow*       window_;
+  glm::ivec2        window_size_;
+  glm::ivec2        frame_buffer_size_;
+  std::string const title_;
+  GLuint            vao_     = 0;
+  GLuint            program_ = 0;
+  GLuint            texture_ = 0;
 };
 
 #endif // define BUW_WINDOW_HPP

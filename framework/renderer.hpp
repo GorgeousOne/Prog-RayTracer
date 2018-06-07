@@ -24,15 +24,15 @@ public:
   void render();
   void write(Pixel const& p);
 
-  inline std::vector<Color> const& colorbuffer() const
+  inline std::vector<Color> const& color_buffer() const
   {
-    return colorbuffer_;
+    return color_buffer_;
   }
 
 private:
   unsigned width_;
   unsigned height_;
-  std::vector<Color> colorbuffer_;
+  std::vector<Color> color_buffer_;
   std::string filename_;
   PpmWriter ppm_;
 };
