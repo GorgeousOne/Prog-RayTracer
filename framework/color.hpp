@@ -15,9 +15,6 @@
 struct Color
 {
   Color(float red, float green, float blue) : r(red), g(green), b(blue) {}
-  float r;
-  float g;
-  float b;
 
   friend std::ostream& operator<<(std::ostream& os, Color const& c)
   {
@@ -54,6 +51,10 @@ struct Color
     tmp -= b;
     return tmp;
   }
+
+  float r;
+  float g;
+  float b;
 };
 
 #endif //#define BUW_COLOR_HPP
