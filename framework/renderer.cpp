@@ -12,7 +12,7 @@
 Renderer::Renderer(unsigned w, unsigned h, std::string const& file)
   : width_(w)
   , height_(h)
-  , color_buffer_(w*h, Color(0.0, 0.0, 0.0))
+  , color_buffer_(w*h, Color{0.0, 0.0, 0.0})
   , filename_(file)
   , ppm_(width_, height_)
 {}
@@ -25,9 +25,9 @@ void Renderer::render()
     for (unsigned x = 0; x < width_; ++x) {
       Pixel p(x,y);
       if ( ((x/checker_pattern_size)%2) != ((y/checker_pattern_size)%2)) {
-        p.color = Color(0.0, 1.0, float(x)/height_);
+        p.color = Color{0.0f, 1.0f, float(x)/height_};
       } else {
-        p.color = Color(1.0, 0.0, float(y)/width_);
+        p.color = Color{1.0f, 0.0f, float(y)/width_};
       }
 
       write(p);
