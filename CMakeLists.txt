@@ -1,27 +1,13 @@
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-cmake_policy(VERSION 2.8)
+cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
+cmake_policy(VERSION 3.14)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(FRAMEWORK_NAME framework)
 
 project(raytracer)
 
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++20" COMPILER_SUPPORTS_CXX20)
-CHECK_CXX_COMPILER_FLAG("-std=c++17" COMPILER_SUPPORTS_CXX17)
-CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-
-if(COMPILER_SUPPORTS_CXX20)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
-elseif(COMPILER_SUPPORTS_CXX17)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-elseif(COMPILER_SUPPORTS_CXX14)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
-elseif(COMPILER_SUPPORTS_CXX11)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-else()
-  message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-endif()
 
 if(CMAKE_CURRENT_SOURCE_DIR EQUAL CMAKE_CURRENT_BINARY_DIR)
   message(FATAL_ERROR "Source and binary directories must be different")
@@ -61,7 +47,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/external/${NANOVG_DIRECTORY}/example/Robot
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/external/${NANOVG_DIRECTORY}/example/Roboto-Regular.ttf DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/source/)
 
 # Use catch for testing
-set(CATCH_DIRECTORY catch-1.5)
+set(CATCH_DIRECTORY catch2)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/${CATCH_DIRECTORY})
 
 set(GLM_DIRECTORY glm-0.9.5.3)
