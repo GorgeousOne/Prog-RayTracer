@@ -24,3 +24,6 @@ checkerboard.ppm
 
 build
 cmake_out
+cmake-build-debug
+
+.idea
