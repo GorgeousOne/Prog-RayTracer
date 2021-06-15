@@ -8,5 +8,5 @@ float Sphere::area() const {
 }
 
 float Sphere::volume() const {
-	return 4.0f / 3.0f * PI * pow(radius_, 3);
+	return 4.0f / 3.0f * PI * std::abs(pow(radius_, 3));
 }
