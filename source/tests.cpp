@@ -7,6 +7,7 @@
 
 #define PI 3.14159265f
 
+//Aufgabe 5.2
 TEST_CASE("create a sphere", "[geometry]") {
 	Sphere s0{1};
 	REQUIRE(4 * PI == Approx(s0.area()));

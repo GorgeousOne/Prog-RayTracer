@@ -1,4 +1,5 @@
 #include "Box.h"
+#include "Shape.cpp"
 
 float Box::size_x() const {
 	return max_.x - min_.x;
@@ -20,4 +21,8 @@ float Box::area() const {
 
 float Box::volume() const {
 	return size_x() * size_y() * size_z();
+}
+
+std::ostream &Box::print(std::ostream &os) const {
+	return Shape::print(os);
 }
