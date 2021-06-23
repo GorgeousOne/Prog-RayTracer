@@ -4,9 +4,15 @@ Box::Box(glm::vec3 const& min, glm::vec3 const& max, std::string const& name, Co
 		Shape(name, color),
 		min_(min),
 		max_(max) {
-	assert(min.x <= max.x);
-	assert(min.y <= max.y);
-	assert(min.z <= max.z);
+
+	if (min.x > max.x || min.y > max.y || min.z > max.z) {
+		throw "Box minimum cannot be greater than maximum";
+	}
+	std::cout << "created " << *this << std::endl << std::endl;
+}
+
+Box::~Box() {
+	std::cout << "destroyed " << *this;
 }
 
 float Box::size_x() const {
@@ -32,5 +38,6 @@ float Box::volume() const {
 }
 
 std::ostream& Box::print(std::ostream &os) const {
-	return Shape::print(os);
+	Shape::print(os);
+	return os << "min:" << min_ << "\nmax: " << max_;
 }

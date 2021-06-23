@@ -9,7 +9,13 @@
 Sphere::Sphere(float radius, glm::vec3 const& center, std::string const& name, Color const& color) :
 		Shape(name, color),
 		radius_(std::abs(radius)),
-		center_(center) {}
+		center_(center) {
+	std::cout << "created " << *this << std::endl << std::endl;
+}
+
+Sphere::~Sphere() {
+	std::cout << "destroyed " << *this << std::endl << std::endl;
+}
 
 float Sphere::area() const {
 	return 4.0f * PI * pow(radius_, 2);
@@ -20,7 +26,8 @@ float Sphere::volume() const {
 }
 
 std::ostream& Sphere::print(std::ostream &os) const {
-	return Shape::print(os);
+	Shape::print(os);
+	return os << "radius: " << radius_ << "\ncenter: " << center_;
 }
 
 //Aufgabe 5.6

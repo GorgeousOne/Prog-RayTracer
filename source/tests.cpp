@@ -38,7 +38,7 @@ TEST_CASE("create cuboid", "[geometry]") {
 }
 
 //Aufgabe 5.6
-TEST_CASE ("intersect_ray_sphere", "[intersect]") {
+TEST_CASE("intersect_ray_sphere", "[intersect]") {
 	// Ray
 	glm::vec3 ray_origin{0.0f, 0.0f, 0.0f};
 	glm::vec3 ray_direction{0.0f, 0.0f, 1.0f};
@@ -57,8 +57,9 @@ TEST_CASE ("intersect_ray_sphere", "[intersect]") {
 	REQUIRE(distance == Approx(4.0f));
 }
 
-TEST_CASE ("intersect_ray_sphere2", "[intersect]") {
-	Ray ray{{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}};
+TEST_CASE("intersect_ray_sphere2", "[intersect]") {
+	Ray ray{{0.0f, 0.0f, 0.0f},
+	        {0.0f, 0.0f, 1.0f}};
 
 	Sphere sphere0{2.0f, {0.0f, 0.0f, 10.0f}};
 	HitPoint hit0 = sphere0.intersect(ray);
@@ -76,6 +77,21 @@ TEST_CASE ("intersect_ray_sphere2", "[intersect]") {
 	REQUIRE(true == hit2.does_intersect);
 	REQUIRE(10.0f == hit2.intersection_distance);
 	REQUIRE(glm::vec3{0.0f, 0.0f, 10.0f} == hit2.intersection_point);
+}
+
+//Aufgabe 5.8
+TEST_CASE("virtual_destructor", "[destruct]") {
+	Color red{255, 0, 0};
+	glm::vec3 position{0.0f, 0.0f, 0.0f};
+
+	auto *s1 = new Sphere{1.2f, position, "sphere0", red};
+	Shape *s2 = new Sphere{1.2f, position, "sphere1", red};
+
+	s1->print(std::cout) << std::endl << std::endl;
+	s2->print(std::cout) << std::endl << std::endl;
+
+	delete s1;
+	delete s2;
 }
 
 int main(int argc, char *argv[]) {

@@ -3,12 +3,15 @@
 
 #include <string>
 #include "color.hpp"
+#include <glm/vec3.hpp>
 
 class Shape {
 
 public:
 
 	Shape(std::string const& name, Color const &color);
+	virtual ~Shape();
+
 	virtual float area() const = 0;
 	virtual float volume() const = 0;
 
@@ -22,4 +25,5 @@ protected:
 
 std::ostream& operator<<(std::ostream& os, Shape const& s);
 
+std::ostream& operator<<(std::ostream &os, glm::vec3 const& v);
 #endif
