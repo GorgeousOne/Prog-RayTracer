@@ -15,7 +15,7 @@ public:
 	// Aufgabe 5.4
 	virtual std::ostream& print (std::ostream& os) const;
 
-private:
+protected:
 	std::string name_;
 	Color color_;
 };

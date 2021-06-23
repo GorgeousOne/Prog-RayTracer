@@ -7,14 +7,7 @@
 class Box : public Shape {
 
 public:
-	Box(glm::vec3 const& min = glm::vec3(0.0), glm::vec3 const& max = glm::vec3(0.0), std::string const& name = "box", Color const& color = {}) :
-			Shape(name, color),
-			min_(min),
-			max_(max) {
-		assert(min.x <= max.x);
-		assert(min.y <= max.y);
-		assert(min.z <= max.z);
-	}
+	Box(glm::vec3 const& min = glm::vec3(0.0), glm::vec3 const& max = glm::vec3(0.0), std::string const& name = "box", Color const& color = {});
 
 	float area() const override;
 	float volume() const override;
