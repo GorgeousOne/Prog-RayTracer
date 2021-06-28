@@ -25,9 +25,10 @@ float Sphere::volume() const {
 	return 4.0f / 3.0f * PI * std::abs(pow(radius_, 3));
 }
 
+//Aufgabe 5.5
 std::ostream& Sphere::print(std::ostream &os) const {
 	Shape::print(os);
-	return os << "radius: " << radius_ << "\ncenter: " << center_;
+	return os << "radius: " << radius_ << "\ncenter: " << center_ << std::endl;
 }
 
 //Aufgabe 5.6

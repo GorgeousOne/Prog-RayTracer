@@ -39,5 +39,5 @@ float Box::volume() const {
 
 std::ostream& Box::print(std::ostream &os) const {
 	Shape::print(os);
-	return os << "min:" << min_ << "\nmax: " << max_;
+	return os << "min:" << min_ << "\nmax: " << max_ << std::endl;
 }

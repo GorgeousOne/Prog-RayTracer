@@ -26,15 +26,22 @@ TEST_CASE("create a sphere", "[geometry]") {
 }
 
 TEST_CASE("create cuboid", "[geometry]") {
-	Box b0{{0, 0, 0},
-	       {1, 2, 3}};
+	Box b0{{0, 0, 0}, {1, 2, 3}};
 	REQUIRE(22 == b0.area());
 	REQUIRE(6 == b0.volume());
 
-	Box b1{{-1, -1, -1},
-	       {1,  1,  1}};
+	Box b1{{-1, -1, -1}, {1,  1,  1}};
 	REQUIRE(24 == b1.area());
 	REQUIRE(8 == b1.volume());
+}
+
+//Aufgabe 5.5
+TEST_CASE("print shapes", "[print]") {
+	Box b{{0, 0, 0}, {1, 2, 3}};
+	b.print(std::cout);
+
+	Sphere s{1};
+	s.print(std::cout);
 }
 
 //Aufgabe 5.6
