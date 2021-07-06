@@ -4,6 +4,8 @@
 #include <string>
 #include "color.hpp"
 #include <glm/vec3.hpp>
+#include "HitPoint.hpp"
+#include "Ray.hpp"
 
 class Shape {
 
@@ -14,6 +16,7 @@ public:
 
 	virtual float area() const = 0;
 	virtual float volume() const = 0;
+	virtual HitPoint intersect(Ray const& ray, float &t) const = 0;
 
 	// Aufgabe 5.4
 	virtual std::ostream& print (std::ostream& os) const;

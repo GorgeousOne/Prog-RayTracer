@@ -1,8 +1,8 @@
-#include "Shape.h"
+#include "Shape.hpp"
 
-Shape::Shape(std::string const& name, Color const &color) :
+Shape::Shape(std::string const& name, std::shared_ptr<Material> material) :
 		name_{name},
-		color_{color} {
+		material_{material} {
 	std::cout << "created " << *this << std::endl << std::endl;
 }
 
@@ -12,7 +12,7 @@ Shape::~Shape() {
 
 //Aufgabe 5.4
 std::ostream& Shape::print(std::ostream &os) const {
-	return os << "=== " << name_ << " ===" << "\ncolor:"<< color_;
+	return os << "=== " << name_ << " ===" << "\ncolor:"<< material_;
 }
 
 std::ostream& operator<<(std::ostream &os, Shape const& s) {

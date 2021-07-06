@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/intersect.hpp>
 
-#include "Sphere.h"
+#include "Sphere.hpp"
 #include "Box.h"
 
 #define PI 3.14159265f
@@ -33,6 +33,10 @@ TEST_CASE("create cuboid", "[geometry]") {
 	Box b1{{-1, -1, -1}, {1,  1,  1}};
 	REQUIRE(24 == b1.area());
 	REQUIRE(8 == b1.volume());
+
+	Box b2{{}, {}};
+
+	REQUIRE_THROWS(Box{{0, 0, 0}, {-1, -1, -1}});
 }
 
 //Aufgabe 5.5
@@ -65,21 +69,22 @@ TEST_CASE("intersect_ray_sphere", "[intersect]") {
 }
 
 TEST_CASE("intersect_ray_sphere2", "[intersect]") {
+	float t;
 	Ray ray{{0.0f, 0.0f, 0.0f},
 	        {0.0f, 0.0f, 1.0f}};
 
 	Sphere sphere0{2.0f, {0.0f, 0.0f, 10.0f}};
-	HitPoint hit0 = sphere0.intersect(ray);
+	HitPoint hit0 = sphere0.intersect(ray, t);
 	REQUIRE(true == hit0.does_intersect);
 	REQUIRE(8.0f == hit0.intersection_distance);
 	REQUIRE(glm::vec3{0.0f, 0.0f, 8.0f} == hit0.intersection_point);
 
 	Sphere sphere1{2.0f, {4.0f, 0.0f, 10.0f}};
-	HitPoint hit1 = sphere1.intersect(ray);
+	HitPoint hit1 = sphere1.intersect(ray, t);
 	REQUIRE(false == hit1.does_intersect);
 
 	Sphere sphere2{2.0f, {2.0f, 0.0f, 10.0f}};
-	HitPoint hit2 = sphere2.intersect(ray);
+	HitPoint hit2 = sphere2.intersect(ray, t);
 
 	REQUIRE(true == hit2.does_intersect);
 	REQUIRE(10.0f == hit2.intersection_distance);
@@ -88,11 +93,10 @@ TEST_CASE("intersect_ray_sphere2", "[intersect]") {
 
 //Aufgabe 5.8
 TEST_CASE("virtual_destructor", "[destruct]") {
-	Color red{255, 0, 0};
 	glm::vec3 position{0.0f, 0.0f, 0.0f};
 
-	auto *s1 = new Sphere{1.2f, position, "sphere0", red};
-	Shape *s2 = new Sphere{1.2f, position, "sphere1", red};
+	auto *s1 = new Sphere{1.2f, position, "sphere0"};
+	Shape *s2 = new Sphere{1.2f, position, "sphere1"};
 
 	s1->print(std::cout) << std::endl << std::endl;
 	s2->print(std::cout) << std::endl << std::endl;

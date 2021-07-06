@@ -18,11 +18,12 @@ install(TARGETS raytracer DESTINATION .)
 # Build tests
 add_executable(tests
         tests.cpp
-        ../framework/Shape.h ../framework/Shape.cpp
-        ../framework/Sphere.h ../framework/Sphere.cpp
+        ../framework/Shape.hpp ../framework/Shape.cpp
+        ../framework/Sphere.hpp ../framework/Sphere.cpp
         ../framework/Box.h ../framework/Box.cpp
-        ../framework/Ray.h
-        ../framework/HitPoint.h
+        ../framework/Ray.hpp
+        ../framework/HitPoint.hpp
+        ../framework/Material.hpp ../framework/Material.cpp
         )
 target_link_libraries(tests
         ${GLFW_LIBRARIES}

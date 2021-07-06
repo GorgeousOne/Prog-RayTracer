@@ -1,13 +1,13 @@
 #ifndef RAYTRACER_CUBE_H
 #define RAYTRACER_CUBE_H
 
-#include "Shape.h"
+#include "Shape.hpp"
 #include <glm/vec3.hpp>
 
 class Box : public Shape {
 
 public:
-	Box(glm::vec3 const& min = glm::vec3(0.0), glm::vec3 const& max = glm::vec3(0.0), std::string const& name = "box", Color const& color = {});
+	Box(glm::vec3 const& min = glm::vec3(0.0), glm::vec3 const& max = glm::vec3(0.0), std::string const& name = "box", std::shared_ptr<Material> material = {});
 	~Box() override;
 
 	float area() const override;
@@ -17,6 +17,8 @@ public:
 	float size_y() const;
 	float size_z() const;
 	std::ostream& print (std::ostream &os) const override;
+
+	HitPoint intersect(Ray const& ray, float &t) const override;
 
 private:
 	glm::vec3 min_;

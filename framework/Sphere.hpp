@@ -1,9 +1,9 @@
 #ifndef RAYTRACER_SPHERE_H
 #define RAYTRACER_SPHERE_H
 
-#include "Shape.h"
-#include "Ray.h"
-#include "HitPoint.h"
+#include "Shape.hpp"
+#include "Ray.hpp"
+#include "HitPoint.hpp"
 #include <glm/vec3.hpp>
 
 class Sphere : public Shape {
@@ -17,7 +17,7 @@ public:
 	float volume() const override;
 	std::ostream& print(std::ostream &os) const override;
 
-	HitPoint intersect(Ray const& ray);
+	HitPoint intersect(Ray const& ray, float &t) const override;
 
 private:
 	float radius_;

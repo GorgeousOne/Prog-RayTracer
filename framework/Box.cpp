@@ -1,7 +1,7 @@
 #include "Box.h"
 
-Box::Box(glm::vec3 const& min, glm::vec3 const& max, std::string const& name, Color const& color) :
-		Shape(name, color),
+Box::Box(glm::vec3 const& min, glm::vec3 const& max, std::string const& name, std::shared_ptr<Material> material) :
+		Shape(name, material),
 		min_(min),
 		max_(max) {
 
@@ -40,4 +40,8 @@ float Box::volume() const {
 std::ostream& Box::print(std::ostream &os) const {
 	Shape::print(os);
 	return os << "min:" << min_ << "\nmax: " << max_ << std::endl;
+}
+
+HitPoint Box::intersect(Ray const &ray, float &t) const {
+	return HitPoint();
 }

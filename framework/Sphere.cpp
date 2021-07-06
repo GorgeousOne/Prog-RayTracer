@@ -1,4 +1,4 @@
-#include "Sphere.h"
+#include "Sphere.hpp"
 #include <cmath>   //pow
 
 #include <glm/glm.hpp>
@@ -6,8 +6,8 @@
 
 #define PI 3.14159265f
 
-Sphere::Sphere(float radius, glm::vec3 const& center, std::string const& name, Color const& color) :
-		Shape(name, color),
+Sphere::Sphere(float radius, glm::vec3 const& center, std::string const& name, std::shared_ptr<Material> material) :
+		Shape(name, material),
 		radius_(std::abs(radius)),
 		center_(center) {
 	std::cout << "created " << *this << std::endl << std::endl;
@@ -32,7 +32,7 @@ std::ostream& Sphere::print(std::ostream &os) const {
 }
 
 //Aufgabe 5.6
-HitPoint Sphere::intersect(Ray const &ray) {
+HitPoint Sphere::intersect(Ray const &ray, float &t) const {
 	float distance = 0.0f;
 
 	bool result = glm::intersectRaySphere(
@@ -41,5 +41,5 @@ HitPoint Sphere::intersect(Ray const &ray) {
 			radius_ * radius_,
 			distance);
 
-	return HitPoint{result, distance, name_, color_, ray.point(distance), ray.direction};
+	return HitPoint{result, distance, name_, material_, ray.point(distance), ray.direction};
 }
