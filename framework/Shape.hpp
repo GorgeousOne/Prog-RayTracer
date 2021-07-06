@@ -1,17 +1,19 @@
-#ifndef RAYTRACER_SHAPE_H
-#define RAYTRACER_SHAPE_H
+#ifndef RAYTRACER_SHAPE_HPP
+#define RAYTRACER_SHAPE_HPP
 
 #include <string>
 #include "color.hpp"
 #include <glm/vec3.hpp>
+#include <memory>
 #include "HitPoint.hpp"
 #include "Ray.hpp"
+#include "Material.hpp"
 
 class Shape {
 
 public:
 
-	Shape(std::string const& name, Color const &color);
+	Shape(std::string const& name, std::shared_ptr<Material> material);
 	virtual ~Shape();
 
 	virtual float area() const = 0;
@@ -23,7 +25,7 @@ public:
 
 protected:
 	std::string name_;
-	Color color_;
+	std::shared_ptr<Material> material_;
 };
 
 std::ostream& operator<<(std::ostream& os, Shape const& s);

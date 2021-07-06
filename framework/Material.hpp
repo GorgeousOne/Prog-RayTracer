@@ -1,8 +1,21 @@
-//
-// Created by Fred Feuerpferd on 06.07.2021.
-//
 
-#ifndef RAYTRACER_MATERIAL_H
-#define RAYTRACER_MATERIAL_H
+#ifndef RAYTRACER_MATERIAL_HPP
+#define RAYTRACER_MATERIAL_HPP
+#include <string>
+#include "color.hpp"
 
-#endif //RAYTRACER_MATERIAL_H
+struct Material {
+	std::string name = "default";
+	//diffuse reflection coefficient
+	Color kd = {};
+	//ambient coefficient
+	Color ka = {};
+	//specular reflection coefficient
+	Color ks = {};
+	//specular reflection exponent
+	float m = 0;
+};
+
+std::ostream& operator<<(std::ostream& os, Material const& mat);
+
+#endif

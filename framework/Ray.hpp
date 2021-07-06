@@ -1,6 +1,6 @@
 
-#ifndef RAYTRACER_RAY_H
-#define RAYTRACER_RAY_H
+#ifndef RAYTRACER_RAY_HPP
+#define RAYTRACER_RAY_HPP
 
 #include <glm/vec3.hpp>
 

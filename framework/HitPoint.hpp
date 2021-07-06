@@ -1,14 +1,15 @@
 
-#ifndef RAYTRACER_HITPOINT_H
-#define RAYTRACER_HITPOINT_H
+#ifndef RAYTRACER_HITPOINT_HPP
+#define RAYTRACER_HITPOINT_HPP
 #include <glm/vec3.hpp>
 #include "color.hpp"
+#include "Material.hpp"
 
 struct HitPoint {
 	bool does_intersect = false;
 	float intersection_distance = 0.0f;
 	std::string hit_object = "null";
-	Color hit_object_color = Color{};
+	std::shared_ptr<Material> hit_object_color = nullptr;
 	glm::vec3 intersection_point = glm::vec3{};
 	glm::vec3 ray_direction = glm::vec3{};
 };
