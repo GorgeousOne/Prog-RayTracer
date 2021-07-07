@@ -25,6 +25,8 @@ add_executable(tests
         ../framework/hitpoint.hpp
         ../framework/material.hpp ../framework/material.cpp
 	../framework/scene.hpp ../framework/scene.cpp
+		../framework/ambientLight.hpp
+		../framework/pointLight.hpp
         )
 target_link_libraries(tests
         ${GLFW_LIBRARIES}
