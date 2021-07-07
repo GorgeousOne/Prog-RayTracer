@@ -1,0 +1,3 @@
+light bleeding
+camera tilting
+triangle mesh in sdf

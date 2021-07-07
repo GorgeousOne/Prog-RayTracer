@@ -27,6 +27,7 @@ add_executable(tests
 	../framework/scene.hpp ../framework/scene.cpp
 		../framework/ambientLight.hpp
 		../framework/pointLight.hpp
+		../framework/camera.hpp
         )
 target_link_libraries(tests
         ${GLFW_LIBRARIES}
