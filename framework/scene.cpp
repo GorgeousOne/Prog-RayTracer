@@ -2,7 +2,18 @@
 #include <sstream>
 #include "scene.hpp"
 
-Scene loadScene(std::string const& file_path) {
+void add_to_scene(std::istringstream& words_stream, Scene& new_scene) {
+	//streams words of each line
+	std::string token_str = "";
+	words_stream >> token_str;
+
+	int arg_count = std::count(std::istreambuf_iterator<char>(words_stream), std::istreambuf_iterator<char>(), " ");
+
+	if ("material" == token_str) {
+	}
+}
+
+Scene load_scene(std::string const& file_path) {
 	Scene new_scene{};
 
 	std::ifstream input_sdf_file(file_path);
@@ -21,7 +32,7 @@ Scene loadScene(std::string const& file_path) {
 			continue;
 		}
 		if ("define" == token_str) {
-
+			add_to_scene(words_stream, new_scene);
 		} else if ("render") {
 
 		}

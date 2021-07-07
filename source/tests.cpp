@@ -5,8 +5,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/intersect.hpp>
 
-#include "Sphere.hpp"
-#include "Box.h"
+#include "sphere.hpp"
+#include "box.hpp"
+#include "scene.hpp"
 
 #define PI 3.14159265f
 
@@ -106,5 +107,11 @@ TEST_CASE("virtual_destructor", "[destruct]") {
 }
 
 int main(int argc, char *argv[]) {
+
+	Scene scene1{};
+	std::istringstream words_stream("material red 1 2 3 4 5 6 7 8 9 10");
+
+	add_to_scene(words_stream, scene1);
+
 	return Catch::Session().run(argc, argv);
 }

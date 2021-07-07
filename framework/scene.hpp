@@ -14,4 +14,7 @@ struct Scene {
 	AmbientLight ambient{};
 	Camera camera{};
 };
+
+void add_to_scene(std::istringstream& words_stream, Scene& new_scene);
+Scene load_scene(std::string const& file_path);
 #endif

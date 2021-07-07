@@ -1,4 +1,4 @@
-#include "Box.h"
+#include "box.hpp"
 
 Box::Box(glm::vec3 const& min, glm::vec3 const& max, std::string const& name, std::shared_ptr<Material> material) :
 		Shape(name, material),
