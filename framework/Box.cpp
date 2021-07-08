@@ -8,11 +8,6 @@ Box::Box(glm::vec3 const& min, glm::vec3 const& max, std::string const& name, st
 	if (min.x > max.x || min.y > max.y || min.z > max.z) {
 		throw "Box minimum cannot be greater than maximum";
 	}
-	std::cout << "created " << *this << std::endl << std::endl;
-}
-
-Box::~Box() {
-	std::cout << "destroyed " << *this;
 }
 
 float Box::size_x() const {

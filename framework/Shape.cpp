@@ -2,13 +2,7 @@
 
 Shape::Shape(std::string const& name, std::shared_ptr<Material> material) :
 		name_{name},
-		material_{material} {
-	std::cout << "created " << *this << std::endl << std::endl;
-}
-
-Shape::~Shape() {
-	std::cout << "destroyed " << *this << std::endl << std::endl;
-}
+		material_{material} {}
 
 //Aufgabe 5.4
 std::ostream& Shape::print(std::ostream &os) const {

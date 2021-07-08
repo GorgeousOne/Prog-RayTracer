@@ -14,7 +14,6 @@ class Shape {
 public:
 
 	Shape(std::string const& name, std::shared_ptr<Material> material);
-	virtual ~Shape();
 
 	virtual float area() const = 0;
 	virtual float volume() const = 0;

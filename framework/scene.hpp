@@ -9,6 +9,7 @@
 #include <map>
 
 struct Scene {
+	std::map<std::string, std::shared_ptr<Material>> materials{};
 	std::map<std::string, std::shared_ptr<Shape>> shapes{};
 	std::vector<PointLight> lights{};
 	AmbientLight ambient{};

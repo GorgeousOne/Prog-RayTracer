@@ -9,13 +9,7 @@
 Sphere::Sphere(float radius, glm::vec3 const& center, std::string const& name, std::shared_ptr<Material> material) :
 		Shape(name, material),
 		radius_(std::abs(radius)),
-		center_(center) {
-	std::cout << "created " << *this << std::endl << std::endl;
-}
-
-Sphere::~Sphere() {
-	std::cout << "destroyed " << *this << std::endl << std::endl;
-}
+		center_(center) {}
 
 float Sphere::area() const {
 	return 4.0f * PI * pow(radius_, 2);

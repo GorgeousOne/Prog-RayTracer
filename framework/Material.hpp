@@ -6,10 +6,10 @@
 
 struct Material {
 	std::string name = "default";
-	//diffuse reflection coefficient
-	Color kd = {};
 	//ambient coefficient
 	Color ka = {};
+	//diffuse reflection coefficient
+	Color kd = {};
 	//specular reflection coefficient
 	Color ks = {};
 	//specular reflection exponent
