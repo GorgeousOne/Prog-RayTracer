@@ -1,7 +1,7 @@
 #ifndef RAYTRACER_CUBE_H
 #define RAYTRACER_CUBE_H
 
-#include "Shape.hpp"
+#include "shape.hpp"
 #include <glm/vec3.hpp>
 
 class Box : public Shape {

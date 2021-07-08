@@ -2,7 +2,6 @@
 
 #include <catch.hpp>
 #include <glm/vec3.hpp>
-#include <glm/glm.hpp>
 #include <glm/gtx/intersect.hpp>
 
 #include "sphere.hpp"
@@ -106,11 +105,33 @@ TEST_CASE("virtual_destructor", "[destruct]") {
 	delete s2;
 }
 
+TEST_CASE("box_ray_intersection", "[intersect]") {
+//	float t;
+	Ray ray{{0, 0, 0},
+	        {-1, -1, -1}};
+	glm::vec3 ray_dir_inv = glm::vec3{
+			1 / ray.direction.x,
+			1 / ray.direction.y,
+			1 / ray.direction.z,
+	};
+
+	Box box0{{-11, -10, -10}, {-9, -8, -8}};
+	float t;
+	int range = 10000000;
+
+	auto start = std::chrono::steady_clock::now();
+	for (int i = 0; i < range; ++i) {
+		box0.intersect(ray, t);
+	}
+	auto end = std::chrono::steady_clock::now();
+	std::chrono::duration<double> elapsed_seconds = end-start;
+	std::cout << elapsed_seconds.count() << "s\n";
+}
 int main(int argc, char *argv[]) {
 
-	Scene scene1{};
-	std::istringstream words_stream("material red 1 2 3 4 5 6 7 8 9 10");
-	add_to_scene(words_stream, scene1);
+//	Scene scene1{};
+//	std::istringstream words_stream("material red 1 2 3 4 5 6 7 8 9 10");
+//	add_to_scene(words_stream, scene1);
 
 	return Catch::Session().run(argc, argv);
 }

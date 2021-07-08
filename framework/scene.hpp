@@ -1,7 +1,7 @@
 #ifndef RAYTRACER_SCENE_HPP
 #define RAYTRACER_SCENE_HPP
 
-#include "Shape.hpp"
+#include "shape.hpp"
 #include "camera.hpp"
 #include "pointLight.hpp"
 #include "ambientLight.hpp"

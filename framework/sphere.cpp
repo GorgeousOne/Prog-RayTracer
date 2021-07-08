@@ -1,4 +1,4 @@
-#include "Sphere.hpp"
+#include "sphere.hpp"
 #include <cmath>   //pow
 
 #include <glm/glm.hpp>
@@ -22,11 +22,11 @@ float Sphere::volume() const {
 //Aufgabe 5.5
 std::ostream& Sphere::print(std::ostream &os) const {
 	Shape::print(os);
-	return os << "radius: " << radius_ << "\ncenter: " << center_ << std::endl;
+	return os << "\nradius: " << radius_ << "\ncenter: " << center_ << std::endl;
 }
 
 //Aufgabe 5.6
-HitPoint Sphere::intersect(Ray const &ray, float &t) const {
+HitPoint Sphere::intersect(Ray const& ray, float &t) const {
 	float distance = 0.0f;
 
 	bool result = glm::intersectRaySphere(

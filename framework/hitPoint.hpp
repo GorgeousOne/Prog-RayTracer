@@ -3,7 +3,7 @@
 #define RAYTRACER_HITPOINT_HPP
 #include <glm/vec3.hpp>
 #include "color.hpp"
-#include "Material.hpp"
+#include "material.hpp"
 
 struct HitPoint {
 	bool does_intersect = false;

@@ -22,7 +22,7 @@ add_executable(tests
         ../framework/sphere.hpp ../framework/sphere.cpp
         ../framework/box.hpp ../framework/box.cpp
         ../framework/ray.hpp
-        ../framework/hitpoint.hpp
+        ../framework/hitPoint.hpp
         ../framework/material.hpp ../framework/material.cpp
         ../framework/scene.hpp ../framework/scene.cpp
         ../framework/ambientLight.hpp

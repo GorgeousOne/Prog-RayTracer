@@ -5,14 +5,13 @@
 #include "color.hpp"
 #include <glm/vec3.hpp>
 #include <memory>
-#include "HitPoint.hpp"
-#include "Ray.hpp"
-#include "Material.hpp"
+#include "hitPoint.hpp"
+#include "ray.hpp"
+#include "material.hpp"
 
 class Shape {
 
 public:
-
 	Shape(std::string const& name, std::shared_ptr<Material> material);
 
 	virtual float area() const = 0;

@@ -1,4 +1,4 @@
-#include "Shape.hpp"
+#include "shape.hpp"
 
 Shape::Shape(std::string const& name, std::shared_ptr<Material> material) :
 		name_{name},
