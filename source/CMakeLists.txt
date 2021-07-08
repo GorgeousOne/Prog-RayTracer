@@ -20,14 +20,14 @@ add_executable(tests
         tests.cpp
         ../framework/shape.hpp ../framework/shape.cpp
         ../framework/sphere.hpp ../framework/sphere.cpp
-        ../framework/box.h ../framework/box.cpp
+        ../framework/box.hpp ../framework/box.cpp
         ../framework/ray.hpp
         ../framework/hitpoint.hpp
         ../framework/material.hpp ../framework/material.cpp
-	../framework/scene.hpp ../framework/scene.cpp
-		../framework/ambientLight.hpp
-		../framework/pointLight.hpp
-		../framework/camera.hpp
+        ../framework/scene.hpp ../framework/scene.cpp
+        ../framework/ambientLight.hpp
+        ../framework/pointLight.hpp
+        ../framework/camera.hpp
         )
 target_link_libraries(tests
         ${GLFW_LIBRARIES}

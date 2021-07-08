@@ -109,7 +109,7 @@ TEST_CASE("virtual_destructor", "[destruct]") {
 int main(int argc, char *argv[]) {
 
 	Scene scene1{};
-	std::istringstream words_stream("material red 1 2 3 4 5 6 7 8 9 10");
+	std::istringstream words_stream("material red 1 2 3 4 5 6 7 8 9");
 
 	add_to_scene(words_stream, scene1);
 
