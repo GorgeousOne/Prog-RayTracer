@@ -2,16 +2,17 @@
 #ifndef RAYTRACER_MATERIAL_HPP
 #define RAYTRACER_MATERIAL_HPP
 #include <string>
-#include "color.hpp"
+#include <glm/vec3.hpp>
+#include "printVec3.hpp"
 
 struct Material {
 	std::string name = "default";
 	//ambient coefficient
-	Color ka = {};
+	glm::vec3 ka = {};
 	//diffuse reflection coefficient
-	Color kd = {};
+	glm::vec3 kd = {};
 	//specular reflection coefficient
-	Color ks = {};
+	glm::vec3 ks = {};
 	//specular reflection exponent
 	float m = 0;
 };

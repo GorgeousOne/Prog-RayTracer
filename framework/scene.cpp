@@ -6,15 +6,15 @@
 
 void add_mat_to_scene(std::istringstream& arg_stream, Scene& new_scene) {
 	std::string name;
-	Color ka;
-	Color kd;
-	Color ks;
+	glm::vec3 ka;
+	glm::vec3 kd;
+	glm::vec3 ks;
 	float brightness;
 
 	arg_stream >> name;
-	arg_stream >> ka.r >> ka.g >> ka.b;
-	arg_stream >> kd.r >> kd.g >> kd.b;
-	arg_stream >> ks.r >> ks.g >> ks.b;
+	arg_stream >> ka.x >> ka.y >> ka.z;
+	arg_stream >> kd.x >> kd.y >> kd.z;
+	arg_stream >> ks.x >> ks.y >> ks.z;
 	arg_stream >> brightness;
 	new_scene.materials.emplace(name, std::make_shared<Material>(Material{name, ka, kd, ks, brightness}));
 }

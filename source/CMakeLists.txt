@@ -28,6 +28,7 @@ add_executable(tests
         ../framework/ambientLight.hpp
         ../framework/pointLight.hpp
         ../framework/camera.hpp
+        ../framework/printVec3.hpp ../framework/printVec3.cpp
         )
 target_link_libraries(tests
         ${GLFW_LIBRARIES}

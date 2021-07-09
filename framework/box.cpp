@@ -34,7 +34,7 @@ float Box::volume() const {
 
 std::ostream &Box::print(std::ostream &os) const {
 	Shape::print(os);
-	return os << "min:" << min_ << "\nmax: " << max_ << std::endl;
+	return os << "\nmin:" << min_ << "\nmax: " << max_ << std::endl;
 }
 
 HitPoint Box::intersect(Ray const& ray, float &t) const {

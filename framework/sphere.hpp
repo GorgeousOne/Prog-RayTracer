@@ -2,9 +2,6 @@
 #define RAYTRACER_SPHERE_HPP
 
 #include "shape.hpp"
-#include "ray.hpp"
-#include "hitPoint.hpp"
-#include <glm/vec3.hpp>
 
 class Sphere : public Shape {
 

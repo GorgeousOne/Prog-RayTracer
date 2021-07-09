@@ -8,6 +8,7 @@
 #include "hitPoint.hpp"
 #include "ray.hpp"
 #include "material.hpp"
+#include "printVec3.hpp"
 
 class Shape {
 
@@ -28,5 +29,4 @@ protected:
 
 std::ostream& operator<<(std::ostream& os, Shape const& s);
 
-std::ostream& operator<<(std::ostream &os, glm::vec3 const& v);
 #endif
