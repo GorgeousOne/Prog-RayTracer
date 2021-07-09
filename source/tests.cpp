@@ -106,27 +106,49 @@ TEST_CASE("virtual_destructor", "[destruct]") {
 }
 
 TEST_CASE("box_ray_intersection", "[intersect]") {
-//	float t;
-	Ray ray{{0, 0, 0},
-	        {-1, -1, -1}};
-	glm::vec3 ray_dir_inv = glm::vec3{
-			1 / ray.direction.x,
-			1 / ray.direction.y,
-			1 / ray.direction.z,
-	};
+	float t;
+	Box box{{-10, -10, -10}, {10, 10, 10}};
 
-	Box box0{{-11, -10, -10}, {-9, -8, -8}};
+	//ray intersects box
+	HitPoint hit0 = box.intersect(Ray{{5, 5, -20}, {0, 0, 1}}, t);
+	REQUIRE(true == hit0.does_intersect);
+	REQUIRE(10 == hit0.intersection_distance);
+	REQUIRE(glm::vec3{5, 5, -10} == hit0.intersection_point);
+
+	//axis aligned ray does not intersect box
+	HitPoint hit1 = box.intersect(Ray{{20, 20, 0}, {0, 0, 1}}, t);
+	REQUIRE(false == hit1.does_intersect);
+
+	//random ray does not intersect box
+	HitPoint hit5 = box.intersect(Ray{{-20, -20, -20}, {1, 20, 1}}, t);
+	REQUIRE(false == hit1.does_intersect);
+
+	//ray with negative direction intersects box
+	HitPoint hit2 = box.intersect(Ray{{10, 30, 10}, {-1, -1, -1}}, t);
+	REQUIRE(true == hit2.does_intersect);
+	REQUIRE(20 == hit2.intersection_distance);
+	REQUIRE(glm::vec3{-10, 10, -10} == hit2.intersection_point);
+
+	//ray points away from box
+	HitPoint hit3 = box.intersect(Ray{{0, 0, 20}, {0, 0, 1}}, t);
+	REQUIRE(false == hit3.does_intersect);
+}
+
+TEST_CASE("box_ray_intersection_speed", "[intersect]") {
+	Box box{{0, 0, 0}, {1, 1, 1}};
+	Ray ray{{0.5f, 0.5f, -10}, {0, 0, 1}};
 	float t;
 	int range = 10000000;
 
 	auto start = std::chrono::steady_clock::now();
 	for (int i = 0; i < range; ++i) {
-		box0.intersect(ray, t);
+		box.intersect(ray, t);
 	}
 	auto end = std::chrono::steady_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end-start;
-	std::cout << elapsed_seconds.count() << "s\n";
+	std::cout << range << " intersections take " << elapsed_seconds.count() << "s\n";
 }
+
 int main(int argc, char *argv[]) {
 
 //	Scene scene1{};
