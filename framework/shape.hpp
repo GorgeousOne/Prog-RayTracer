@@ -15,6 +15,8 @@ class Shape {
 public:
 	Shape(std::string const& name, std::shared_ptr<Material> material);
 
+	virtual std::string get_name() const;
+
 	virtual float area() const = 0;
 	virtual float volume() const = 0;
 	virtual HitPoint intersect(Ray const& ray, float &t) const = 0;

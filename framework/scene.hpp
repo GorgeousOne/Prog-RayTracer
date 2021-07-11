@@ -16,7 +16,6 @@ struct Scene {
 	Camera camera{};
 };
 
-void add_mat_to_scene(std::istringstream& arg_stream, Scene& new_scene);
 void add_to_scene(std::istringstream& words_stream, Scene& new_scene);
 Scene load_scene(std::string const& file_path);
 #endif

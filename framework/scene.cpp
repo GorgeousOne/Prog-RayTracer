@@ -3,8 +3,11 @@
 #include <algorithm>
 #include <iterator>
 #include "scene.hpp"
+#include "shape.hpp"
+#include "box.hpp"
+#include "sphere.hpp"
 
-void add_mat_to_scene(std::istringstream& arg_stream, Scene& new_scene) {
+Material add_mat_to_scene(std::istringstream& arg_stream) {
 	std::string name;
 	glm::vec3 ka;
 	glm::vec3 kd;
@@ -16,7 +19,80 @@ void add_mat_to_scene(std::istringstream& arg_stream, Scene& new_scene) {
 	arg_stream >> kd.x >> kd.y >> kd.z;
 	arg_stream >> ks.x >> ks.y >> ks.z;
 	arg_stream >> brightness;
-	new_scene.materials.emplace(name, std::make_shared<Material>(Material{name, ka, kd, ks, brightness}));
+	
+	return { name, ka, kd, ks, brightness };
+}
+
+Box add_box_to_scene(std::istringstream& arg_stream, std::map<std::string, std::shared_ptr<Material>>& materials) {
+	std::string name;
+	std::string mat_name;
+	glm::vec3 min;
+	glm::vec3 max;
+
+	arg_stream >> name;
+	arg_stream >> min.x >> min.y >> min.z;
+	arg_stream >> max.x >> max.y >> max.z;
+	arg_stream >> mat_name;
+
+	std::map<std::string, std::shared_ptr<Material>>::iterator it = materials.find(mat_name);
+	std::shared_ptr<Material> material = (*it).second;
+
+	return {min, max, name, material};
+}
+
+Sphere add_sphere_to_scene(std::istringstream& arg_stream, std::map<std::string, std::shared_ptr<Material>>& materials) {
+	std::string name;
+	std::string mat_name;
+	float radius;
+	glm::vec3 center;
+
+	arg_stream >> name;
+	arg_stream >> center.x >> center.y >> center.z;
+	arg_stream >> radius;
+	arg_stream >> mat_name;
+
+	std::map<std::string, std::shared_ptr<Material>>::iterator it = materials.find(mat_name);
+	std::shared_ptr<Material> material = (*it).second;
+	
+	return {radius, center, name, material};
+}
+
+PointLight add_point_light_to_scene(std::istringstream& arg_stream) {
+	std::string name;
+	glm::vec3 pos;
+	Color color;
+	float brightness;
+
+	arg_stream >> name;
+	arg_stream >> pos.x >> pos.y >> pos.z;
+	arg_stream >> color.r >> color.g >> color.b;
+	arg_stream >> brightness;
+
+	return { name, color, brightness, pos };
+}
+
+AmbientLight add_ambient_to_scene(std::istringstream& arg_stream) {
+	std::string name;
+	Color color;
+	float brightness;
+
+	arg_stream >> name;
+	arg_stream >> color.r >> color.b >> color.g;
+	arg_stream >> brightness;
+
+	return { name, color, brightness };
+}
+
+Camera add_camera_to_scene(std::istringstream& arg_stream) {
+	std::string name;
+	glm::vec3 pos{ 0 , 0 , 0 };
+	glm::vec3 direction{ 0, 0, -1 };
+	float fov_x;
+
+	arg_stream >> name;
+	arg_stream >> fov_x;
+
+	return { name, pos, direction, fov_x };
 }
 
 void add_to_scene(std::istringstream& words_stream, Scene& new_scene) {
@@ -25,10 +101,47 @@ void add_to_scene(std::istringstream& words_stream, Scene& new_scene) {
 	int arg_count =  std::distance(std::istream_iterator<std::string>(words_stream), std::istream_iterator<std::string>());
 
 	if ("material" == token_str) {
-		if (arg_count < 11) {
+		if (arg_count != 11) {
 			throw std::runtime_error(std::to_string(arg_count) + " arguments given, 11 required to create Material");
 		}
-		add_mat_to_scene(words_stream, new_scene);
+		Material new_mat{ add_mat_to_scene(words_stream) };
+		new_scene.materials.emplace(new_mat.name, std::make_shared<Material>(new_mat));
+	}
+	if ("shape" == token_str) {
+		words_stream >> token_str;
+		if ("box" == token_str) {
+			if (arg_count != 8) {
+				throw std::runtime_error(std::to_string(arg_count) + " arguments given, 8 required to create Material");
+			}
+			Box new_box{ add_box_to_scene(words_stream, new_scene.materials) };
+			new_scene.shapes.emplace(new_box.get_name(), std::make_shared<Shape>(new_box));
+		}
+		if ("sphere" == token_str) {
+			if (arg_count != 6) {
+				throw std::runtime_error(std::to_string(arg_count) + " arguments given, 6 required to create Material");
+			}
+			Sphere new_sphere{ add_sphere_to_scene(words_stream, new_scene.materials) };
+			new_scene.shapes.emplace(new_sphere.get_name(), std::make_shared<Shape>(new_sphere));
+		}
+	}
+	if ("light" == token_str) {
+		if (arg_count != 8) {
+			throw std::runtime_error(std::to_string(arg_count) + " arguments given, 8 required to create Material");
+		}
+		PointLight new_light{ add_point_light_to_scene(words_stream) };
+		new_scene.lights.push_back(new_light);
+	}
+	if ("ambient" == token_str) {
+		if (arg_count != 5) {
+			throw std::runtime_error(std::to_string(arg_count) + " arguments given, 5 required to create Material");
+		}
+		new_scene.ambient = { add_ambient_to_scene(words_stream) };
+	}
+	if ("camera" == token_str) {
+		if (arg_count != 2) {
+			throw std::runtime_error(std::to_string(arg_count) + " arguments given, 2 required to create Material");
+		}
+		new_scene.camera = { add_camera_to_scene(words_stream) };
 	}
 }
 
