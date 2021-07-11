@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <string>
-#include <glm/vec3.hpp>
+#include <glm/glm.hpp>
 
 std::ostream& operator<<(std::ostream &os, glm::vec3 const& v);
 

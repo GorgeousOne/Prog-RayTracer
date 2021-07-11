@@ -3,7 +3,7 @@
 
 #include <string>
 #include "color.hpp"
-#include <glm/vec3.hpp>
+#include <glm/glm.hpp>
 #include <memory>
 #include "hitPoint.hpp"
 #include "ray.hpp"

@@ -1,7 +1,7 @@
 #ifndef RAYTRACER_CAMERA_H
 #define RAYTRACER_CAMERA_H
 
-#include <glm/vec3.hpp>
+#include <glm/glm.hpp>
 #include <string>
 #include "color.hpp"
 

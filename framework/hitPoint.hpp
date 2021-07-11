@@ -1,7 +1,7 @@
 
 #ifndef RAYTRACER_HITPOINT_HPP
 #define RAYTRACER_HITPOINT_HPP
-#include <glm/vec3.hpp>
+#include <glm/glm.hpp>
 #include "color.hpp"
 #include "material.hpp"
 

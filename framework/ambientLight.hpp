@@ -1,7 +1,7 @@
 #ifndef RAYTRACER_AMBIENTLIGHT_H
 #define RAYTRACER_AMBIENTLIGHT_H
 
-#include <glm/vec3.hpp>
+#include <glm/glm.hpp>
 #include "color.hpp"
 
 struct AmbientLight {

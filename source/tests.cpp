@@ -1,12 +1,13 @@
 #define CATCH_CONFIG_RUNNER
 
 #include <catch.hpp>
-#include <glm/vec3.hpp>
+#include <glm/glm.hpp>
 #include <glm/gtx/intersect.hpp>
 
 #include "sphere.hpp"
 #include "box.hpp"
 #include "scene.hpp"
+#include "render.hpp"
 
 #define PI 3.14159265f
 
@@ -174,6 +175,11 @@ TEST_CASE("load_material", "[sdf]") {
 	REQUIRE(10 == mat->m);
 }
 
+TEST_CASE("render_test", "[render]") {
+	Render render{4, 2, Camera{"", {}, {0, 0, -1}, 90}};
+	render.render(Scene{});
+
+}
 int main(int argc, char *argv[]) {
 	return Catch::Session().run(argc, argv);
 }
