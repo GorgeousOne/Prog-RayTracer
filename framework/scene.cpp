@@ -6,6 +6,10 @@
 #include "box.hpp"
 #include "sphere.hpp"
 
+std::shared_ptr<Material> Scene::find_mat(std::string const& name) const {
+	return materials.find(name)->second;
+}
+
 std::shared_ptr<Material> load_mat(std::istringstream& arg_stream) {
 	std::string name;
 	glm::vec3 ka;

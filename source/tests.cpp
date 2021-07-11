@@ -149,11 +149,31 @@ TEST_CASE("box_ray_intersection_speed", "[intersect]") {
 	std::cout << range << " intersections take " << elapsed_seconds.count() << "s\n";
 }
 
+TEST_CASE("find_scene_material", "[scene]") {
+	std::istringstream words_stream("red 1 2 3 4 5 6 7 8 9 10");
+	auto mat = load_mat(words_stream);
+	Scene scene{};
+	scene.materials.emplace(mat->name, mat);
+
+	auto invalid_mat = scene.find_mat("not a material name");
+	REQUIRE(nullptr == invalid_mat);
+
+	auto added_mat = scene.find_mat(mat->name);
+	REQUIRE(nullptr != added_mat);
+	REQUIRE(mat->name == added_mat->name);
+}
+
+TEST_CASE("load_material", "[sdf]") {
+	std::istringstream words_stream("red 1 2 3 4 5 6 7 8 9 10");
+	auto mat = load_mat(words_stream);
+
+	REQUIRE("red" == mat->name);
+	REQUIRE(glm::vec3{1, 2, 3} == mat->ka);
+	REQUIRE(glm::vec3{4, 5, 6} == mat->kd);
+	REQUIRE(glm::vec3{7, 8, 9} == mat->ks);
+	REQUIRE(10 == mat->m);
+}
+
 int main(int argc, char *argv[]) {
-
-//	Scene scene1{};
-//	std::istringstream words_stream("material red 1 2 3 4 5 6 7 8 9 10");
-//	add_to_scene(words_stream, scene1);
-
 	return Catch::Session().run(argc, argv);
 }

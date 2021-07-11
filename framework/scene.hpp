@@ -14,8 +14,11 @@ struct Scene {
 	std::vector<PointLight> lights{};
 	AmbientLight ambient{};
 	Camera camera{};
+
+	[[nodiscard]] std::shared_ptr<Material> find_mat(std::string const& name) const;
 };
 
+std::shared_ptr<Material> load_mat(std::istringstream& arg_stream);
 void add_to_scene(std::istringstream& words_stream, Scene& new_scene);
 Scene load_scene(std::string const& file_path);
 #endif
