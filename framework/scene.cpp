@@ -93,6 +93,20 @@ Camera load_camera(std::istringstream& arg_stream) {
 	return { name, pos, direction, fov_x };
 }
 
+void render(std::istringstream& arg_stream) {
+	std::string cam_name;
+	std::string file_name;
+	unsigned int res_x;
+	unsigned int res_y;
+
+	arg_stream >> cam_name;
+	arg_stream >> file_name;
+	arg_stream >> res_x;
+	arg_stream >> res_y;
+
+	//NOT IMPLEMENTED FOR THIS ASSIGNMENT
+}
+
 void add_to_scene(std::istringstream& words_stream, Scene& new_scene) {
 	std::string token_str;
 	words_stream >> token_str;
@@ -164,7 +178,7 @@ Scene load_scene(std::string const& file_path) {
 		if ("define" == token_str) {
 			add_to_scene(words_stream, new_scene);
 		} else if ("render") {
-
+			render(words_stream);
 		}
 	}
 	return new_scene;
