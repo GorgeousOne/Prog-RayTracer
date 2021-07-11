@@ -15,10 +15,10 @@ struct Scene {
 	AmbientLight ambient{};
 	Camera camera{};
 
-	std::shared_ptr<Material> find_mat(std::string const& name) const;
+	[[nodiscard]] std::shared_ptr<Material> find_mat(std::string const& name) const;
 };
 
-void add_mat_to_scene(std::istringstream& arg_stream, Scene& new_scene);
+std::shared_ptr<Material> load_mat(std::istringstream& arg_stream);
 void add_to_scene(std::istringstream& words_stream, Scene& new_scene);
 Scene load_scene(std::string const& file_path);
 #endif
