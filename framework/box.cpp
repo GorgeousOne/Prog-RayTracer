@@ -37,6 +37,7 @@ std::ostream &Box::print(std::ostream &os) const {
 	return os << "\nmin:" << min_ << "\nmax: " << max_ << std::endl;
 }
 
+//Aufgabe 6.3r
 HitPoint Box::intersect(Ray const& ray, float &t) const {
 	//furthest entering intersection with a box plane
 	float t_min = -std::numeric_limits<float>::infinity();

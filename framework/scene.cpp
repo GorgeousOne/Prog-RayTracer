@@ -19,6 +19,10 @@ void add_mat_to_scene(std::istringstream& arg_stream, Scene& new_scene) {
 	new_scene.materials.emplace(name, std::make_shared<Material>(Material{name, ka, kd, ks, brightness}));
 }
 
+std::shared_ptr<Material> Scene::find_mat(std::string const& name) const {
+	return materials.find(name)->second;
+}
+
 void add_to_scene(std::istringstream& words_stream, Scene& new_scene) {
 	std::string token_str;
 	words_stream >> token_str;

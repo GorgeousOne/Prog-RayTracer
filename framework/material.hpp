@@ -5,6 +5,7 @@
 #include <glm/vec3.hpp>
 #include "printVec3.hpp"
 
+//Aufgabe 6.4
 struct Material {
 	std::string name = "default";
 	//ambient coefficient
