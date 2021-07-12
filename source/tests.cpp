@@ -4,10 +4,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/intersect.hpp>
 
+#include "renderer.hpp"
 #include "sphere.hpp"
 #include "box.hpp"
 #include "scene.hpp"
-#include "render.hpp"
 
 #define PI 3.14159265f
 
@@ -176,8 +176,18 @@ TEST_CASE("load_material", "[sdf]") {
 }
 
 TEST_CASE("render_test", "[render]") {
-	Render render{4, 2, Camera{"", {}, {0, 0, -1}, 90}};
-	render.render(Scene{});
+	Renderer renderer{400, 400, "C:/Users/Fred Feuerpferd/Documents/Univ/Programmiersprachen/Belege/programmiersprachen-raytracer/art/img.ppm"};
+
+	Scene scene {};
+	auto mat = std::make_shared<Material>(Material{"red", {1, 0, 0}});
+	auto mat2 = std::make_shared<Material>(Material{"blue", {0, 0, 1}});
+
+	scene.shapes.emplace("sphere", std::make_shared<Sphere>(Sphere{3, {-2, -2, -10}, "asdf", mat}));
+	scene.shapes.emplace("cube", std::make_shared<Box>(Box{{2, 2, -13}, {4, 4, -10}, "abdd", mat2}));
+
+	renderer.render(scene);
+//	Render render{4, 2, Camera{"", {}, {0, 0, -1}, 90}};
+//	render.render(Scene{});
 
 }
 int main(int argc, char *argv[]) {
