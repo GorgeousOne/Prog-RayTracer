@@ -20,7 +20,8 @@
 *.out
 *.app
 
-checkerboard.ppm
+*.ppm
+*png
 
 build
 cmake_out
