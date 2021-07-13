@@ -31,16 +31,19 @@ void Renderer::render() {
 }
 
 glm::vec3 Renderer::hit_color(Ray const& ray, Scene const& scene) {
+	HitPoint min_hit{};
 
-	for (auto it : scene.shapes) {
+	for (auto const& it : scene.shapes) {
 		float t;
-		HitPoint intersec = it.second->intersect(ray, t);
-
-		if (intersec.does_intersect) {
-			return intersec.hit_object_color->ka;
+		HitPoint hit = it.second->intersect(ray, t);
+		if (hit.does_intersect) {
+			continue;
+		}
+		if (!min_hit.does_intersect || hit.intersection_distance < min_hit.intersection_distance) {
+			min_hit = hit;
 		}
 	}
-	return glm::vec3{};
+	return min_hit.does_intersect ? min_hit.hit_object_color->ka : glm::vec3{};
 }
 
 #define PI 3.14159265f
@@ -57,13 +60,11 @@ void Renderer::render(Scene const& scene) {
 	glm::vec3 pixel_width {w / width_, 0, 0};
 	glm::vec3 pixel_height {0, w / height_, 0};
 
-	for (unsigned x = 0; x < width_; ++x) {
-		for (unsigned y = 0; y < height_; ++y) {
-			glm::vec3 ray_dir {min_corner
-					+ pixel_width * static_cast<float>(x)
-					+ pixel_height * static_cast<float>(y)};
+	for (float x = 0; x < width_; ++x) {
+		for (float y = 0; y < height_; ++y) {
+			glm::vec3 ray_dir {min_corner + pixel_width * x + pixel_height * y};
 			Ray ray {camera.position, glm::normalize(ray_dir)};
-			Pixel pixel {x, y};
+			Pixel pixel {static_cast<unsigned>(x), static_cast<unsigned>(y)};
 			auto col = hit_color(ray, scene);
 			pixel.color = Color{col.x, col.y, col.z};
 			write(pixel);
