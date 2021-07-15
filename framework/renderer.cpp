@@ -54,7 +54,7 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 
 			Ray ray {cam.position, glm::normalize(ray_dir)};
 			Pixel pixel {x, y};
-			pixel.color = hit_color(ray, scene);
+			pixel.color = get_intersection_color(ray, scene);
 			write(pixel);
 		}
 	}
@@ -76,30 +76,71 @@ void Renderer::write(Pixel const &p) {
 	ppm_.write(p);
 }
 
-Color Renderer::hit_color(Ray const& ray, Scene const& scene) {
-	HitPoint min_hit{};
+HitPoint Renderer::get_closest_hit(Ray const& ray, Scene const& scene) {
+	HitPoint closest_hit{};
 
 	for (auto const& it : scene.shapes) {
 		float t;
 		HitPoint hit = it.second->intersect(ray, t);
+
 		if (!hit.does_intersect) {
 			continue;
 		}
-		if (!min_hit.does_intersect || hit.intersection_distance < min_hit.intersection_distance) {
-			min_hit = hit;
+		if (!closest_hit.does_intersect || hit.intersection_distance < closest_hit.intersection_distance) {
+			closest_hit = hit;
 		}
 	}
-	return min_hit.does_intersect ? shade(min_hit) : Color {};
+	return closest_hit;
 }
 
-Color Renderer::shade(HitPoint const& hitPoint) {
-	return normal_color(hitPoint);
+HitPoint Renderer::find_light_block(Ray const& light_ray, Scene const& scene) {
+
+	for (auto const &it : scene.shapes) {
+		float t;
+		HitPoint hit = it.second->intersect(light_ray, t);
+
+		if (hit.does_intersect && t <= 1) {
+			return hit;
+		}
+	}
+	return HitPoint {};
+}
+
+Color Renderer::get_intersection_color(Ray const& ray, Scene const& scene) {
+	HitPoint closest_hit = get_closest_hit(ray, scene);
+	return closest_hit.does_intersect ? shade(closest_hit, scene) : Color {};
+}
+
+Color Renderer::shade(HitPoint const& hitPoint, Scene const& scene) {
+	Color shaded_color {0, 0, 0};
+//	shaded_color.r = hitPoint.hit_material->kd.x;
+//	shaded_color.g = hitPoint.hit_material->kd.y;
+//	shaded_color.b = hitPoint.hit_material->kd.z;
+//	shaded_color += normal_color(hitPoint);
+
+	shaded_color += diffuse_color(hitPoint, scene);
+	return shaded_color;
+}
+
+Color Renderer::diffuse_color(HitPoint const& hitPoint, Scene const& scene) {
+	Color diffuse_color {};
+
+	for (PointLight const& light : scene.lights)  {
+		glm::vec3 light_dir = light.position - hitPoint.position;
+		Ray light_ray {hitPoint.position, light_dir};
+		HitPoint light_block = find_light_block(light_ray, scene);
+
+		if (light_block.does_intersect) {
+			continue;
+		}
+		float cos_incidence_angle = glm::dot(hitPoint.surface_normal, glm::normalize(light_ray.direction));
+		Color light_intensity = light.color * light.brightness;
+		diffuse_color += light_intensity * hitPoint.hit_material->kd * cos_incidence_angle;
+	}
+	return diffuse_color;
 }
 
 Color Renderer::normal_color(HitPoint const& hitPoint) {
-	std::cout << (hitPoint.surface_normal.x + 1)
-	          << (hitPoint.surface_normal.y + 1)
-	          << (hitPoint.surface_normal.z + 1) << "\n";
 	return Color {
 			(hitPoint.surface_normal.x + 1) / 2,
 			(hitPoint.surface_normal.y + 1) / 2,

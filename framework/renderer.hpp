@@ -36,10 +36,14 @@ private:
 	std::string filename_;
 	PpmWriter ppm_;
 
-	Color hit_color(Ray const& ray, Scene const& scene);
-	Color shade(HitPoint const& hitPoint);
+	Color get_intersection_color(Ray const& ray, Scene const& scene);
+	Color shade(HitPoint const& hitPoint, Scene const& scene);
 
+	Color diffuse_color(HitPoint const& hitPoint, Scene const& scene);
 	Color normal_color(HitPoint const &hitPoint);
+
+	HitPoint get_closest_hit(Ray const &ray, Scene const &scene);
+	HitPoint find_light_block(Ray const &light_ray, Scene const &scene);
 };
 
 #endif // #ifndef BUW_RENDERER_HPP

@@ -11,49 +11,69 @@
 #define BUW_COLOR_HPP
 
 #include <iostream>
+#include <glm/vec3.hpp>
 
-struct Color
-{
+struct Color {
 
-  friend std::ostream& operator<<(std::ostream& os, Color const& c)
-  {
-    os << "(" << c.r << "," << c.g << "," << c.b << ")\n";
-    return os;
-  }
+	friend std::ostream &operator<<(std::ostream &os, Color const& c) {
+		os << "(" << c.r << "," << c.g << "," << c.b << ")\n";
+		return os;
+	}
 
-  Color& operator+=(Color const& other)
-  {
-    r += other.r;
-    g += other.g;
-    b += other.b;
-    return *this;
-  }
+	Color &operator+=(Color const& other) {
+		r += other.r;
+		g += other.g;
+		b += other.b;
+		return *this;
+	}
 
-  Color& operator-=(Color const& other)
-  {
-    r -= other.r;
-    g -= other.g;
-    b -= other.b;
-    return *this;
-  }
+	Color &operator-=(Color const& other) {
+		r -= other.r;
+		g -= other.g;
+		b -= other.b;
+		return *this;
+	}
 
-  friend Color operator+(Color const& a, Color const& b)
-  {
-    auto tmp(a);
-    tmp += b;
-    return tmp;
-  }
+	Color &operator*=(float f) {
+		r *= f;
+		g *= f;
+		b *= f;
+		return *this;
+	}
 
-  friend Color operator-(Color const& a, Color const& b)
-  {
-    auto tmp(a);
-    tmp -= b;
-    return tmp;
-  }
+	Color &operator*=(glm::vec3 coefficient) {
+		r *= coefficient.x;
+		g *= coefficient.y;
+		b *= coefficient.z;
+		return *this;
+	}
 
-  float r = 0.5f;
-  float g = 0.5f;
-  float b = 0.5f;
+	friend Color operator+(Color const& a, Color const& b) {
+		auto tmp(a);
+		tmp += b;
+		return tmp;
+	}
+
+	friend Color operator-(Color const& a, Color const& b) {
+		auto tmp(a);
+		tmp -= b;
+		return tmp;
+	}
+
+	friend Color operator*(Color const& a, float f) {
+		auto tmp(a);
+		tmp *= f;
+		return tmp;
+	}
+
+	friend Color operator*(Color const& a, glm::vec3 coefficient) {
+		auto tmp(a);
+		tmp *= coefficient;
+		return tmp;
+	}
+	float r = 0;
+	float g = 0;
+	float b = 0;
 };
 
 #endif //#define BUW_COLOR_HPP

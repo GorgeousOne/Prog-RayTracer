@@ -1,9 +1,9 @@
 #ifndef RAYTRACER_POINTLIGHT_H
 #define RAYTRACER_POINTLIGHT_H
 
-#include "ambientLight.hpp"
+#include "light.hpp"
 
-struct PointLight : AmbientLight {
+struct PointLight : Light {
 	glm::vec3 position = {};
 };
 #endif

@@ -78,7 +78,7 @@ TEST_CASE("intersect_ray_sphere2", "[intersect]") {
 	HitPoint hit0 = sphere0.intersect(ray, t);
 	REQUIRE(true == hit0.does_intersect);
 	REQUIRE(8.0f == hit0.intersection_distance);
-	REQUIRE(glm::vec3{0.0f, 0.0f, 8.0f} == hit0.intersection);
+	REQUIRE(glm::vec3{0.0f, 0.0f, 8.0f} == hit0.position);
 
 	Sphere sphere1{2.0f, {4.0f, 0.0f, 10.0f}};
 	HitPoint hit1 = sphere1.intersect(ray, t);
@@ -89,7 +89,7 @@ TEST_CASE("intersect_ray_sphere2", "[intersect]") {
 
 	REQUIRE(true == hit2.does_intersect);
 	REQUIRE(10.0f == hit2.intersection_distance);
-	REQUIRE(glm::vec3{0.0f, 0.0f, 10.0f} == hit2.intersection);
+	REQUIRE(glm::vec3{0.0f, 0.0f, 10.0f} == hit2.position);
 }
 
 //Aufgabe 5.8
@@ -114,7 +114,7 @@ TEST_CASE("box_ray_intersection", "[intersect]") {
 	HitPoint hit0 = box.intersect(Ray{{5, 5, -20}, {0, 0, 1}}, t);
 	REQUIRE(true == hit0.does_intersect);
 	REQUIRE(10 == hit0.intersection_distance);
-	REQUIRE(glm::vec3{5, 5, -10} == hit0.intersection);
+	REQUIRE(glm::vec3{5, 5, -10} == hit0.position);
 
 	//axis aligned ray does not intersect box
 	HitPoint hit1 = box.intersect(Ray{{20, 20, 0}, {0, 0, 1}}, t);
@@ -128,7 +128,7 @@ TEST_CASE("box_ray_intersection", "[intersect]") {
 	HitPoint hit2 = box.intersect(Ray{{10, 30, 10}, {-1, -1, -1}}, t);
 	REQUIRE(true == hit2.does_intersect);
 	REQUIRE(20 == hit2.intersection_distance);
-	REQUIRE(glm::vec3{-10, 10, -10} == hit2.intersection);
+	REQUIRE(glm::vec3{-10, 10, -10} == hit2.position);
 
 	//ray points away from box
 	HitPoint hit3 = box.intersect(Ray{{0, 0, 20}, {0, 0, 1}}, t);
@@ -177,9 +177,10 @@ TEST_CASE("load_material", "[sdf]") {
 
 TEST_CASE("render_test", "[render]") {
 	Scene scene = load_scene("C:/Users/Fred Feuerpferd/Documents/Univ/Programmiersprachen/Belege/programmiersprachen-raytracer/sdf/example.sdf");
-	Renderer renderer{400, 400, "C:/Users/Fred Feuerpferd/Documents/Univ/Programmiersprachen/Belege/programmiersprachen-raytracer/art/img.ppm"};
+	Renderer renderer{400, 400, "C:/Users/Fred Feuerpferd/Documents/Univ/Programmiersprachen/Belege/programmiersprachen-raytracer/sdf/img.ppm"};
 
 	std::cout << "shapes " << scene.shapes.size() << "\n";
+	std::cout << "lights " << scene.lights.size() << "\n";
 	renderer.render(scene, scene.camera);
 }
 int main(int argc, char *argv[]) {

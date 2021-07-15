@@ -68,7 +68,7 @@ PointLight load_point_light(std::istringstream& arg_stream) {
 	return { name, color, brightness, pos };
 }
 
-AmbientLight load_ambient(std::istringstream& arg_stream) {
+Light load_ambient(std::istringstream& arg_stream) {
 	std::string name;
 	Color color;
 	float brightness;

@@ -25,7 +25,7 @@ add_executable(tests
         ../framework/hitPoint.hpp
         ../framework/material.hpp ../framework/material.cpp
         ../framework/scene.hpp ../framework/scene.cpp
-        ../framework/ambientLight.hpp
+        ../framework/light.hpp
         ../framework/pointLight.hpp
         ../framework/camera.hpp
         ../framework/printVec3.hpp ../framework/printVec3.cpp

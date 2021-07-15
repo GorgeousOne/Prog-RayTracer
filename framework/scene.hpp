@@ -4,7 +4,7 @@
 #include "shape.hpp"
 #include "camera.hpp"
 #include "pointLight.hpp"
-#include "ambientLight.hpp"
+#include "light.hpp"
 #include <vector>
 #include <map>
 
@@ -12,7 +12,7 @@ struct Scene {
 	std::map<std::string, std::shared_ptr<Material>> materials{};
 	std::map<std::string, std::shared_ptr<Shape>> shapes{};
 	std::vector<PointLight> lights{};
-	AmbientLight ambient{};
+	Light ambient{};
 	Camera camera{};
 
 	[[nodiscard]] std::shared_ptr<Material> find_mat(std::string const& name) const;
