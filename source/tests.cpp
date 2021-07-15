@@ -176,19 +176,11 @@ TEST_CASE("load_material", "[sdf]") {
 }
 
 TEST_CASE("render_test", "[render]") {
+	Scene scene = load_scene("C:/Users/Fred Feuerpferd/Documents/Univ/Programmiersprachen/Belege/programmiersprachen-raytracer/sdf/example.sdf");
 	Renderer renderer{400, 400, "C:/Users/Fred Feuerpferd/Documents/Univ/Programmiersprachen/Belege/programmiersprachen-raytracer/art/img.ppm"};
 
-	Scene scene {};
-	auto mat = std::make_shared<Material>(Material{"red", {1, 0, 0}});
-	auto mat2 = std::make_shared<Material>(Material{"blue", {0, 0, 1}});
-
-	scene.shapes.emplace("sphere", std::make_shared<Sphere>(Sphere{3, {-2, -2, -10}, "asdf", mat}));
-	scene.shapes.emplace("cube", std::make_shared<Box>(Box{{2, 2, -13}, {4, 4, -10}, "abdd", mat2}));
-
-	renderer.render(scene);
-//	Render render{4, 2, Camera{"", {}, {0, 0, -1}, 90}};
-//	render.render(Scene{});
-
+	std::cout << "shapes " << scene.shapes.size() << "\n";
+	renderer.render(scene, scene.camera);
 }
 int main(int argc, char *argv[]) {
 	return Catch::Session().run(argc, argv);

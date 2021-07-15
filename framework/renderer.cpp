@@ -36,7 +36,7 @@ glm::vec3 Renderer::hit_color(Ray const& ray, Scene const& scene) {
 	for (auto const& it : scene.shapes) {
 		float t;
 		HitPoint hit = it.second->intersect(ray, t);
-		if (hit.does_intersect) {
+		if (!hit.does_intersect) {
 			continue;
 		}
 		if (!min_hit.does_intersect || hit.intersection_distance < min_hit.intersection_distance) {
@@ -48,23 +48,28 @@ glm::vec3 Renderer::hit_color(Ray const& ray, Scene const& scene) {
 
 #define PI 3.14159265f
 
-void Renderer::render(Scene const& scene) {
-	Camera camera = scene.camera;
+void Renderer::render(Scene const& scene, Camera const& cam) {
+	float fov_radians = cam.fov_x / 180 * PI;
+	float img_plane_dist = (width_ / 2.0f) / tan(fov_radians / 2);
 
-	float aspect_ratio = 1.0f * width_ / height_;
-	float fov_radians = camera.fov_x / 180 * PI;
-	float w = 2 * tan(fov_radians / 2);
-	float h = w / aspect_ratio;
+	glm::vec3 pixel_width = glm::cross(cam.direction, cam.up);
+	glm::vec3 pixel_height {cam.up};
+	assert(1.0f == 	glm::length(pixelWidth));
+	glm::vec3 min_corner =
+			cam.position
+			+ img_plane_dist * cam.direction
+			- (width_ / 2.0f) * pixel_width
+			- (height_ / 2.0f) * pixel_height;
 
-	glm::vec3 min_corner {-w / 2, -h / 2, -1};
-	glm::vec3 pixel_width {w / width_, 0, 0};
-	glm::vec3 pixel_height {0, w / height_, 0};
+	for (unsigned x = 0; x < width_; ++x) {
+		for (unsigned y = 0; y < height_; ++y) {
+			glm::vec3 ray_dir {
+				min_corner
+				+ static_cast<float>(x) * pixel_width
+				+ static_cast<float>(y) * pixel_height};
 
-	for (float x = 0; x < width_; ++x) {
-		for (float y = 0; y < height_; ++y) {
-			glm::vec3 ray_dir {min_corner + pixel_width * x + pixel_height * y};
-			Ray ray {camera.position, glm::normalize(ray_dir)};
-			Pixel pixel {static_cast<unsigned>(x), static_cast<unsigned>(y)};
+			Ray ray {cam.position, glm::normalize(ray_dir)};
+			Pixel pixel {x, y};
 			auto col = hit_color(ray, scene);
 			pixel.color = Color{col.x, col.y, col.z};
 			write(pixel);
