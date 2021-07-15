@@ -95,5 +95,24 @@ HitPoint Box::intersect(Ray const& ray, float &t) const {
 		return HitPoint{};
 	}
 	//calculate the intersection with the found t
-	return HitPoint{true, t, name_, material_, ray.point(t), ray.direction};
+	glm::vec3 intersection =  ray.point(t);
+	return HitPoint{true, t, name_, material_, intersection, ray.direction, get_surface_normal(intersection)};
 }
+
+glm::vec3 Box::get_surface_normal(glm::vec3 const& intersection) const {
+	if (min_.x == intersection.x) {
+		return glm::vec3 {-1, 0, 0};
+	} else if (min_.y == intersection.y) {
+		return glm::vec3 {0, -1, 0};
+	} else if (min_.z == intersection.z) {
+		return glm::vec3 {0, 0, -1};
+	} else if (max_.x == intersection.x) {
+		return glm::vec3 {1, 0, 0};
+	} else if (max_.y == intersection.y) {
+		return glm::vec3 {0, 1, 0};
+	} else if (max_.z == intersection.z) {
+		return glm::vec3 {0, 0, 1};
+	}
+	throw "Intersection does not lie on box surface";
+}
+

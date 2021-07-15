@@ -35,5 +35,10 @@ HitPoint Sphere::intersect(Ray const& ray, float &t) const {
 			radius_ * radius_,
 			distance);
 
-	return HitPoint{result, distance, name_, material_, ray.point(distance), ray.direction};
+	glm::vec3 intersection = ray.point(distance);
+	return HitPoint{result, distance, name_, material_, intersection, ray.direction, get_surface_normal(intersection)};
+}
+
+glm::vec3 Sphere::get_surface_normal(glm::vec3 const& intersection) const {
+	return glm::normalize(intersection - center_);
 }

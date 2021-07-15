@@ -36,7 +36,10 @@ private:
 	std::string filename_;
 	PpmWriter ppm_;
 
-	glm::vec3 hit_color(Ray const& ray, Scene const& scene);
+	Color hit_color(Ray const& ray, Scene const& scene);
+	Color shade(HitPoint const& hitPoint);
+
+	Color normal_color(HitPoint const &hitPoint);
 };
 
 #endif // #ifndef BUW_RENDERER_HPP

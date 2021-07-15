@@ -78,7 +78,7 @@ TEST_CASE("intersect_ray_sphere2", "[intersect]") {
 	HitPoint hit0 = sphere0.intersect(ray, t);
 	REQUIRE(true == hit0.does_intersect);
 	REQUIRE(8.0f == hit0.intersection_distance);
-	REQUIRE(glm::vec3{0.0f, 0.0f, 8.0f} == hit0.intersection_point);
+	REQUIRE(glm::vec3{0.0f, 0.0f, 8.0f} == hit0.intersection);
 
 	Sphere sphere1{2.0f, {4.0f, 0.0f, 10.0f}};
 	HitPoint hit1 = sphere1.intersect(ray, t);
@@ -89,7 +89,7 @@ TEST_CASE("intersect_ray_sphere2", "[intersect]") {
 
 	REQUIRE(true == hit2.does_intersect);
 	REQUIRE(10.0f == hit2.intersection_distance);
-	REQUIRE(glm::vec3{0.0f, 0.0f, 10.0f} == hit2.intersection_point);
+	REQUIRE(glm::vec3{0.0f, 0.0f, 10.0f} == hit2.intersection);
 }
 
 //Aufgabe 5.8
@@ -114,7 +114,7 @@ TEST_CASE("box_ray_intersection", "[intersect]") {
 	HitPoint hit0 = box.intersect(Ray{{5, 5, -20}, {0, 0, 1}}, t);
 	REQUIRE(true == hit0.does_intersect);
 	REQUIRE(10 == hit0.intersection_distance);
-	REQUIRE(glm::vec3{5, 5, -10} == hit0.intersection_point);
+	REQUIRE(glm::vec3{5, 5, -10} == hit0.intersection);
 
 	//axis aligned ray does not intersect box
 	HitPoint hit1 = box.intersect(Ray{{20, 20, 0}, {0, 0, 1}}, t);
@@ -128,7 +128,7 @@ TEST_CASE("box_ray_intersection", "[intersect]") {
 	HitPoint hit2 = box.intersect(Ray{{10, 30, 10}, {-1, -1, -1}}, t);
 	REQUIRE(true == hit2.does_intersect);
 	REQUIRE(20 == hit2.intersection_distance);
-	REQUIRE(glm::vec3{-10, 10, -10} == hit2.intersection_point);
+	REQUIRE(glm::vec3{-10, 10, -10} == hit2.intersection);
 
 	//ray points away from box
 	HitPoint hit3 = box.intersect(Ray{{0, 0, 20}, {0, 0, 1}}, t);

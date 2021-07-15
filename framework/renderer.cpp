@@ -30,22 +30,6 @@ void Renderer::render() {
 	ppm_.save(filename_);
 }
 
-glm::vec3 Renderer::hit_color(Ray const& ray, Scene const& scene) {
-	HitPoint min_hit{};
-
-	for (auto const& it : scene.shapes) {
-		float t;
-		HitPoint hit = it.second->intersect(ray, t);
-		if (!hit.does_intersect) {
-			continue;
-		}
-		if (!min_hit.does_intersect || hit.intersection_distance < min_hit.intersection_distance) {
-			min_hit = hit;
-		}
-	}
-	return min_hit.does_intersect ? min_hit.hit_object_color->ka : glm::vec3{};
-}
-
 #define PI 3.14159265f
 
 void Renderer::render(Scene const& scene, Camera const& cam) {
@@ -70,8 +54,7 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 
 			Ray ray {cam.position, glm::normalize(ray_dir)};
 			Pixel pixel {x, y};
-			auto col = hit_color(ray, scene);
-			pixel.color = Color{col.x, col.y, col.z};
+			pixel.color = hit_color(ray, scene);
 			write(pixel);
 		}
 	}
@@ -92,3 +75,37 @@ void Renderer::write(Pixel const &p) {
 	}
 	ppm_.write(p);
 }
+
+Color Renderer::hit_color(Ray const& ray, Scene const& scene) {
+	HitPoint min_hit{};
+
+	for (auto const& it : scene.shapes) {
+		float t;
+		HitPoint hit = it.second->intersect(ray, t);
+		if (!hit.does_intersect) {
+			continue;
+		}
+		if (!min_hit.does_intersect || hit.intersection_distance < min_hit.intersection_distance) {
+			min_hit = hit;
+		}
+	}
+	return min_hit.does_intersect ? shade(min_hit) : Color {};
+}
+
+Color Renderer::shade(HitPoint const& hitPoint) {
+	return normal_color(hitPoint);
+}
+
+Color Renderer::normal_color(HitPoint const& hitPoint) {
+	std::cout << (hitPoint.surface_normal.x + 1)
+	          << (hitPoint.surface_normal.y + 1)
+	          << (hitPoint.surface_normal.z + 1) << "\n";
+	return Color {
+			(hitPoint.surface_normal.x + 1) / 2,
+			(hitPoint.surface_normal.y + 1) / 2,
+			(hitPoint.surface_normal.z + 1) / 2
+	};
+}
+
+
+

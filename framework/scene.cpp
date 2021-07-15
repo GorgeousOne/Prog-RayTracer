@@ -124,14 +124,13 @@ void add_to_scene(std::istringstream& words_stream, Scene& new_scene) {
 		}
 	}
 	if ("light" == token_str) {
-		PointLight new_light{load_point_light(words_stream) };
-		new_scene.lights.push_back(new_light);
+		new_scene.lights.push_back(load_point_light(words_stream));
 	}
 	if ("ambient" == token_str) {
-		new_scene.ambient = {load_ambient(words_stream) };
+		new_scene.ambient = load_ambient(words_stream);
 	}
 	if ("camera" == token_str) {
-		new_scene.camera = {load_camera(words_stream) };
+		new_scene.camera = load_camera(words_stream);
 	}
 }
 
