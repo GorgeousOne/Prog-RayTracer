@@ -148,5 +148,26 @@ Color Renderer::normal_color(HitPoint const& hitPoint) {
 	};
 }
 
+float *Renderer::pixel_buffer() const {
+	auto* pixel_data = new float[width_ * height_ * 3];
+
+	for (int i = 0; i < color_buffer_.size(); ++i) {
+		Color color = color_buffer_[i];
+		pixel_data[i * 3] = color.r;
+		pixel_data[i * 3 + 1] = color.g;
+		pixel_data[i * 3 + 2] = color.b;
+	}
+
+	return pixel_data;
+}
+
+unsigned int Renderer::getWidth() const {
+	return width_;
+}
+
+unsigned int Renderer::getHeight() const {
+	return height_;
+}
+
 
 

@@ -28,6 +28,7 @@ public:
 	inline std::vector<Color> const& color_buffer() const {
 		return color_buffer_;
 	}
+	[[nodiscard]] float* pixel_buffer() const;
 
 private:
 	unsigned width_;
