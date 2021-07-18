@@ -65,7 +65,7 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 	ppm_.save(filename_);
 }
 
-void Renderer::write(Pixel const &p) {
+void Renderer::write(Pixel const& p) {
 	// flip pixels, because of opengl glDrawPixels
 	size_t buf_pos = (width_ * p.y + p.x);
 
@@ -99,7 +99,7 @@ HitPoint Renderer::get_closest_hit(Ray const& ray, Scene const& scene) {
 
 HitPoint Renderer::find_light_block(Ray const& light_ray, Scene const& scene) {
 
-	for (auto const &it : scene.shapes) {
+	for (auto const& it : scene.shapes) {
 		float t;
 		HitPoint hit = it.second->intersect(light_ray, t);
 
@@ -122,8 +122,13 @@ Color Renderer::shade(HitPoint const& hitPoint, Scene const& scene) {
 //	shaded_color.b = hitPoint.hit_material->kd.z;
 
 //	shaded_color += normal_color(hitPoint);
+	shaded_color += ambient_color(hitPoint, scene.ambient);
 	shaded_color += diffuse_color(hitPoint, scene);
-	return shaded_color;
+	return tone_map_color(shaded_color);
+}
+
+Color Renderer::ambient_color(HitPoint const& intersection, Light const& ambient) {
+	return ambient.color * ambient.brightness * intersection.hit_material->ka;
 }
 
 Color Renderer::diffuse_color(HitPoint const& hitPoint, Scene const& scene) {
@@ -150,6 +155,13 @@ Color Renderer::normal_color(HitPoint const& hitPoint) {
 			(hitPoint.surface_normal.y + 1) / 2,
 			(hitPoint.surface_normal.z + 1) / 2
 	};
+}
+
+Color& Renderer::tone_map_color(Color& color) const {
+	color.r /= color.r + 1;
+	color.g /= color.g + 1;
+	color.b /= color.b + 1;
+	return color;
 }
 
 float *Renderer::pixel_buffer() const {
