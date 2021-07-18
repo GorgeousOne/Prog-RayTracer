@@ -1,0 +1,14 @@
+# materials
+define material red 1 0 0 1 0 0 1 0 0 20
+define material green 0 1 0 0 1 0 0 1 0 50
+define material blue 0 0 1 0 0 1 0 0 1 10
+# geometry
+define shape box rbottom 1 1 -12 3 3 -10 red
+define shape box lbottom -5 -10 -15 5 -5 -11 green
+define shape sphere bsphere -2 0 -10 1 blue
+# light - from right above
+define light sun -5 20 0 .2 .2 .2 4
+define light sun2 0 20 0 .2 .2 .2 2
+
+# camera
+define camera eye 60.0

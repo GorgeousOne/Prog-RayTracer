@@ -18,7 +18,7 @@
 
 #define GLM_FORCE_RADIANS
 #include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
+#include <glm/glm.hpp>
 #include <glm/gtx/multiple.hpp>
 
 #include <array>

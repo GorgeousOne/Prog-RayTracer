@@ -1,7 +1,6 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <iterator>
 #include "scene.hpp"
 #include "box.hpp"
 #include "sphere.hpp"
@@ -71,7 +70,7 @@ PointLight load_point_light(std::istringstream& arg_stream) {
 	return {name, color, brightness, pos};
 }
 
-AmbientLight load_ambient(std::istringstream& arg_stream) {
+Light load_ambient(std::istringstream& arg_stream) {
 	std::string name;
 	Color color;
 	float brightness;
@@ -85,14 +84,12 @@ AmbientLight load_ambient(std::istringstream& arg_stream) {
 
 Camera load_camera(std::istringstream& arg_stream) {
 	std::string name;
-	glm::vec3 pos{0, 0, 0};
-	glm::vec3 direction{0, 0, -1};
 	float fov_x;
 
 	arg_stream >> name;
 	arg_stream >> fov_x;
 
-	return {name, pos, direction, fov_x};
+	return {name, fov_x};
 }
 
 void render(std::istringstream& arg_stream) {
@@ -143,9 +140,7 @@ Scene load_scene(std::string const& file_path) {
 
 	//writes sdf file line by line into line_buffer
 	while (std::getline(input_sdf_file, line_buffer)) {
-		std::cout << line_buffer << std::endl;
 		std::istringstream words_stream(line_buffer);
-
 		//streams words of each line
 		std::string token_str;
 		words_stream >> token_str;

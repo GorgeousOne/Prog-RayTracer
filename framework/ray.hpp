@@ -2,7 +2,7 @@
 #ifndef RAYTRACER_RAY_HPP
 #define RAYTRACER_RAY_HPP
 
-#include <glm/vec3.hpp>
+#include <glm/glm.hpp>
 
 struct Ray {
 	glm::vec3 origin = {0.0f, 0.0f, 0.0f};

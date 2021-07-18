@@ -1,12 +1,12 @@
 #ifndef RAYTRACER_AMBIENTLIGHT_H
 #define RAYTRACER_AMBIENTLIGHT_H
 
-#include <glm/vec3.hpp>
+#include <glm/glm.hpp>
 #include "color.hpp"
 
-struct AmbientLight {
+struct Light {
 	std::string name = "default";
-	Color color = {};
-	float brightness = 0;
+	Color color {255, 255, 255};
+	float brightness = 1;
 };
 #endif

@@ -1,22 +1,51 @@
-#include "fensterchen.hpp"
-#include <GLFW/glfw3.h>
-#include <utility>
-#include <cmath>
 
-int main(int argc, char* argv[])
-{
-  Window win{glm::ivec2{800,800}};
+#include <GL/glew.h>
+#include <GLFW//glfw3.h>
+#include <iostream>
+#include <chrono>
 
-  while (!win.should_close()) {
-    if (win.get_key(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-      win.close();
-    }
+#include "scene.hpp"
+#include "renderer.hpp"
 
-    auto t = win.get_time();
-    auto m = win.mouse_position();
+void display_image(unsigned width, unsigned height, float* data) {
+	GLFWwindow* window;
 
-    win.update();
-  }
+	if (!glfwInit()) {
+		throw "Could not init glfw";
+	}
+	window = glfwCreateWindow(width, height, "hi", nullptr, nullptr);
 
-  return 0;
+	if (!window) {
+		throw "Could not open window";
+	}
+	glfwMakeContextCurrent(window);
+
+	while (!glfwWindowShouldClose(window)) {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDrawPixels(width, height, GL_RGB, GL_FLOAT, data);
+		glfwSwapBuffers(window);
+		glfwWaitEvents();
+	}
+}
+
+int main(int argc, const char** argv) {
+	unsigned img_width = 720;
+	unsigned img_height = 720;
+
+	Scene scene = load_scene("../../../sdf/example.sdf");
+	Renderer renderer{img_width, img_height, "../../../sdf/img.ppm"};
+	std::cout << "shapes " << scene.shapes.size() << "\n";
+	std::cout << "lights " << scene.lights.size() << "\n";
+
+	try {
+		auto start = std::chrono::steady_clock::now();
+		renderer.render(scene, scene.camera);
+		auto end = std::chrono::steady_clock::now();
+		std::chrono::duration<double> elapsed_seconds = end-start;
+		std::cout << elapsed_seconds.count() << "s\n";
+	} catch (const char *str) {
+		std::cout << "Exception: " << str << std::endl;
+	}
+	display_image(img_width, img_height, renderer.pixel_buffer());
+	return 0;
 }

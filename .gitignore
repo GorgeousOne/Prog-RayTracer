@@ -21,7 +21,8 @@
 *.app
 
 *.ppm
-*png
+*.png
+*.jpg
 
 build
 cmake_out

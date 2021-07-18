@@ -21,5 +21,7 @@ public:
 private:
 	glm::vec3 min_;
 	glm::vec3 max_;
+
+	glm::vec3 get_surface_normal(glm::vec3 const& intersection) const;
 };
 #endif

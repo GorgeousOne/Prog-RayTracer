@@ -18,6 +18,8 @@ public:
 private:
 	float radius_;
 	glm::vec3 center_;
+
+	glm::vec3 get_surface_normal(glm::vec3 const& intersection) const;
 };
 
 #endif
