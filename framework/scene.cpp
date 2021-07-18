@@ -24,7 +24,8 @@ std::shared_ptr<Material> load_mat(std::istringstream& arg_stream) {
 	return std::make_shared<Material>(Material{name, ka, kd, ks, brightness});
 }
 
-std::shared_ptr<Box> load_box(std::istringstream& arg_stream, std::map<std::string, std::shared_ptr<Material>> const& materials) {
+std::shared_ptr<Box>
+load_box(std::istringstream& arg_stream, std::map<std::string, std::shared_ptr<Material>> const& materials) {
 	std::string name;
 	std::string mat_name;
 	glm::vec3 min;
@@ -39,7 +40,8 @@ std::shared_ptr<Box> load_box(std::istringstream& arg_stream, std::map<std::stri
 	return std::make_shared<Box>(min, max, name, it->second);
 }
 
-std::shared_ptr<Sphere> load_sphere(std::istringstream& arg_stream, std::map<std::string, std::shared_ptr<Material>> const& materials) {
+std::shared_ptr<Sphere>
+load_sphere(std::istringstream& arg_stream, std::map<std::string, std::shared_ptr<Material>> const& materials) {
 	std::string name;
 	std::string mat_name;
 	float radius;
@@ -65,7 +67,7 @@ PointLight load_point_light(std::istringstream& arg_stream) {
 	arg_stream >> color.r >> color.g >> color.b;
 	arg_stream >> brightness;
 
-	return { name, color, brightness, pos };
+	return {name, color, brightness, pos};
 }
 
 Light load_ambient(std::istringstream& arg_stream) {
@@ -77,7 +79,7 @@ Light load_ambient(std::istringstream& arg_stream) {
 	arg_stream >> color.r >> color.b >> color.g;
 	arg_stream >> brightness;
 
-	return { name, color, brightness };
+	return {name, color, brightness};
 }
 
 Camera load_camera(std::istringstream& arg_stream) {
@@ -117,26 +119,22 @@ void add_to_scene(std::istringstream& words_stream, Scene& new_scene) {
 		if ("box" == token_str) {
 			auto new_box = load_box(words_stream, new_scene.materials);
 			new_scene.shapes.emplace(new_box->get_name(), new_box);
-		}
-		if ("sphere" == token_str) {
+		} else if ("sphere" == token_str) {
 			auto new_sphere = load_sphere(words_stream, new_scene.materials);
 			new_scene.shapes.emplace(new_sphere->get_name(), new_sphere);
 		}
-	}
-	if ("light" == token_str) {
-		new_scene.lights.push_back(load_point_light(words_stream));
-	}
-	if ("ambient" == token_str) {
-		new_scene.ambient = load_ambient(words_stream);
-	}
-	if ("camera" == token_str) {
-		new_scene.camera = load_camera(words_stream);
+	} else if ("light" == token_str) {
+		PointLight new_light{load_point_light(words_stream)};
+		new_scene.lights.push_back(new_light);
+	} else if ("ambient" == token_str) {
+		new_scene.ambient = {load_ambient(words_stream)};
+	} else if ("camera" == token_str) {
+		new_scene.camera = {load_camera(words_stream)};
 	}
 }
 
 Scene load_scene(std::string const& file_path) {
 	Scene new_scene{};
-
 	std::ifstream input_sdf_file(file_path);
 	std::string line_buffer;
 

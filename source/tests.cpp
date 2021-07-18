@@ -176,6 +176,14 @@ TEST_CASE("load_material", "[sdf]") {
 	REQUIRE(10 == mat->m);
 }
 
+TEST_CASE("load_scene", "[sdf]") {
+	Scene scene = load_scene("C:/Users/Fred Feuerpferd/Documents/Univ/Programmiersprachen/Belege/programmiersprachen-raytracer/misc/example.sdf");
+	std::cout << "\n";
+	std::cout << scene.materials.size() << "mats\n";
+	std::cout << scene.shapes.size() << "shapes\n";
+	std::cout << scene.lights.size() << "lights\n";
+}
+
 int main(int argc, char *argv[]) {
 	return Catch::Session().run(argc, argv);
 }
