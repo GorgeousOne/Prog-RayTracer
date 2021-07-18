@@ -19,7 +19,7 @@
 
 class Renderer {
 public:
-	Renderer(unsigned w, unsigned h, std::string const &file);
+	Renderer(unsigned w, unsigned h, std::string const& file);
 
 	void render();
 	void render(Scene const& scene, Camera const& cam);
@@ -38,14 +38,14 @@ private:
 	PpmWriter ppm_;
 
 	Color get_intersection_color(Ray const& ray, Scene const& scene);
+	HitPoint get_closest_hit(Ray const& ray, Scene const& scene);
+	HitPoint find_light_block(Ray const& light_ray, Scene const& scene);
+
 	Color shade(HitPoint const& hitPoint, Scene const& scene);
-
-	Color ambient_color(HitPoint const &, Light const &ambient);
+	Color ambient_color(HitPoint const& , Light const& ambient);
 	Color diffuse_color(HitPoint const& hitPoint, Scene const& scene);
-	Color normal_color(HitPoint const &hitPoint);
-
-	HitPoint get_closest_hit(Ray const &ray, Scene const &scene);
-	HitPoint find_light_block(Ray const &light_ray, Scene const &scene);
+	Color normal_color(HitPoint const& hitPoint);
+	Color& tone_map_color(Color &color) const;
 };
 
 #endif // #ifndef BUW_RENDERER_HPP
