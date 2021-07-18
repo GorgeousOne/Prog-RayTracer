@@ -122,8 +122,13 @@ Color Renderer::shade(HitPoint const& hitPoint, Scene const& scene) {
 //	shaded_color.b = hitPoint.hit_material->kd.z;
 
 //	shaded_color += normal_color(hitPoint);
+	shaded_color += ambient_color(hitPoint, scene.ambient);
 	shaded_color += diffuse_color(hitPoint, scene);
 	return shaded_color;
+}
+
+Color Renderer::ambient_color(HitPoint const& intersection, Light const& ambient) {
+	return ambient.color * ambient.brightness * intersection.hit_material->ka;
 }
 
 Color Renderer::diffuse_color(HitPoint const& hitPoint, Scene const& scene) {

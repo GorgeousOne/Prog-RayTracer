@@ -40,6 +40,7 @@ private:
 	Color get_intersection_color(Ray const& ray, Scene const& scene);
 	Color shade(HitPoint const& hitPoint, Scene const& scene);
 
+	Color ambient_color(HitPoint const &, Light const &ambient);
 	Color diffuse_color(HitPoint const& hitPoint, Scene const& scene);
 	Color normal_color(HitPoint const &hitPoint);
 
