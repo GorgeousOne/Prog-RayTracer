@@ -4,6 +4,7 @@
 #include "scene.hpp"
 #include "box.hpp"
 #include "sphere.hpp"
+#include "triangle.hpp"
 
 std::shared_ptr<Material> Scene::find_mat(std::string const& name) const {
 	return materials.find(name)->second;
@@ -24,8 +25,7 @@ std::shared_ptr<Material> load_mat(std::istringstream& arg_stream) {
 	return std::make_shared<Material>(Material{name, ka, kd, ks, brightness});
 }
 
-std::shared_ptr<Box>
-load_box(std::istringstream& arg_stream, std::map<std::string, std::shared_ptr<Material>> const& materials) {
+std::shared_ptr<Box> load_box(std::istringstream& arg_stream, std::map<std::string, std::shared_ptr<Material>> const& materials) {
 	std::string name;
 	std::string mat_name;
 	glm::vec3 min;
@@ -40,8 +40,7 @@ load_box(std::istringstream& arg_stream, std::map<std::string, std::shared_ptr<M
 	return std::make_shared<Box>(min, max, name, it->second);
 }
 
-std::shared_ptr<Sphere>
-load_sphere(std::istringstream& arg_stream, std::map<std::string, std::shared_ptr<Material>> const& materials) {
+std::shared_ptr<Sphere> load_sphere(std::istringstream& arg_stream, std::map<std::string, std::shared_ptr<Material>> const& materials) {
 	std::string name;
 	std::string mat_name;
 	float radius;
@@ -54,6 +53,23 @@ load_sphere(std::istringstream& arg_stream, std::map<std::string, std::shared_pt
 
 	auto it = materials.find(mat_name);
 	return std::make_shared<Sphere>(radius, center, name, it->second);
+}
+
+std::shared_ptr<Triangle> load_triangle(std::istringstream& arg_stream, std::map<std::string, std::shared_ptr<Material>> const& materials) {
+	std::string name;
+	std::string mat_name;
+	glm::vec3 v0;
+	glm::vec3 v1;
+	glm::vec3 v2;
+
+	arg_stream >> name;
+	arg_stream >> v0.x >> v0.y >> v0.z;
+	arg_stream >> v1.x >> v1.y >> v1.z;
+	arg_stream >> v2.x >> v2.y >> v2.z;
+	arg_stream >> mat_name;
+
+	auto it = materials.find(mat_name);
+	return std::make_shared<Triangle>(v0, v1, v2, name, it->second);
 }
 
 PointLight load_point_light(std::istringstream& arg_stream) {
@@ -122,6 +138,9 @@ void add_to_scene(std::istringstream& words_stream, Scene& new_scene) {
 		} else if ("sphere" == token_str) {
 			auto new_sphere = load_sphere(words_stream, new_scene.materials);
 			new_scene.shapes.emplace(new_sphere->get_name(), new_sphere);
+		} else if ("triangle" == token_str) {
+			auto new_triangle = load_triangle(words_stream, new_scene.materials);
+			new_scene.shapes.emplace(new_triangle->get_name(), new_triangle);
 		}
 	} else if ("light" == token_str) {
 		PointLight new_light{load_point_light(words_stream)};

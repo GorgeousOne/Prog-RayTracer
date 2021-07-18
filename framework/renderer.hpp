@@ -39,7 +39,7 @@ private:
 
 	Color get_intersection_color(Ray const& ray, Scene const& scene);
 	HitPoint get_closest_hit(Ray const& ray, Scene const& scene);
-	HitPoint find_light_block(Ray const& light_ray, Scene const& scene);
+	HitPoint find_light_block(Ray const& light_ray, float range, Scene const& scene);
 
 	Color shade(HitPoint const& hitPoint, Scene const& scene);
 	Color ambient_color(HitPoint const& , Light const& ambient);

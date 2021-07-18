@@ -28,18 +28,18 @@ std::ostream& Sphere::print(std::ostream &os) const {
 
 //Aufgabe 5.6
 HitPoint Sphere::intersect(Ray const& ray, float &t) const {
-	float distance {0};
 
 	bool does_intersect = glm::intersectRaySphere(
 			ray.origin, glm::normalize(ray.direction),
 			center_,
 			radius_ * radius_,
-			distance);
+			t);
 
 	if (does_intersect) {
-		glm::vec3 intersection = ray.point(distance - EPSILON);
-		return {does_intersect, distance, name_, material_, intersection, ray.direction, get_surface_normal(intersection)};
-	} else {
+		t -= EPSILON;
+		glm::vec3 intersection = ray.point(t);
+		return {does_intersect, t, name_, material_, intersection, ray.direction, get_surface_normal(intersection)};
+	}else {
 		return {};
 	}
 }

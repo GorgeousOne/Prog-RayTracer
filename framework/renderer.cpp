@@ -97,13 +97,12 @@ HitPoint Renderer::get_closest_hit(Ray const& ray, Scene const& scene) {
 	return closest_hit;
 }
 
-HitPoint Renderer::find_light_block(Ray const& light_ray, Scene const& scene) {
-
+HitPoint Renderer::find_light_block(Ray const& light_ray, float range, Scene const& scene) {
 	for (auto const& it : scene.shapes) {
 		float t;
 		HitPoint hit = it.second->intersect(light_ray, t);
 
-		if (hit.does_intersect && t <= 1) {
+		if (hit.does_intersect && t <= range) {
 			return hit;
 		}
 	}
@@ -136,15 +135,17 @@ Color Renderer::diffuse_color(HitPoint const& hitPoint, Scene const& scene) {
 
 	for (PointLight const& light : scene.lights)  {
 		glm::vec3 light_dir = light.position - hitPoint.position;
-		Ray light_ray {hitPoint.position, light_dir};
-		HitPoint light_block = find_light_block(light_ray, scene);
+		float distance = glm::length(light_dir);
+
+		Ray light_ray {hitPoint.position, glm::normalize(light_dir)};
+		HitPoint light_block = find_light_block(light_ray, distance, scene);
 
 		if (light_block.does_intersect) {
 			continue;
 		}
 		float cos_incidence_angle = glm::dot(hitPoint.surface_normal, glm::normalize(light_ray.direction));
 		Color light_intensity = light.color * light.brightness;
-		diffuse_color += light_intensity * hitPoint.hit_material->kd * cos_incidence_angle;
+		diffuse_color += light_intensity * hitPoint.hit_material->kd * abs(cos_incidence_angle);
 	}
 	return diffuse_color;
 }

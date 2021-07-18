@@ -153,8 +153,8 @@ TEST_CASE("triangle_ray_intersection", "[intersect]") {
 	HitPoint hit1 = triangle0.intersect(Ray {{1, 10, 1}, {0, -1, 0}}, t);
 	REQUIRE(false == hit1.does_intersect);
 
-	//backwards culling
-	HitPoint hit2 = triangle0.intersect(Ray {{1, -10, 1}, {0, 1, 0}}, t);
+	//parallel ray
+	HitPoint hit2 = triangle0.intersect(Ray {{10, 0, 0}, {-1, 0, 0}}, t);
 	REQUIRE(false == hit2.does_intersect);
 }
 

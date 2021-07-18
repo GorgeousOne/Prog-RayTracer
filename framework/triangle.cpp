@@ -40,14 +40,15 @@ std::ostream &Triangle::print(std::ostream &os) const {
 }
 
 //https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection
-HitPoint Triangle::intersect(Ray const& ray, float &distance) const {
+HitPoint Triangle::intersect(Ray const& ray, float &t) const {
 	glm::vec3 v0v1 = v1_ - v0_;
 	glm::vec3 v0v2 = v2_ - v0_;
 	glm::vec3 p_vec = glm::cross(ray.direction, (v0v2));
 	float det =glm::dot(v0v1, p_vec);
 
 	//returns if the triangle is facing the triangle backwards / is parallel to it
-    if (det < EPSILON) {
+	//remove "det > -EPSILON &&" for large objs maybe
+    if (det > -EPSILON && det < EPSILON) {
     	return {};
     }
 	float inv_det = 1 / det;
@@ -63,7 +64,12 @@ HitPoint Triangle::intersect(Ray const& ray, float &distance) const {
 	if (v < 0 || u + v > 1) {
 		return {};
 	}
-	distance = glm::dot(v0v2, q_vec) * inv_det;
-	glm::vec3 intersection = ray.point(distance - EPSILON);
-	return {true, distance, name_, material_, intersection, ray.direction, n_};
+	t = glm::dot(v0v2, q_vec) * inv_det;
+
+	if (t < EPSILON) {
+		return {};
+	}else {
+		t -= EPSILON;
+		return {true, t, name_, material_, ray.point(t), ray.direction, n_};
+	}
 }

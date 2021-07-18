@@ -9,7 +9,7 @@ struct Ray {
 	glm::vec3 direction = {0.0f, 0.0f, -1.0f};
 
 	[[nodiscard]] glm::vec3 point(float distance) const {
-		return origin + direction*distance;
+		return origin + direction * distance;
 	}
 };
 #endif
