@@ -1,5 +1,7 @@
 #include "box.hpp"
 
+#define EPSILON 0.001f
+
 Box::Box(glm::vec3 const& min, glm::vec3 const& max, std::string const& name, std::shared_ptr<Material> material) :
 		Shape(name, material),
 		min_(min),
@@ -95,24 +97,25 @@ HitPoint Box::intersect(Ray const& ray, float &t) const {
 		return HitPoint{};
 	}
 	//calculate the position with the found t
+	t -= EPSILON;
 	glm::vec3 intersection =  ray.point(t);
 	return HitPoint{true, t, name_, material_, intersection, ray.direction, get_surface_normal(intersection)};
 }
 
 glm::vec3 Box::get_surface_normal(glm::vec3 const& intersection) const {
-	if (min_.x == intersection.x) {
+	if (abs(min_.x - intersection.x) < EPSILON) {
 		return glm::vec3 {-1, 0, 0};
-	} else if (min_.y == intersection.y) {
+	} else if (abs(min_.y - intersection.y) < EPSILON) {
 		return glm::vec3 {0, -1, 0};
-	} else if (min_.z == intersection.z) {
+	} else if (abs(min_.z - intersection.z) < EPSILON) {
 		return glm::vec3 {0, 0, -1};
-	} else if (max_.x == intersection.x) {
+	} else if (abs(max_.x - intersection.x) < EPSILON) {
 		return glm::vec3 {1, 0, 0};
-	} else if (max_.y == intersection.y) {
+	} else if (abs(max_.y - intersection.y) < EPSILON) {
 		return glm::vec3 {0, 1, 0};
-	} else if (max_.z == intersection.z) {
+	} else if (abs(max_.z - intersection.z) < EPSILON) {
 		return glm::vec3 {0, 0, 1};
 	}
-	throw "Intersection does not lie on box surface";
+	//throw "Intersection does not lie on box surface";
 }
 

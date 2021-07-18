@@ -32,8 +32,8 @@ int main(int argc, const char** argv) {
 	unsigned img_width = 720;
 	unsigned img_height = 720;
 
-	Scene scene = load_scene("../../sdf/example.sdf");
-	Renderer renderer{img_width, img_height, "../../sdf/img.ppm"};
+	Scene scene = load_scene("../../../sdf/example.sdf");
+	Renderer renderer{img_width, img_height, "../../../sdf/img.ppm"};
 	std::cout << "shapes " << scene.shapes.size() << "\n";
 	std::cout << "lights " << scene.lights.size() << "\n";
 

@@ -39,20 +39,24 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 	glm::vec3 pixel_width = glm::cross(cam.direction, cam.up);
 	glm::vec3 pixel_height {cam.up};
 	assert(1.0f == 	glm::length(pixelWidth));
+
+	// corner of img_plane relative to camera
 	glm::vec3 min_corner =
-			cam.position
-			+ img_plane_dist * cam.direction
+			img_plane_dist * cam.direction
 			- (width_ / 2.0f) * pixel_width
 			- (height_ / 2.0f) * pixel_height;
 
 	for (unsigned x = 0; x < width_; ++x) {
 		for (unsigned y = 0; y < height_; ++y) {
-			glm::vec3 ray_dir {
+
+			// vector for 3D position of 2D pixel relative to camera
+			glm::vec3 pixel_pos {
 				min_corner
 				+ static_cast<float>(x) * pixel_width
 				+ static_cast<float>(y) * pixel_height};
-
-			Ray ray {cam.position, glm::normalize(ray_dir)};
+			
+			glm::vec3 ray_dir{ glm::normalize(pixel_pos) };
+			Ray ray {cam.position, ray_dir};
 			Pixel pixel {x, y};
 			pixel.color = get_intersection_color(ray, scene);
 			write(pixel);
