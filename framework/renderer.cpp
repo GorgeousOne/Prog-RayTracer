@@ -116,8 +116,8 @@ Color Renderer::shade(HitPoint const& hitPoint, Scene const& scene) {
 //	shaded_color.r = hitPoint.hit_material->kd.x;
 //	shaded_color.g = hitPoint.hit_material->kd.y;
 //	shaded_color.b = hitPoint.hit_material->kd.z;
-//	shaded_color += normal_color(hitPoint);
 
+//	shaded_color += normal_color(hitPoint);
 	shaded_color += diffuse_color(hitPoint, scene);
 	return shaded_color;
 }
@@ -159,14 +159,6 @@ float *Renderer::pixel_buffer() const {
 	}
 
 	return pixel_data;
-}
-
-unsigned int Renderer::getWidth() const {
-	return width_;
-}
-
-unsigned int Renderer::getHeight() const {
-	return height_;
 }
 
 

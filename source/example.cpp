@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <GLFW//glfw3.h>
 #include <iostream>
+#include <chrono>
 
 #include "scene.hpp"
 #include "renderer.hpp"
@@ -21,15 +22,15 @@ void display_image(unsigned width, unsigned height, float* data) {
 
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDrawPixels(400, 400, GL_RGB, GL_FLOAT, data);
+		glDrawPixels(width, height, GL_RGB, GL_FLOAT, data);
 		glfwSwapBuffers(window);
 		glfwWaitEvents();
 	}
 }
 
 int main(int argc, const char** argv) {
-	unsigned img_width = 400;
-	unsigned img_height = 400;
+	unsigned img_width = 720;
+	unsigned img_height = 720;
 
 	Scene scene = load_scene("../../sdf/example.sdf");
 	Renderer renderer{img_width, img_height, "../../sdf/img.ppm"};
@@ -37,7 +38,11 @@ int main(int argc, const char** argv) {
 	std::cout << "lights " << scene.lights.size() << "\n";
 
 	try {
+		auto start = std::chrono::steady_clock::now();
 		renderer.render(scene, scene.camera);
+		auto end = std::chrono::steady_clock::now();
+		std::chrono::duration<double> elapsed_seconds = end-start;
+		std::cout << elapsed_seconds.count() << "s\n";
 	} catch (const char *str) {
 		std::cout << "Exception: " << str << std::endl;
 	}

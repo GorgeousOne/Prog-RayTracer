@@ -8,9 +8,9 @@
 //Aufgabe 6.4
 struct Material {
 	std::string name = "default";
-	//ambient coefficient
+	//ambient color reflection coefficient
 	glm::vec3 ka = {};
-	//diffuse_color reflection coefficient
+	//diffuse color reflection coefficient
 	glm::vec3 kd = {};
 	//specular reflection coefficient
 	glm::vec3 ks = {};
