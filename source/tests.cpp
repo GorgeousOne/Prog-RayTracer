@@ -8,6 +8,7 @@
 #include "renderer.hpp"
 #include "sphere.hpp"
 #include "box.hpp"
+#include "triangle.hpp"
 #include "scene.hpp"
 
 #define PI 3.14159265f
@@ -115,7 +116,9 @@ TEST_CASE("box_ray_intersection", "[intersect]") {
 	HitPoint hit0 = box.intersect(Ray{{5, 5, -20}, {0, 0, 1}}, t);
 	REQUIRE(true == hit0.does_intersect);
 	REQUIRE(10 == hit0.intersection_distance);
-	REQUIRE(glm::vec3{5, 5, -10} == hit0.position);
+	REQUIRE(5 == Approx(hit0.position.x).margin(0.001));
+	REQUIRE(5 == Approx(hit0.position.y).margin(0.001));
+	REQUIRE(-10 == Approx(hit0.position.z).margin(0.001));
 
 	//axis aligned ray does not intersect box
 	HitPoint hit1 = box.intersect(Ray{{20, 20, 0}, {0, 0, 1}}, t);
@@ -129,11 +132,30 @@ TEST_CASE("box_ray_intersection", "[intersect]") {
 	HitPoint hit2 = box.intersect(Ray{{10, 30, 10}, {-1, -1, -1}}, t);
 	REQUIRE(true == hit2.does_intersect);
 	REQUIRE(20 == hit2.intersection_distance);
-	REQUIRE(glm::vec3{-10, 10, -10} == hit2.position);
+	REQUIRE(-10 == Approx(hit2.position.x).margin(0.001));
+	REQUIRE(10 == Approx(hit2.position.y).margin(0.001));
+	REQUIRE(-10 == Approx(hit2.position.z).margin(0.001));
 
 	//ray points away from box
 	HitPoint hit3 = box.intersect(Ray{{0, 0, 20}, {0, 0, 1}}, t);
 	REQUIRE(false == hit3.does_intersect);
+}
+
+TEST_CASE("triangle_ray_intersection", "[intersect]") {
+	float t;
+	Triangle triangle0 {{-1, 0, -1}, {0, 0, 1}, {1, 0, -1}};
+
+	//direct
+	HitPoint hit0 = triangle0.intersect(Ray {{0, 10, 0}, {0, -1, 0}}, t);
+	REQUIRE(true == hit0.does_intersect);
+
+	//direct miss
+	HitPoint hit1 = triangle0.intersect(Ray {{1, 10, 1}, {0, -1, 0}}, t);
+	REQUIRE(false == hit1.does_intersect);
+
+	//backwards culling
+	HitPoint hit2 = triangle0.intersect(Ray {{1, -10, 1}, {0, 1, 0}}, t);
+	REQUIRE(false == hit2.does_intersect);
 }
 
 TEST_CASE("box_ray_intersection_speed", "[intersect]") {

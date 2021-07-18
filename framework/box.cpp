@@ -1,8 +1,12 @@
 #include "box.hpp"
 
-#define EPSILON 0.001f
+#define EPSILON 0.0001f
 
-Box::Box(glm::vec3 const& min, glm::vec3 const& max, std::string const& name, std::shared_ptr<Material> material) :
+Box::Box(
+		glm::vec3 const& min,
+		glm::vec3 const& max,
+		std::string const& name,
+		std::shared_ptr<Material> material) :
 		Shape(name, material),
 		min_(min),
 		max_(max) {
@@ -39,7 +43,7 @@ std::ostream &Box::print(std::ostream &os) const {
 	return os << "\nmin:" << min_ << "\nmax: " << max_ << std::endl;
 }
 
-//Aufgabe 6.3r
+//https://tavianator.com/2011/ray_box.html
 HitPoint Box::intersect(Ray const& ray, float &t) const {
 	//furthest entering position with a box plane
 	float t_min = -std::numeric_limits<float>::infinity();
@@ -97,8 +101,7 @@ HitPoint Box::intersect(Ray const& ray, float &t) const {
 		return HitPoint{};
 	}
 	//calculate the position with the found t
-	t -= EPSILON;
-	glm::vec3 intersection =  ray.point(t);
+	glm::vec3 intersection =  ray.point(t - EPSILON);
 	return HitPoint{true, t, name_, material_, intersection, ray.direction, get_surface_normal(intersection)};
 }
 
