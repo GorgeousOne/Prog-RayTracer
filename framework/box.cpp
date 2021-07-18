@@ -44,7 +44,7 @@ std::ostream &Box::print(std::ostream &os) const {
 }
 
 //https://tavianator.com/2011/ray_box.html
-HitPoint Box::intersect(Ray const& ray, float &t) const {
+HitPoint Box::intersect(Ray const& ray) const {
 	//furthest entering position with a box plane
 	float t_min = -std::numeric_limits<float>::infinity();
 	//closest exiting position with a box plane
@@ -92,6 +92,7 @@ HitPoint Box::intersect(Ray const& ray, float &t) const {
 	if (t_max < t_min) {
 		return HitPoint{};
 	}
+	float t;
 	//ensures that no position in negative ray direction get returned
 	if (t_min > 0) {
 		t = t_min;

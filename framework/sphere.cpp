@@ -27,8 +27,8 @@ std::ostream& Sphere::print(std::ostream &os) const {
 }
 
 //Aufgabe 5.6
-HitPoint Sphere::intersect(Ray const& ray, float &t) const {
-
+HitPoint Sphere::intersect(Ray const& ray) const {
+	float t;
 	bool does_intersect = glm::intersectRaySphere(
 			ray.origin, glm::normalize(ray.direction),
 			center_,

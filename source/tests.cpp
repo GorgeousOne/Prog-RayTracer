@@ -79,7 +79,7 @@ TEST_CASE("intersect_ray_sphere2", "[intersect]") {
 	Sphere sphere0{2.0f, {0.0f, 0.0f, 10.0f}};
 	HitPoint hit0 = sphere0.intersect(ray, t);
 	REQUIRE(true == hit0.does_intersect);
-	REQUIRE(8.0f == hit0.intersection_distance);
+	REQUIRE(8.0f == hit0.distance);
 	REQUIRE(glm::vec3{0.0f, 0.0f, 8.0f} == hit0.position);
 
 	Sphere sphere1{2.0f, {4.0f, 0.0f, 10.0f}};
@@ -90,7 +90,7 @@ TEST_CASE("intersect_ray_sphere2", "[intersect]") {
 	HitPoint hit2 = sphere2.intersect(ray, t);
 
 	REQUIRE(true == hit2.does_intersect);
-	REQUIRE(10.0f == hit2.intersection_distance);
+	REQUIRE(10.0f == hit2.distance);
 	REQUIRE(glm::vec3{0.0f, 0.0f, 10.0f} == hit2.position);
 }
 
@@ -115,7 +115,7 @@ TEST_CASE("box_ray_intersection", "[intersect]") {
 	//ray intersects box
 	HitPoint hit0 = box.intersect(Ray{{5, 5, -20}, {0, 0, 1}}, t);
 	REQUIRE(true == hit0.does_intersect);
-	REQUIRE(10 == hit0.intersection_distance);
+	REQUIRE(10 == hit0.distance);
 	REQUIRE(5 == Approx(hit0.position.x).margin(0.001));
 	REQUIRE(5 == Approx(hit0.position.y).margin(0.001));
 	REQUIRE(-10 == Approx(hit0.position.z).margin(0.001));
@@ -131,7 +131,7 @@ TEST_CASE("box_ray_intersection", "[intersect]") {
 	//ray with negative direction intersects box
 	HitPoint hit2 = box.intersect(Ray{{10, 30, 10}, {-1, -1, -1}}, t);
 	REQUIRE(true == hit2.does_intersect);
-	REQUIRE(20 == hit2.intersection_distance);
+	REQUIRE(20 == hit2.distance);
 	REQUIRE(-10 == Approx(hit2.position.x).margin(0.001));
 	REQUIRE(10 == Approx(hit2.position.y).margin(0.001));
 	REQUIRE(-10 == Approx(hit2.position.z).margin(0.001));

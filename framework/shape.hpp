@@ -19,7 +19,7 @@ public:
 
 	virtual float area() const = 0;
 	virtual float volume() const = 0;
-	virtual HitPoint intersect(Ray const& ray, float &t) const = 0;
+	virtual HitPoint intersect(Ray const& ray) const = 0;
 
 	// Aufgabe 5.4
 	virtual std::ostream& print (std::ostream& os) const;

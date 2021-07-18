@@ -90,7 +90,7 @@ HitPoint Renderer::get_closest_hit(Ray const& ray, Scene const& scene) {
 		if (!hit.does_intersect) {
 			continue;
 		}
-		if (!closest_hit.does_intersect || hit.intersection_distance < closest_hit.intersection_distance) {
+		if (!closest_hit.does_intersect || hit.distance < closest_hit.distance) {
 			closest_hit = hit;
 		}
 	}

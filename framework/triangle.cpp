@@ -40,7 +40,7 @@ std::ostream &Triangle::print(std::ostream &os) const {
 }
 
 //https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection
-HitPoint Triangle::intersect(Ray const& ray, float &t) const {
+HitPoint Triangle::intersect(Ray const& ray) const {
 	glm::vec3 v0v1 = v1_ - v0_;
 	glm::vec3 v0v2 = v2_ - v0_;
 	glm::vec3 p_vec = glm::cross(ray.direction, (v0v2));
