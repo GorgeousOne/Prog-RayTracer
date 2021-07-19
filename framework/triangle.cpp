@@ -64,7 +64,7 @@ HitPoint Triangle::intersect(Ray const& ray) const {
 	if (v < 0 || u + v > 1) {
 		return {};
 	}
-	t = glm::dot(v0v2, q_vec) * inv_det;
+	float t = glm::dot(v0v2, q_vec) * inv_det;
 
 	if (t < EPSILON) {
 		return {};

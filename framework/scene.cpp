@@ -1,26 +1,31 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <string>
+
 #include "scene.hpp"
 #include "box.hpp"
 #include "sphere.hpp"
 #include "triangle.hpp"
-
+#include "composite.hpp"
 std::shared_ptr<Material> Scene::find_mat(std::string const& name) const {
 	return materials.find(name)->second;
 }
 
+glm::vec3 load_vec(std::istringstream& arg_stream) {
+	glm::vec3 v;
+	arg_stream >> v.x >> v.y >> v.z;
+	return v;
+}
+
 std::shared_ptr<Material> load_mat(std::istringstream& arg_stream) {
 	std::string name;
-	glm::vec3 ka;
-	glm::vec3 kd;
-	glm::vec3 ks;
 	float brightness;
 
 	arg_stream >> name;
-	arg_stream >> ka.x >> ka.y >> ka.z;
-	arg_stream >> kd.x >> kd.y >> kd.z;
-	arg_stream >> ks.x >> ks.y >> ks.z;
+	glm::vec3 ka = load_vec(arg_stream);
+	glm::vec3 kd = load_vec(arg_stream);
+	glm::vec3 ks = load_vec(arg_stream);
 	arg_stream >> brightness;
 	return std::make_shared<Material>(Material{name, ka, kd, ks, brightness});
 }
@@ -28,12 +33,10 @@ std::shared_ptr<Material> load_mat(std::istringstream& arg_stream) {
 std::shared_ptr<Box> load_box(std::istringstream& arg_stream, std::map<std::string, std::shared_ptr<Material>> const& materials) {
 	std::string name;
 	std::string mat_name;
-	glm::vec3 min;
-	glm::vec3 max;
 
 	arg_stream >> name;
-	arg_stream >> min.x >> min.y >> min.z;
-	arg_stream >> max.x >> max.y >> max.z;
+	glm::vec3 min = load_vec(arg_stream);
+	glm::vec3 max = load_vec(arg_stream);
 	arg_stream >> mat_name;
 
 	auto it = materials.find(mat_name);
@@ -44,10 +47,9 @@ std::shared_ptr<Sphere> load_sphere(std::istringstream& arg_stream, std::map<std
 	std::string name;
 	std::string mat_name;
 	float radius;
-	glm::vec3 center;
 
 	arg_stream >> name;
-	arg_stream >> center.x >> center.y >> center.z;
+	glm::vec3 center = load_vec(arg_stream);
 	arg_stream >> radius;
 	arg_stream >> mat_name;
 
@@ -58,14 +60,11 @@ std::shared_ptr<Sphere> load_sphere(std::istringstream& arg_stream, std::map<std
 std::shared_ptr<Triangle> load_triangle(std::istringstream& arg_stream, std::map<std::string, std::shared_ptr<Material>> const& materials) {
 	std::string name;
 	std::string mat_name;
-	glm::vec3 v0;
-	glm::vec3 v1;
-	glm::vec3 v2;
 
 	arg_stream >> name;
-	arg_stream >> v0.x >> v0.y >> v0.z;
-	arg_stream >> v1.x >> v1.y >> v1.z;
-	arg_stream >> v2.x >> v2.y >> v2.z;
+	glm::vec3 v0 = load_vec(arg_stream);
+	glm::vec3 v1 = load_vec(arg_stream);
+	glm::vec3 v2 = load_vec(arg_stream);
 	arg_stream >> mat_name;
 
 	auto it = materials.find(mat_name);
@@ -74,12 +73,11 @@ std::shared_ptr<Triangle> load_triangle(std::istringstream& arg_stream, std::map
 
 PointLight load_point_light(std::istringstream& arg_stream) {
 	std::string name;
-	glm::vec3 pos;
 	Color color;
 	float brightness;
 
 	arg_stream >> name;
-	arg_stream >> pos.x >> pos.y >> pos.z;
+	glm::vec3 pos = load_vec(arg_stream);
 	arg_stream >> color.r >> color.g >> color.b;
 	arg_stream >> brightness;
 
@@ -108,6 +106,121 @@ Camera load_camera(std::istringstream& arg_stream) {
 	return {name, fov_x};
 }
 
+std::map<std::string, std::shared_ptr<Material>> load_obj_materials(std::string const& file_path) {
+	std::ifstream input_mtl_file(file_path);
+	std::string line_buffer;
+
+	auto materials = std::map<std::string, std::shared_ptr<Material>>{};
+	std::shared_ptr<Material> current_mat = nullptr;
+
+	while (std::getline(input_mtl_file, line_buffer)) {
+		std::istringstream arg_stream(line_buffer);
+		std::string token;
+		arg_stream >> token;
+
+		if ("#" == token) {
+			continue;
+		}
+		if ("newmtl" == token) {
+			current_mat = std::make_shared<Material>();
+			arg_stream >> current_mat->name;
+			materials.emplace(current_mat->name, current_mat);
+		} else if ("Ka" == token) {
+			current_mat->ka = load_vec(arg_stream);
+		} else if ("Kd" == token) {
+			current_mat->kd = load_vec(arg_stream);
+		} else if ("Ks" == token) {
+			current_mat->ks = load_vec(arg_stream);
+		} else if ("Ns" == token) {
+			arg_stream >> current_mat->m;
+		}
+	}
+	return materials;
+}
+
+std::shared_ptr<Triangle> load_obj_face(
+		std::istringstream& arg_stream,
+		std::vector<glm::vec3> const& vertices,
+		std::vector<glm::vec3> const& normals,
+		std::string name,
+		std::shared_ptr<Material> mat) {
+	unsigned indices_v[3];
+	unsigned indices_vt[3];
+	unsigned indices_vn[3];
+
+	for (int i = 0; i < 3; ++i) {
+		std::string index_group;
+		arg_stream >> index_group;
+		std::stringstream index_stream(index_group);
+
+		index_stream >> indices_v[i];
+		index_stream.ignore();
+		index_stream >> indices_vt[i];
+		index_stream.ignore();
+		index_stream >> indices_vn[i];
+		index_stream.ignore();
+	}
+	return std::make_shared<Triangle>(
+			vertices[indices_v[0] - 1],
+			vertices[indices_v[1] - 1],
+			vertices[indices_v[2] - 1],
+			normals[indices_vn[0] - 1],
+			name,
+			mat);
+}
+
+/**
+ * Loads blender generate .obj files where the order of inputs is vertices, normals, used material then faces
+ * @param directory_path directory of the .obj file
+ * @param name name of the .obj file
+ * @return
+ */
+std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::string const& name) {
+	std::ifstream input_obj_file(directory_path + name + ".obj");
+	std::string line_buffer;
+
+	std::map<std::string, std::shared_ptr<Material>> materials;
+	auto composite = std::make_shared<Composite>();
+	std::shared_ptr<Composite> current_child = composite;
+	std::string child_name;
+	std::shared_ptr<Material> child_mat = nullptr;
+	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec3> normals;
+
+	int face_count = 0;
+
+	while (std::getline(input_obj_file, line_buffer)) {
+		std::istringstream arg_stream(line_buffer);
+		std::string token;
+		arg_stream >> token;
+
+		if ("#" == token) {
+			continue;
+		}
+		if ("mtllib" == token) {
+			std::string mtl_file_name;
+			arg_stream >> mtl_file_name;
+			materials = load_obj_materials(directory_path + mtl_file_name);
+		} else if ("o" == token) {
+			arg_stream >> child_name;
+		} else if ("v" == token) {
+			vertices.push_back(load_vec(arg_stream));
+		} else if ("vn" == token) {
+			normals.push_back(load_vec(arg_stream));
+		} else if ("usemtl" == token) {
+			std::string mat_name;
+			arg_stream >> mat_name;
+			child_mat = materials.find(mat_name)->second;
+			current_child = std::make_shared<Composite>(child_name, child_mat);
+			composite->add_child(current_child);
+		} else if ("f" == token) {
+			current_child->add_child(load_obj_face(arg_stream, vertices, normals, std::to_string(face_count), child_mat));
+			++face_count;
+		}
+	}
+	return composite;
+};
+
 void render(std::istringstream& arg_stream) {
 	std::string cam_name;
 	std::string file_name;
@@ -122,33 +235,38 @@ void render(std::istringstream& arg_stream) {
 	//NOT IMPLEMENTED FOR THIS ASSIGNMENT
 }
 
-void add_to_scene(std::istringstream& words_stream, Scene& new_scene) {
-	std::string token_str;
-	words_stream >> token_str;
+void add_to_scene(std::istringstream& arg_stream, Scene& new_scene) {
+	std::string token;
+	arg_stream >> token;
 
-	if ("material" == token_str) {
-		auto new_mat = load_mat(words_stream);
+	if ("material" == token) {
+		auto new_mat = load_mat(arg_stream);
 		new_scene.materials.emplace(new_mat->name, new_mat);
 	}
-	if ("shape" == token_str) {
-		words_stream >> token_str;
-		if ("box" == token_str) {
-			auto new_box = load_box(words_stream, new_scene.materials);
+	if ("shape" == token) {
+		arg_stream >> token;
+		if ("box" == token) {
+			auto new_box = load_box(arg_stream, new_scene.materials);
 			new_scene.shapes.emplace(new_box->get_name(), new_box);
-		} else if ("sphere" == token_str) {
-			auto new_sphere = load_sphere(words_stream, new_scene.materials);
+		} else if ("sphere" == token) {
+			auto new_sphere = load_sphere(arg_stream, new_scene.materials);
 			new_scene.shapes.emplace(new_sphere->get_name(), new_sphere);
-		} else if ("triangle" == token_str) {
-			auto new_triangle = load_triangle(words_stream, new_scene.materials);
+		} else if ("triangle" == token) {
+			auto new_triangle = load_triangle(arg_stream, new_scene.materials);
 			new_scene.shapes.emplace(new_triangle->get_name(), new_triangle);
+		} else if ("obj" == token) {
+			std::string obj_file_name;
+			arg_stream >> obj_file_name;
+			auto new_composite = load_obj("../../sdf/", obj_file_name);
+			new_scene.shapes.emplace(new_composite->get_name(), new_composite);
 		}
-	} else if ("light" == token_str) {
-		PointLight new_light{load_point_light(words_stream)};
+	} else if ("light" == token) {
+		PointLight new_light{load_point_light(arg_stream)};
 		new_scene.lights.push_back(new_light);
-	} else if ("ambient" == token_str) {
-		new_scene.ambient = {load_ambient(words_stream)};
-	} else if ("camera" == token_str) {
-		new_scene.camera = {load_camera(words_stream)};
+	} else if ("ambient" == token) {
+		new_scene.ambient = {load_ambient(arg_stream)};
+	} else if ("camera" == token) {
+		new_scene.camera = {load_camera(arg_stream)};
 	}
 }
 

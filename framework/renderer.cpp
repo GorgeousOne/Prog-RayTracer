@@ -84,8 +84,7 @@ HitPoint Renderer::get_closest_hit(Ray const& ray, Scene const& scene) {
 	HitPoint closest_hit{};
 
 	for (auto const& it : scene.shapes) {
-		float t;
-		HitPoint hit = it.second->intersect(ray, t);
+		HitPoint hit = it.second->intersect(ray);
 
 		if (!hit.does_intersect) {
 			continue;
@@ -99,10 +98,9 @@ HitPoint Renderer::get_closest_hit(Ray const& ray, Scene const& scene) {
 
 HitPoint Renderer::find_light_block(Ray const& light_ray, float range, Scene const& scene) {
 	for (auto const& it : scene.shapes) {
-		float t;
-		HitPoint hit = it.second->intersect(light_ray, t);
+		HitPoint hit = it.second->intersect(light_ray);
 
-		if (hit.does_intersect && t <= range) {
+		if (hit.does_intersect && hit.distance <= range) {
 			return hit;
 		}
 	}

@@ -42,6 +42,7 @@ add_executable(tests
         ../framework/sphere.hpp ../framework/sphere.cpp
         ../framework/box.hpp ../framework/box.cpp
 		../framework/triangle.hpp ../framework/triangle.cpp
+		../framework/composite.hpp ../framework/composite.cpp
 
 		../framework/ray.hpp
         ../framework/hitPoint.hpp
