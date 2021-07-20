@@ -38,9 +38,26 @@ float Box::volume() const {
 	return size_x() * size_y() * size_z();
 }
 
+glm::vec3 Box::min() const {
+	return min_;
+}
+
+glm::vec3 Box::max() const {
+	return max_;
+}
+
 std::ostream &Box::print(std::ostream &os) const {
 	Shape::print(os);
 	return os << "\nmin:" << min_ << "\nmax: " << max_ << std::endl;
+}
+
+bool Box::intersects_bounds(std::shared_ptr<Shape> const& shape) const {
+	glm::vec3 min = shape->min();
+	glm::vec3 max = shape->max();
+	return
+		(min.x >= min_.x && min.x >= min_.x || max.x >= min.x && max.x <= max.x) &&
+		(min.y >= min_.y && min.y >= min_.y || max.y >= min.y && max.y <= max.y) &&
+		(min.z >= min_.z && min.z >= min_.z || max.z >= min.z && max.z <= max.z);
 }
 
 //https://tavianator.com/2011/ray_box.html
@@ -121,6 +138,6 @@ glm::vec3 Box::get_surface_normal(glm::vec3 const& intersection) const {
 	} else if (intersection.z >= max_.z) {
 		return glm::vec3 {0, 0, 1};
 	}
-	throw "Intersection does not lie on box surface";
+//	throw "Intersection does not lie on box surface";
 }
 

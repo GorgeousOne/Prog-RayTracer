@@ -147,6 +147,7 @@ std::shared_ptr<Triangle> load_obj_face(
 	unsigned indices_v[3];
 	unsigned indices_vt[3];
 	unsigned indices_vn[3];
+	bool has_normals = false;
 
 	for (int i = 0; i < 3; ++i) {
 		std::string index_group;
@@ -155,18 +156,33 @@ std::shared_ptr<Triangle> load_obj_face(
 
 		index_stream >> indices_v[i];
 		index_stream.ignore();
-		index_stream >> indices_vt[i];
-		index_stream.ignore();
-		index_stream >> indices_vn[i];
-		index_stream.ignore();
+		//skips texture coordinates if non provided for a face
+		if ('/' != index_stream.peek()) {
+			index_stream >> indices_vt[i];
+		}
+		//reads face normals if provided
+		if (-1 != index_stream.peek()) {
+			index_stream.ignore();
+			index_stream >> indices_vn[i];
+			has_normals = true;
+		}
 	}
-	return std::make_shared<Triangle>(
-			vertices[indices_v[0] - 1],
-			vertices[indices_v[1] - 1],
-			vertices[indices_v[2] - 1],
-			normals[indices_vn[0] - 1],
-			name,
-			mat);
+	if (has_normals) {
+		return std::make_shared<Triangle>(
+				vertices[indices_v[0] - 1],
+				vertices[indices_v[1] - 1],
+				vertices[indices_v[2] - 1],
+				normals[indices_vn[0] - 1],
+				name,
+				mat);
+	}else {
+		return std::make_shared<Triangle>(
+				vertices[indices_v[0] - 1],
+				vertices[indices_v[1] - 1],
+				vertices[indices_v[2] - 1],
+				name,
+				mat);
+	}
 }
 
 /**
@@ -180,10 +196,9 @@ std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::stri
 	std::string line_buffer;
 
 	std::map<std::string, std::shared_ptr<Material>> materials;
-	auto composite = std::make_shared<Composite>();
+	auto composite = std::make_shared<Composite>(name, nullptr);
 	std::shared_ptr<Composite> current_child = composite;
-	std::string child_name;
-	std::shared_ptr<Material> child_mat = nullptr;
+	std::shared_ptr<Material> child_mat = std::make_shared<Material>();
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> normals;
 
@@ -197,26 +212,39 @@ std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::stri
 		if ("#" == token) {
 			continue;
 		}
+		//loads associated material file
 		if ("mtllib" == token) {
 			std::string mtl_file_name;
 			arg_stream >> mtl_file_name;
 			materials = load_obj_materials(directory_path + mtl_file_name);
+			//creates new sub object
 		} else if ("o" == token) {
+			//adds the previously composed mesh after all faces have been added so it's min max bounds are calculated correctly
+			if (composite->get_name() != current_child->get_name()) {
+				composite->add_child(current_child);
+			}
+			std::string child_name;
 			arg_stream >> child_name;
+			current_child = std::make_shared<Composite>(child_name, child_mat);
+			//adds vertex
 		} else if ("v" == token) {
 			vertices.push_back(load_vec(arg_stream));
+			//adds normal
 		} else if ("vn" == token) {
 			normals.push_back(load_vec(arg_stream));
+			//selects material for following faces
 		} else if ("usemtl" == token) {
 			std::string mat_name;
 			arg_stream >> mat_name;
 			child_mat = materials.find(mat_name)->second;
-			current_child = std::make_shared<Composite>(child_name, child_mat);
-			composite->add_child(current_child);
+			//adds a triangle face
 		} else if ("f" == token) {
 			current_child->add_child(load_obj_face(arg_stream, vertices, normals, std::to_string(face_count), child_mat));
 			++face_count;
 		}
+	}
+	if (composite->get_name() != current_child->get_name()) {
+		composite->add_child(current_child);
 	}
 	return composite;
 };

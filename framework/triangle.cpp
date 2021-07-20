@@ -34,6 +34,20 @@ float Triangle::volume() const {
 	return 0;
 }
 
+glm::vec3 Triangle::min() const {
+	return glm::vec3 {
+		std::min(std::min(v0_.x, v1_.x), v2_.x),
+		std::min(std::min(v0_.y, v1_.y), v2_.y),
+		std::min(std::min(v0_.z, v1_.z), v2_.z)};
+}
+
+glm::vec3 Triangle::max() const {
+	return glm::vec3 {
+		std::max(std::max(v0_.x, v1_.x), v2_.x),
+		std::max(std::max(v0_.y, v1_.y), v2_.y),
+		std::max(std::max(v0_.z, v1_.z), v2_.z)};
+}
+
 std::ostream &Triangle::print(std::ostream &os) const {
 	Shape::print(os);
 	return os << "\nv0:" << v0_ << "\nv1:" << v1_ << "\nv2:" << v2_ << "\nn:" << n_ << std::endl;
@@ -48,7 +62,7 @@ HitPoint Triangle::intersect(Ray const& ray) const {
 
 	//returns if the triangle is facing the triangle backwards / is parallel to it
 	//remove "det > -EPSILON &&" for large objs maybe
-    if (det > -EPSILON && det < EPSILON) {
+    if (det < EPSILON) { // && det > -EPSILON) {
     	return {};
     }
 	float inv_det = 1 / det;

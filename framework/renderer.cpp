@@ -38,7 +38,7 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 
 	glm::vec3 pixel_width = glm::cross(cam.direction, cam.up);
 	glm::vec3 pixel_height {cam.up};
-	assert(1.0f == 	glm::length(pixelWidth));
+	assert(1.0f == 	glm::length(pixel_width));
 
 	// corner of img_plane relative to camera
 	glm::vec3 min_corner =
@@ -142,8 +142,12 @@ Color Renderer::diffuse_color(HitPoint const& hitPoint, Scene const& scene) {
 			continue;
 		}
 		float cos_incidence_angle = glm::dot(hitPoint.surface_normal, glm::normalize(light_ray.direction));
+
+		if (cos_incidence_angle < 0) {
+			continue;
+		}
 		Color light_intensity = light.color * light.brightness;
-		diffuse_color += light_intensity * hitPoint.hit_material->kd * abs(cos_incidence_angle);
+		diffuse_color += light_intensity * hitPoint.hit_material->kd * cos_incidence_angle;
 	}
 	return diffuse_color;
 }
@@ -172,7 +176,6 @@ float *Renderer::pixel_buffer() const {
 		pixel_data[i * 3 + 1] = color.g;
 		pixel_data[i * 3 + 2] = color.b;
 	}
-
 	return pixel_data;
 }
 

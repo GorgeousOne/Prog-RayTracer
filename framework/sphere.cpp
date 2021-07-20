@@ -20,6 +20,14 @@ float Sphere::volume() const {
 	return 4.0f / 3.0f * PI * std::abs(pow(radius_, 3));
 }
 
+glm::vec3 Sphere::min() const {
+	return center_ - glm::vec3 {radius_, radius_, radius_};
+}
+
+glm::vec3 Sphere::max() const {
+	return center_ + glm::vec3 {radius_, radius_, radius_};
+}
+
 //Aufgabe 5.5
 std::ostream& Sphere::print(std::ostream &os) const {
 	Shape::print(os);
