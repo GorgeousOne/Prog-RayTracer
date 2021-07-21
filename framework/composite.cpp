@@ -105,30 +105,32 @@ void Composite::build_octree() {
 		return;
 	}
 	glm::vec3 oct_size = (max() - min()) * 0.5f;
+	std::vector<std::shared_ptr<Composite>> subdivisions;
+
 	for (int x = 0; x < 2; ++x) {
 		for (int y = 0; y < 2; ++y) {
 			for (int z = 0; z < 2; ++z) {
 				glm::vec3 oct_min = min() + glm::vec3 {x * oct_size.x, y * oct_size.y, z * oct_size.z};
 				glm::vec3 oct_max = min() + glm::vec3 {(x + 1) * oct_size.x, (y + 1) * oct_size.y, (z + 1) * oct_size.z};
-				subdivisions_.push_back(std::make_shared<Composite>(Composite{std::make_shared<Box>(Box{oct_min, oct_max})}));
+				subdivisions.push_back(std::make_shared<Composite>(Composite{std::make_shared<Box>(Box{oct_min, oct_max})}));
 			}
 		}
 	}
-	for (auto oct : subdivisions_) {
+	for (auto oct : subdivisions) {
 		for (auto child : children_) {
 			if (oct->bounds_->intersects_bounds(child)) {
 				oct->add_child(child);
 			}
 		}
 	}
-	for (auto oct : subdivisions_) {
+	for (auto oct : subdivisions) {
 		if (oct->children_.size() == children_.size()) {
 			return;
 		}
 	}
 	children_.clear();
 
-	for (auto oct : subdivisions_) {
+	for (auto oct : subdivisions) {
 		if (oct->children_.size() != 0) {
 			oct->build_octree();
 			children_.push_back(oct);
