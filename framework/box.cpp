@@ -55,13 +55,24 @@ bool Box::intersects_bounds(std::shared_ptr<Shape> const& shape) const {
 	glm::vec3 min = shape->min();
 	glm::vec3 max = shape->max();
 	return
-		(min.x >= min_.x && min.x >= min_.x || max.x >= min.x && max.x <= max.x) &&
-		(min.y >= min_.y && min.y >= min_.y || max.y >= min.y && max.y <= max.y) &&
-		(min.z >= min_.z && min.z >= min_.z || max.z >= min.z && max.z <= max.z);
+		(min.x >= min_.x && min.x <= max_.x || max.x >= min_.x && max.x <= max_.x || min.x < min_.x && max.x > max_.x) &&
+		(min.y >= min_.y && min.y <= max_.y || max.y >= min_.y && max.y <= max_.y || min.y < min_.y && max.y > max_.y) &&
+		(min.z >= min_.z && min.z <= max_.z || max.z >= min_.z && max.z <= max_.z || min.z < min_.z && max.z > max_.z);
+}
+
+bool Box::contains(glm::vec3 const& v) const{
+	return
+		v.x >= min_.x && v.x <= max_.x &&
+		v.y >= min_.y && v.y <= max_.y &&
+		v.z >= min_.z && v.z <= max_.z;
 }
 
 //https://tavianator.com/2011/ray_box.html
 HitPoint Box::intersect(Ray const& ray) const {
+
+	if (contains(ray.origin)) {
+		return HitPoint{true, 0, name_, material_, ray.origin, ray.direction, {}};
+	}
 	//furthest entering position with a box plane
 	float t_min = -std::numeric_limits<float>::infinity();
 	//closest exiting position with a box plane
@@ -118,7 +129,7 @@ HitPoint Box::intersect(Ray const& ray) const {
 	} else {
 		return HitPoint{};
 	}
-	t-= EPSILON;
+	t -= EPSILON;
 	//calculate the position with the found t
 	glm::vec3 intersection =  ray.point(t);
 	return HitPoint{true, t, name_, material_, intersection, ray.direction, get_surface_normal(intersection)};

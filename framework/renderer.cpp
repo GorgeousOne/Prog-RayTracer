@@ -7,6 +7,7 @@
 // Renderer
 // -----------------------------------------------------------------------------
 
+#include <chrono>
 #include "renderer.hpp"
 
 Renderer::Renderer(unsigned w, unsigned h, std::string const& file)
@@ -62,7 +63,12 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 			write(pixel);
 		}
 	}
+	auto start = std::chrono::steady_clock::now();
 	ppm_.save(filename_);
+	auto end = std::chrono::steady_clock::now();
+	std::chrono::duration<double> elapsed_seconds = end-start;
+	std::cout << "save " << filename_ << "\n";
+	std::cout << elapsed_seconds.count() << "s save time\n";
 }
 
 void Renderer::write(Pixel const& p) {

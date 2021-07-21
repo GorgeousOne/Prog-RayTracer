@@ -4,10 +4,8 @@
 #include <string>
 
 #include "scene.hpp"
-#include "box.hpp"
 #include "sphere.hpp"
-#include "triangle.hpp"
-#include "composite.hpp"
+
 std::shared_ptr<Material> Scene::find_mat(std::string const& name) const {
 	return materials.find(name)->second;
 }
@@ -221,6 +219,7 @@ std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::stri
 		} else if ("o" == token) {
 			//adds the previously composed mesh after all faces have been added so it's min max bounds are calculated correctly
 			if (composite->get_name() != current_child->get_name()) {
+				current_child->build_octree();
 				composite->add_child(current_child);
 			}
 			std::string child_name;
@@ -244,8 +243,10 @@ std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::stri
 		}
 	}
 	if (composite->get_name() != current_child->get_name()) {
+		current_child->build_octree();
 		composite->add_child(current_child);
 	}
+	composite->build_octree();
 	return composite;
 };
 

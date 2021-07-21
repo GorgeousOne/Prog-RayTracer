@@ -1,7 +1,7 @@
 #include "triangle.hpp"
 #include <glm/gtx/intersect.hpp>
 
-#define EPSILON 0.0001f
+#define EPSILON 0.001f
 
 Triangle::Triangle(
 		glm::vec3 const& v0,

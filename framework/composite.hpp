@@ -8,6 +8,7 @@
 class Composite : public Shape {
 public:
 	Composite(std::string const& name = "composite", std::shared_ptr<Material> material = {});
+	Composite(std::shared_ptr<Box> bounds, std::string const& name = "composite", std::shared_ptr<Material> material = {});
 
 	float area() const override;
 	float volume() const override;
@@ -18,12 +19,12 @@ public:
 	HitPoint intersect(Ray const& ray) const override;
 
 	void add_child(std::shared_ptr<Shape> shape);
+	void build_octree();
+	unsigned int child_count();
 
 private:
-	glm::vec3 min_;
-	glm::vec3 max_;
+	std::shared_ptr<Box> bounds_;
 	std::vector<std::shared_ptr<Shape>> children_;
 };
-
 
 #endif //RAYTRACER_COMPOSITE_H

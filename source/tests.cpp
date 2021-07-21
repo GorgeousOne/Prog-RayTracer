@@ -162,6 +162,7 @@ TEST_CASE("composite_ray_intersection", "[intersect]") {
 	Composite comp {};
 	comp.add_child(sphere);
 	comp.add_child(box);
+	comp.build_octree();
 
 	HitPoint hit1 = comp.intersect({{0, 10, 1}, {0, -1, 0}});
 	REQUIRE(true == hit1.does_intersect);

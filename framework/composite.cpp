@@ -1,8 +1,14 @@
 #include <numeric>
+#include <iomanip>
 #include "composite.hpp"
 
+#define EPSILON 0.001f
+
 Composite::Composite(std::string const &name, std::shared_ptr<Material> material) :
-	Shape(name, material), min_{glm::vec3 {}}, max_{glm::vec3 {}} {}
+	Shape(name, material), bounds_{nullptr} {}
+
+Composite::Composite(std::shared_ptr<Box> bounds, std::string const &name, std::shared_ptr<Material> material) :
+	Shape(name, material), bounds_{bounds} {}
 
 float Composite::area() const {
 	float area_sum = 0;
@@ -14,6 +20,7 @@ float Composite::area() const {
 
 float Composite::volume() const {
 	float volume_sum = 0;
+
 	for (auto child : children_) {
 		volume_sum += child->volume();
 	}
@@ -21,11 +28,33 @@ float Composite::volume() const {
 }
 
 glm::vec3 Composite::min() const {
-	return min_;
+	if (nullptr != bounds_) {
+		return bounds_->min();
+	}
+	glm::vec3 min{};
+
+	for (auto child : children_) {
+		glm::vec3 child_min = child->min();
+		min.x = std::min(min.x, child_min.x);
+		min.y = std::min(min.y, child_min.y);
+		min.z = std::min(min.z, child_min.z);
+	}
+	return min;
 }
 
 glm::vec3 Composite::max() const {
-	return max_;
+	if (nullptr != bounds_) {
+		return bounds_->max();
+	}
+	glm::vec3 max{};
+
+	for (auto child : children_) {
+		glm::vec3 child_max = child->max();
+		max.x = std::max(max.x, child_max.x);
+		max.y = std::max(max.y, child_max.y);
+		max.z = std::max(max.z, child_max.z);
+	}
+	return max;
 }
 
 std::ostream &Composite::print(std::ostream &os) const {
@@ -38,13 +67,11 @@ std::ostream &Composite::print(std::ostream &os) const {
 }
 
 HitPoint Composite::intersect(Ray const &ray) const {
-	Box bounds = Box {min(), max()};
-	HitPoint bound_hit = bounds.intersect(ray);
+	HitPoint bounds_hit = bounds_->intersect(ray);
 
-	if (!bound_hit.does_intersect) {
-		return bound_hit;
+	if (!bounds_hit.does_intersect) {
+		return bounds_hit;
 	}
-
 	float min_t = -1;
 	HitPoint min_hit {};
 
@@ -63,19 +90,48 @@ HitPoint Composite::intersect(Ray const &ray) const {
 }
 
 void Composite::add_child(std::shared_ptr<Shape> shape) {
-
-	if (children_.empty()) {
-		min_ = shape->min();
-		max_ = shape->max();
-	}else {
-		glm::vec3 child_min = shape->min();
-		glm::vec3 child_max = shape->max();
-		min_.x = std::min(min_.x, child_min.x);
-		min_.y = std::min(min_.y, child_min.y);
-		min_.z = std::min(min_.z, child_min.z);
-		max_.x = std::max(max_.x, child_max.x);
-		max_.y = std::max(max_.y, child_max.y);
-		max_.z = std::max(max_.z, child_max.z);
-	}
 	children_.push_back(shape);
+}
+
+unsigned Composite::child_count() {
+	return children_.size();
+}
+
+void Composite::build_octree() {
+	if (nullptr == bounds_) {
+		bounds_ = std::make_shared<Box>(min(), max());
+	}
+	if (children_.size() <= 64) {
+		return;
+	}
+	glm::vec3 oct_size = (max() - min()) * 0.5f;
+	for (int x = 0; x < 2; ++x) {
+		for (int y = 0; y < 2; ++y) {
+			for (int z = 0; z < 2; ++z) {
+				glm::vec3 oct_min = min() + glm::vec3 {x * oct_size.x, y * oct_size.y, z * oct_size.z};
+				glm::vec3 oct_max = min() + glm::vec3 {(x + 1) * oct_size.x, (y + 1) * oct_size.y, (z + 1) * oct_size.z};
+				subdivisions_.push_back(std::make_shared<Composite>(Composite{std::make_shared<Box>(Box{oct_min, oct_max})}));
+			}
+		}
+	}
+	for (auto oct : subdivisions_) {
+		for (auto child : children_) {
+			if (oct->bounds_->intersects_bounds(child)) {
+				oct->add_child(child);
+			}
+		}
+	}
+	for (auto oct : subdivisions_) {
+		if (oct->children_.size() == children_.size()) {
+			return;
+		}
+	}
+	children_.clear();
+
+	for (auto oct : subdivisions_) {
+		if (oct->children_.size() != 0) {
+			oct->build_octree();
+			children_.push_back(oct);
+		}
+	}
 }
