@@ -58,11 +58,10 @@ HitPoint Triangle::intersect(Ray const& ray) const {
 	glm::vec3 v0v1 = v1_ - v0_;
 	glm::vec3 v0v2 = v2_ - v0_;
 	glm::vec3 p_vec = glm::cross(ray.direction, (v0v2));
-	float det =glm::dot(v0v1, p_vec);
+	float det = glm::dot(v0v1, p_vec);
 
-	//returns if the triangle is facing the triangle backwards / is parallel to it
-	//remove "det > -EPSILON &&" for large objs maybe
-    if (det < EPSILON) { // && det > -EPSILON) {
+	//returns if the ray is parallel to the triangle
+    if (det < EPSILON && det > -EPSILON) {
     	return {};
     }
 	float inv_det = 1 / det;

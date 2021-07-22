@@ -67,12 +67,22 @@ bool Box::contains(glm::vec3 const& v) const{
 		v.z >= min_.z && v.z <= max_.z;
 }
 
-//https://tavianator.com/2011/ray_box.html
 HitPoint Box::intersect(Ray const& ray) const {
+	float t;
+	bool does_intersect = intersect(ray, t);
 
-	if (contains(ray.origin)) {
-		return HitPoint{true, 0, name_, material_, ray.origin, ray.direction, {}};
+	if (!does_intersect) {
+		return HitPoint{};
+	}else {
+		//calculate the intersection point with found t
+		glm::vec3 intersection = ray.point(t);
+		return HitPoint{true, t, name_, material_, intersection, ray.direction, get_surface_normal(intersection)};
 	}
+}
+
+//https://tavianator.com/2011/ray_box.html
+bool Box::intersect(Ray const& ray, float &t) const {
+
 	//furthest entering position with a box plane
 	float t_min = -std::numeric_limits<float>::infinity();
 	//closest exiting position with a box plane
@@ -81,7 +91,7 @@ HitPoint Box::intersect(Ray const& ray) const {
 	if (0 == ray.direction.x) {
 		//returns no position if the ray runs parallel on yz-plane to the box
 		if (ray.origin.x < min_.x || ray.origin.x > max_.x) {
-			return HitPoint{};
+			return false;
 		}
 	//checks if the intersections of the ray with the min & max yz-planes of the box
 	// are closer to the surface of the box than any previous position with a min / max plane
@@ -96,7 +106,7 @@ HitPoint Box::intersect(Ray const& ray) const {
 	}
 	if (0 == ray.direction.y) {
 		if (ray.origin.y < min_.y || ray.origin.y > max_.y) {
-			return HitPoint{};
+			return false;
 		}
 	} else {
 		float ray_dir_inv_y = 1 / ray.direction.y;
@@ -107,7 +117,7 @@ HitPoint Box::intersect(Ray const& ray) const {
 	}
 	if (0 == ray.direction.z) {
 		if (ray.origin.z < min_.z || ray.origin.z > max_.z) {
-			return HitPoint{};
+			return false;
 		}
 	} else {
 		float ray_dir_inv_z = 1 / ray.direction.z;
@@ -118,21 +128,20 @@ HitPoint Box::intersect(Ray const& ray) const {
 	}
 	//returns no position, if the ray misses the box
 	if (t_max < t_min) {
-		return HitPoint{};
+		return false;
 	}
-	float t;
+	t;
 	//ensures that no position in negative ray direction get returned
 	if (t_min > 0) {
 		t = t_min;
+	//returns max t if ray is inside box
 	} else if (t_max > 0) {
 		t = t_max;
 	} else {
-		return HitPoint{};
+		return false;
 	}
 	t -= EPSILON;
-	//calculate the position with the found t
-	glm::vec3 intersection =  ray.point(t);
-	return HitPoint{true, t, name_, material_, intersection, ray.direction, get_surface_normal(intersection)};
+	return true;
 }
 
 glm::vec3 Box::get_surface_normal(glm::vec3 const& intersection) const {

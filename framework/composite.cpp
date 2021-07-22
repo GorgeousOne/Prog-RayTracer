@@ -67,10 +67,11 @@ std::ostream &Composite::print(std::ostream &os) const {
 }
 
 HitPoint Composite::intersect(Ray const &ray) const {
-	HitPoint bounds_hit = bounds_->intersect(ray);
+	float t;
+	bool bounds_hit = bounds_->intersect(ray, t);
 
-	if (!bounds_hit.does_intersect) {
-		return bounds_hit;
+	if (!bounds_hit) {
+		return HitPoint{};
 	}
 	float min_t = -1;
 	HitPoint min_hit {};
