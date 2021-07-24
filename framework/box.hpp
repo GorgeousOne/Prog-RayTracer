@@ -10,18 +10,23 @@ public:
 
 	float area() const override;
 	float volume() const override;
+	glm::vec3 min() const override;
+	glm::vec3 max() const override;
 
 	float size_x() const;
 	float size_y() const;
 	float size_z() const;
+
 	std::ostream& print (std::ostream &os) const override;
 
-	HitPoint intersect(Ray const& ray, float &t) const override;
+	bool intersects_bounds(std::shared_ptr<Shape> const &shape) const;
+	bool contains(glm::vec3 const &v) const;
+	HitPoint intersect(Ray const& ray) const override;
+	bool intersect(Ray const &ray, float &t) const;
 
 private:
 	glm::vec3 min_;
 	glm::vec3 max_;
-
 	glm::vec3 get_surface_normal(glm::vec3 const& intersection) const;
 };
 #endif

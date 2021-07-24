@@ -7,7 +7,7 @@
 
 struct HitPoint {
 	bool does_intersect = false;
-	float intersection_distance = 0.0f;
+	float distance = 0.0f;
 	std::string hit_object = "null";
 	std::shared_ptr<Material> hit_material = nullptr;
 	glm::vec3 position {};

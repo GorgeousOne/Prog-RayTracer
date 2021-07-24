@@ -5,7 +5,7 @@
 #include <glm/gtx/intersect.hpp>
 
 #define PI 3.14159265f
-#define EPSILON 0.0001f
+#define EPSILON 0.001f
 
 Sphere::Sphere(float radius, glm::vec3 const& center, std::string const& name, std::shared_ptr<Material> material) :
 		Shape(name, material),
@@ -20,6 +20,14 @@ float Sphere::volume() const {
 	return 4.0f / 3.0f * PI * std::abs(pow(radius_, 3));
 }
 
+glm::vec3 Sphere::min() const {
+	return center_ - glm::vec3 {radius_, radius_, radius_};
+}
+
+glm::vec3 Sphere::max() const {
+	return center_ + glm::vec3 {radius_, radius_, radius_};
+}
+
 //Aufgabe 5.5
 std::ostream& Sphere::print(std::ostream &os) const {
 	Shape::print(os);
@@ -27,17 +35,21 @@ std::ostream& Sphere::print(std::ostream &os) const {
 }
 
 //Aufgabe 5.6
-HitPoint Sphere::intersect(Ray const& ray, float &t) const {
-	float distance = 0.0f;
-
-	bool result = glm::intersectRaySphere(
+HitPoint Sphere::intersect(Ray const& ray) const {
+	float t;
+	bool does_intersect = glm::intersectRaySphere(
 			ray.origin, glm::normalize(ray.direction),
 			center_,
 			radius_ * radius_,
-			distance);
+			t);
 
-	glm::vec3 intersection = ray.point(distance - EPSILON);
-	return HitPoint{result, distance, name_, material_, intersection, ray.direction, get_surface_normal(intersection)};
+	if (does_intersect) {
+		t -= EPSILON;
+		glm::vec3 intersection = ray.point(t);
+		return {does_intersect, t, name_, material_, intersection, ray.direction, get_surface_normal(intersection)};
+	}else {
+		return {};
+	}
 }
 
 glm::vec3 Sphere::get_surface_normal(glm::vec3 const& intersection) const {

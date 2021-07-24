@@ -9,9 +9,9 @@
 struct Material {
 	std::string name = "default";
 	//ambient color reflection coefficient
-	glm::vec3 ka = {};
+	glm::vec3 ka = {0.2, 0.2, 0.2};
 	//diffuse color reflection coefficient
-	glm::vec3 kd = {};
+	glm::vec3 kd = {0.5, 0.5, 0.5};
 	//specular reflection coefficient
 	glm::vec3 ks = {};
 	//specular reflection exponent

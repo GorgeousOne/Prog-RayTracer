@@ -3,6 +3,9 @@ add_executable(example
         ../framework/shape.hpp ../framework/shape.cpp
         ../framework/sphere.hpp ../framework/sphere.cpp
         ../framework/box.hpp ../framework/box.cpp
+		../framework/triangle.hpp ../framework/triangle.cpp
+		../framework/composite.hpp ../framework/composite.cpp
+
         ../framework/ray.hpp
         ../framework/hitPoint.hpp
         ../framework/material.hpp ../framework/material.cpp
@@ -38,7 +41,10 @@ add_executable(tests
         ../framework/shape.hpp ../framework/shape.cpp
         ../framework/sphere.hpp ../framework/sphere.cpp
         ../framework/box.hpp ../framework/box.cpp
-        ../framework/ray.hpp
+		../framework/triangle.hpp ../framework/triangle.cpp
+		../framework/composite.hpp ../framework/composite.cpp
+
+		../framework/ray.hpp
         ../framework/hitPoint.hpp
         ../framework/material.hpp ../framework/material.cpp
         ../framework/scene.hpp ../framework/scene.cpp

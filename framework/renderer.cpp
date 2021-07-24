@@ -7,6 +7,7 @@
 // Renderer
 // -----------------------------------------------------------------------------
 
+#include <chrono>
 #include "renderer.hpp"
 
 Renderer::Renderer(unsigned w, unsigned h, std::string const& file)
@@ -38,7 +39,7 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 
 	glm::vec3 pixel_width = glm::cross(cam.direction, cam.up);
 	glm::vec3 pixel_height {cam.up};
-	assert(1.0f == 	glm::length(pixelWidth));
+	assert(1.0f == 	glm::length(pixel_width));
 
 	// corner of img_plane relative to camera
 	glm::vec3 min_corner =
@@ -62,7 +63,12 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 			write(pixel);
 		}
 	}
+	auto start = std::chrono::steady_clock::now();
 	ppm_.save(filename_);
+	auto end = std::chrono::steady_clock::now();
+	std::chrono::duration<double> elapsed_seconds = end-start;
+	std::cout << "save " << filename_ << "\n";
+	std::cout << elapsed_seconds.count() << "s save time\n";
 }
 
 void Renderer::write(Pixel const& p) {
@@ -84,26 +90,23 @@ HitPoint Renderer::get_closest_hit(Ray const& ray, Scene const& scene) {
 	HitPoint closest_hit{};
 
 	for (auto const& it : scene.shapes) {
-		float t;
-		HitPoint hit = it.second->intersect(ray, t);
+		HitPoint hit = it.second->intersect(ray);
 
 		if (!hit.does_intersect) {
 			continue;
 		}
-		if (!closest_hit.does_intersect || hit.intersection_distance < closest_hit.intersection_distance) {
+		if (!closest_hit.does_intersect || hit.distance < closest_hit.distance) {
 			closest_hit = hit;
 		}
 	}
 	return closest_hit;
 }
 
-HitPoint Renderer::find_light_block(Ray const& light_ray, Scene const& scene) {
-
+HitPoint Renderer::find_light_block(Ray const& light_ray, float range, Scene const& scene) {
 	for (auto const& it : scene.shapes) {
-		float t;
-		HitPoint hit = it.second->intersect(light_ray, t);
+		HitPoint hit = it.second->intersect(light_ray);
 
-		if (hit.does_intersect && t <= 1) {
+		if (hit.does_intersect && hit.distance <= range) {
 			return hit;
 		}
 	}
@@ -136,13 +139,19 @@ Color Renderer::diffuse_color(HitPoint const& hitPoint, Scene const& scene) {
 
 	for (PointLight const& light : scene.lights)  {
 		glm::vec3 light_dir = light.position - hitPoint.position;
-		Ray light_ray {hitPoint.position, light_dir};
-		HitPoint light_block = find_light_block(light_ray, scene);
+		float distance = glm::length(light_dir);
+
+		Ray light_ray {hitPoint.position, glm::normalize(light_dir)};
+		HitPoint light_block = find_light_block(light_ray, distance, scene);
 
 		if (light_block.does_intersect) {
 			continue;
 		}
 		float cos_incidence_angle = glm::dot(hitPoint.surface_normal, glm::normalize(light_ray.direction));
+
+		if (cos_incidence_angle < 0) {
+			continue;
+		}
 		Color light_intensity = light.color * light.brightness;
 		diffuse_color += light_intensity * hitPoint.hit_material->kd * cos_incidence_angle;
 	}
@@ -173,7 +182,6 @@ float *Renderer::pixel_buffer() const {
 		pixel_data[i * 3 + 1] = color.g;
 		pixel_data[i * 3 + 2] = color.b;
 	}
-
 	return pixel_data;
 }
 
