@@ -97,11 +97,17 @@ Light load_ambient(std::istringstream& arg_stream) {
 Camera load_camera(std::istringstream& arg_stream) {
 	std::string name;
 	float fov_x;
+	glm::vec3 pos;
+	glm::vec3 dir;
+	glm::vec3 up;
 
 	arg_stream >> name;
 	arg_stream >> fov_x;
+	arg_stream >> pos.x >> pos.y >> pos.z;
+	arg_stream >> dir.x >> dir.y >> dir.z;
+	arg_stream >> up.x >> up.y >> up.z;
 
-	return {name, fov_x};
+	return {name, fov_x, pos, dir, up};
 }
 
 std::map<std::string, std::shared_ptr<Material>> load_obj_materials(std::string const& file_path) {

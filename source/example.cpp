@@ -33,12 +33,8 @@ int main(int argc, const char** argv) {
 	unsigned img_height = 1000;
 
 	Scene scene = load_scene("../../../sdf/example.sdf");
-//	scene.camera.position = glm::vec3 {0, 11, 13};
-	scene.camera.position = glm::vec3 {0, 60, 20};
-	scene.camera.direction = glm::vec3 {0, -1, 0};
-	scene.camera.up = glm::vec3 {0, 0, -1};
-
 	Renderer renderer{img_width, img_height, "../../../sdf/img.ppm"};
+
 	std::cout << "shapes " << scene.shapes.size() << "\n";
 	std::cout << "lights " << scene.lights.size() << "\n";
 

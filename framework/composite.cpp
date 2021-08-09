@@ -70,12 +70,14 @@ HitPoint Composite::intersect(Ray const &ray) const {
 	float t;
 	bool bounds_hit = bounds_->intersect(ray, t);
 
+	//test if bounding box is being intersected
 	if (!bounds_hit) {
-		return HitPoint{};
+		return {};
 	}
 	float min_t = -1;
 	HitPoint min_hit {};
 
+	//find closest child that the ray intersects with
 	for (auto const& child : children_) {
 		HitPoint hit = child->intersect(ray);
 
@@ -108,6 +110,7 @@ void Composite::build_octree() {
 	glm::vec3 oct_size = (max() - min()) * 0.5f;
 	std::vector<std::shared_ptr<Composite>> subdivisions;
 
+	//create 8 smaller boxes
 	for (int x = 0; x < 2; ++x) {
 		for (int y = 0; y < 2; ++y) {
 			for (int z = 0; z < 2; ++z) {
@@ -124,6 +127,7 @@ void Composite::build_octree() {
 			}
 		}
 	}
+	//stop subdividing if subdivisions have same amount of children
 	for (auto oct : subdivisions) {
 		if (oct->children_.size() == children_.size()) {
 			return;
