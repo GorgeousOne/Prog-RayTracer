@@ -8,6 +8,7 @@
 // -----------------------------------------------------------------------------
 
 #include <chrono>
+#include <glm/gtx/string_cast.hpp>
 #include "renderer.hpp"
 
 Renderer::Renderer(unsigned w, unsigned h, std::string const& file)
@@ -32,7 +33,7 @@ void Renderer::render() {
 }
 
 #define PI 3.14159265f
-
+/*
 void Renderer::render(Scene const& scene, Camera const& cam) {
 	float fov_radians = cam.fov_x / 180 * PI;
 	float img_plane_dist = (width_ / 2.0f) / tan(fov_radians / 2);
@@ -67,6 +68,51 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 	ppm_.save(filename_);
 	auto end = std::chrono::steady_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end-start;
+	std::cout << "save " << filename_ << "\n";
+	std::cout << elapsed_seconds.count() << "s save time\n";
+}*/
+
+void Renderer::render(Scene const& scene, Camera const& cam) {
+	float fov_radians = cam.fov_x / 180 * PI;
+	float img_plane_dist = (width_ / 2.0f) / tan(fov_radians / 2);
+
+	glm::vec3 u = glm::cross(cam.direction, cam.up);
+	glm::vec3 v = glm::cross(u, cam.direction);
+	glm::mat4 trans_mat{
+			/*u.x, v.x, -cam.direction.x, cam.position.x,
+			u.y, v.y, -cam.direction.y, cam.position.y,
+			u.z, v.z, -cam.direction.z, cam.position.z,
+			0, 0, 0, 1*/
+			glm::vec4{u, 0},
+			glm::vec4{v, 0},
+			glm::vec4{-cam.direction, 0},
+			glm::vec4{cam.position, 1}
+	};
+	std::cout << glm::to_string(trans_mat) << std::endl;
+
+	
+	assert(1.0f == glm::length(pixel_width));
+
+	// corner of img_plane relative to camera
+	glm::vec3 min_corner{ -width_/2.0f, -height_/2.0f, -img_plane_dist };
+
+	for (unsigned x = 0; x < width_; ++x) {
+		for (unsigned y = 0; y < height_; ++y) {
+
+			// vector for 3D position of 2D pixel relative to camera
+			glm::vec3 pixel_pos = min_corner + glm::vec3{x, y, 0};
+
+			glm::vec4 trans_ray_dir = trans_mat * glm::vec4{ glm::normalize(pixel_pos), 0 };
+			Ray ray{ cam.position, glm::vec3{trans_ray_dir} };
+			Pixel pixel{ x, y };
+			pixel.color = get_intersection_color(ray, scene);
+			write(pixel);
+		}
+	}
+	auto start = std::chrono::steady_clock::now();
+	ppm_.save(filename_);
+	auto end = std::chrono::steady_clock::now();
+	std::chrono::duration<double> elapsed_seconds = end - start;
 	std::cout << "save " << filename_ << "\n";
 	std::cout << elapsed_seconds.count() << "s save time\n";
 }

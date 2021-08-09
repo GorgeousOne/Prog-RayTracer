@@ -107,7 +107,7 @@ Camera load_camera(std::istringstream& arg_stream) {
 	arg_stream >> dir.x >> dir.y >> dir.z;
 	arg_stream >> up.x >> up.y >> up.z;
 
-	return {name, fov_x, pos, dir, up};
+	return {name, fov_x, pos, glm::normalize(dir), glm::normalize(up)};
 }
 
 std::map<std::string, std::shared_ptr<Material>> load_obj_materials(std::string const& file_path) {
