@@ -14,13 +14,16 @@ std::string Shape::get_name() const {
 
 void Shape::translate(float d_x, float d_y, float d_z) {
 	glm::mat4 translation(1);
-	translation[3][0] = d_x;
-	translation[3][1] = d_y;
-	translation[3][2] = d_z;
-	
-	world_transformation_ = world_transformation_ * translation;
+	translation[3][0] += d_x;
+	translation[3][1] += d_y;
+	translation[3][2] += d_z;
+//	std::cout << glm::to_string(translation) << std::endl;
+//	world_transformation_ = world_transformation_ * translation;
+	world_transformation_ = glm::translate(world_transformation_, { d_x, d_y, d_z });
+	world_transformation_inv_ = glm::inverse(world_transformation_);
+
 	std::cout << glm::to_string(world_transformation_) << std::endl;
-	//world_transformation_ = glm::translate(world_transformation_, { d_x, d_y, d_z });
+//	std::cout << glm::to_string() << std::endl;
 }
 
 void Shape::rotate(float roll, float pitch, float yaw) {

@@ -23,6 +23,6 @@ define light sun2 3 20 10 .2 .2 .2 16
 define camera eye 60.0 0 0 0 0 0 -1 0 1 0
 
 # transform
-transform blue_box translate 1 2 -13
-transform blue_box rotate 10 10 10
-transform blue_box scale 2 2 2
+transform blue_box translate -1 2 -13
+# transform blue_box rotate 10 10 10
+# transform blue_box scale 2 2 2

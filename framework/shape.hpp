@@ -34,7 +34,6 @@ protected:
 	std::shared_ptr<Material> material_;
 	glm::mat4 world_transformation_;
 	glm::mat4 world_transformation_inv_;
-
 };
 
 std::ostream& operator<<(std::ostream& os, Shape const& s);

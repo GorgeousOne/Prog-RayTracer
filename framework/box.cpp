@@ -69,60 +69,61 @@ bool Box::contains(glm::vec3 const& v) const{
 
 HitPoint Box::intersect(Ray const& ray) const {
 	float t;
-	bool does_intersect = intersect(ray, t);
+	Ray ray_inv = transform_ray(world_transformation_inv_, ray);
+	bool does_intersect = intersect(ray_inv, t);
 
 	if (!does_intersect) {
 		return HitPoint{};
 	}else {
 		//calculate the intersection point with found t
-		glm::vec3 intersection = ray.point(t);
-		return HitPoint{true, t, name_, material_, intersection, ray.direction, get_surface_normal(intersection)};
+		glm::vec3 surface_normal_inv = get_surface_normal(ray_inv.point(t));
+		glm::vec3 surface_normal = transform_vec3(world_transformation_, surface_normal_inv);
+		return HitPoint{true, t, name_, material_, ray.point(t), ray.direction, glm::normalize(surface_normal)};
 	}
 }
 
 //https://tavianator.com/2011/ray_box.html
-bool Box::intersect(Ray const& ray, float &t) const {
-
+bool Box::intersect(Ray const& ray_inv, float &t) const {
 	//furthest entering position with a box plane
 	float t_min = -std::numeric_limits<float>::infinity();
 	//closest exiting position with a box plane
 	float t_max = std::numeric_limits<float>::infinity();
 
-	if (0 == ray.direction.x) {
+	if (0 == ray_inv.direction.x) {
 		//returns no position if the ray runs parallel on yz-plane to the box
-		if (ray.origin.x < min_.x || ray.origin.x > max_.x) {
+		if (ray_inv.origin.x < min_.x || ray_inv.origin.x > max_.x) {
 			return false;
 		}
 	//checks if the intersections of the ray with the min & max yz-planes of the box
 	// are closer to the surface of the box than any previous position with a min / max plane
 	} else {
-		float ray_dir_inv_x = 1 / ray.direction.x;
-		float tx1 = (min_.x - ray.origin.x) * ray_dir_inv_x;
-		float tx2 = (max_.x - ray.origin.x) * ray_dir_inv_x;
+		float ray_dir_inv_x = 1 / ray_inv.direction.x;
+		float tx1 = (min_.x - ray_inv.origin.x) * ray_dir_inv_x;
+		float tx2 = (max_.x - ray_inv.origin.x) * ray_dir_inv_x;
 		//updates the entering position, if the new position is further away from ray origin (aka closer to box)
 		t_min = std::max(t_min, std::min(tx1, tx2));
 		//updates the exiting position, if the new position is closer to ray origin (aka also closer to box)
 		t_max = std::min(t_max, std::max(tx1, tx2));
 	}
-	if (0 == ray.direction.y) {
-		if (ray.origin.y < min_.y || ray.origin.y > max_.y) {
+	if (0 == ray_inv.direction.y) {
+		if (ray_inv.origin.y < min_.y || ray_inv.origin.y > max_.y) {
 			return false;
 		}
 	} else {
-		float ray_dir_inv_y = 1 / ray.direction.y;
-		float ty1 = (min_.y - ray.origin.y) * ray_dir_inv_y;
-		float ty2 = (max_.y - ray.origin.y) * ray_dir_inv_y;
+		float ray_dir_inv_y = 1 / ray_inv.direction.y;
+		float ty1 = (min_.y - ray_inv.origin.y) * ray_dir_inv_y;
+		float ty2 = (max_.y - ray_inv.origin.y) * ray_dir_inv_y;
 		t_min = std::max(t_min, std::min(ty1, ty2));
 		t_max = std::min(t_max, std::max(ty1, ty2));
 	}
-	if (0 == ray.direction.z) {
-		if (ray.origin.z < min_.z || ray.origin.z > max_.z) {
+	if (0 == ray_inv.direction.z) {
+		if (ray_inv.origin.z < min_.z || ray_inv.origin.z > max_.z) {
 			return false;
 		}
 	} else {
-		float ray_dir_inv_z = 1 / ray.direction.z;
-		float tz1 = (min_.z - ray.origin.z) * ray_dir_inv_z;
-		float tz2 = (max_.z - ray.origin.z) * ray_dir_inv_z;
+		float ray_dir_inv_z = 1 / ray_inv.direction.z;
+		float tz1 = (min_.z - ray_inv.origin.z) * ray_dir_inv_z;
+		float tz2 = (max_.z - ray_inv.origin.z) * ray_dir_inv_z;
 		t_min = std::max(t_min, std::min(tz1, tz2));
 		t_max = std::min(t_max, std::max(tz1, tz2));
 	}
@@ -144,20 +145,19 @@ bool Box::intersect(Ray const& ray, float &t) const {
 	return true;
 }
 
-glm::vec3 Box::get_surface_normal(glm::vec3 const& intersection) const {
-	if (intersection.x <= min_.x) {
-		return glm::vec3 {-1, 0, 0};
-	} else if (intersection.y <= min_.y) {
-		return glm::vec3 {0, -1, 0};
-	} else if (intersection.z <= min_.z) {
-		return glm::vec3 {0, 0, -1};
-	} else if (intersection.x >= max_.x) {
-		return glm::vec3 {1, 0, 0};
-	} else if (intersection.y >= max_.y) {
-		return glm::vec3 {0, 1, 0};
-	} else if (intersection.z >= max_.z) {
-		return glm::vec3 {0, 0, 1};
+glm::vec3 Box::get_surface_normal(glm::vec3 const& intersection_inv) const {
+	if (intersection_inv.x <= min_.x) {
+		return glm::vec3{-1, 0, 0};
+	} else if (intersection_inv.y <= min_.y) {
+		return glm::vec3{0, -1, 0};
+	} else if (intersection_inv.z <= min_.z) {
+		return glm::vec3{0, 0, -1};
+	} else if (intersection_inv.x >= max_.x) {
+		return glm::vec3{1, 0, 0};
+	} else if (intersection_inv.y >= max_.y) {
+		return glm::vec3{0, 1, 0};
+	} else {
+		return glm::vec3{0, 0, 1};
 	}
-//	throw "Intersection does not lie on box surface";
 }
 
