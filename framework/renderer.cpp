@@ -33,44 +33,6 @@ void Renderer::render() {
 }
 
 #define PI 3.14159265f
-/*
-void Renderer::render(Scene const& scene, Camera const& cam) {
-	float fov_radians = cam.fov_x / 180 * PI;
-	float img_plane_dist = (width_ / 2.0f) / tan(fov_radians / 2);
-
-	glm::vec3 pixel_width = glm::cross(cam.direction, cam.up);
-	glm::vec3 pixel_height {cam.up};
-	assert(1.0f == 	glm::length(pixel_width));
-
-	// corner of img_plane relative to camera
-	glm::vec3 min_corner =
-			img_plane_dist * cam.direction
-			- (width_ / 2.0f) * pixel_width
-			- (height_ / 2.0f) * pixel_height;
-
-	for (unsigned x = 0; x < width_; ++x) {
-		for (unsigned y = 0; y < height_; ++y) {
-
-			// vector for 3D position of 2D pixel relative to camera
-			glm::vec3 pixel_pos {
-				min_corner
-				+ static_cast<float>(x) * pixel_width
-				+ static_cast<float>(y) * pixel_height};
-			
-			glm::vec3 ray_dir{ glm::normalize(pixel_pos) };
-			Ray ray {cam.position, ray_dir};
-			Pixel pixel {x, y};
-			pixel.color = get_intersection_color(ray, scene);
-			write(pixel);
-		}
-	}
-	auto start = std::chrono::steady_clock::now();
-	ppm_.save(filename_);
-	auto end = std::chrono::steady_clock::now();
-	std::chrono::duration<double> elapsed_seconds = end-start;
-	std::cout << "save " << filename_ << "\n";
-	std::cout << elapsed_seconds.count() << "s save time\n";
-}*/
 
 void Renderer::render(Scene const& scene, Camera const& cam) {
 	float fov_radians = cam.fov_x / 180 * PI;
@@ -85,9 +47,8 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 			0, 0, 0, 1
 	};
 
-
 	// corner of img_plane relative to camera
-	glm::vec3 min_corner{ -width_/2.0f, -height_/2.0f, -img_plane_dist };
+	glm::vec3 min_corner{ -(width_/2.0f), -(height_/2.0f), -img_plane_dist };
 
 	for (unsigned x = 0; x < width_; ++x) {
 		for (unsigned y = 0; y < height_; ++y) {
