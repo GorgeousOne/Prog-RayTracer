@@ -29,8 +29,8 @@ void display_image(unsigned width, unsigned height, float* data) {
 }
 
 int main(int argc, const char** argv) {
-	unsigned img_width = 1000;
-	unsigned img_height = 1000;
+	unsigned img_width = 800;
+	unsigned img_height = 800;
 
 	Scene scene = load_scene("../../../sdf/example.sdf");
 	Renderer renderer{img_width, img_height, "../../../sdf/img.ppm"};
