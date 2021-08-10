@@ -2,7 +2,9 @@
 
 Shape::Shape(std::string const& name, std::shared_ptr<Material> material) :
 		name_{name},
-		material_{material} {}
+		material_{material},
+		world_transformation_{ glm::mat4() },
+		world_transformation_inv_{ glm::inverse(world_transformation_) } {}
 
 std::string Shape::get_name() const {
 	return name_;

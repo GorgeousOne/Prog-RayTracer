@@ -12,4 +12,7 @@ struct Ray {
 		return origin + direction * distance;
 	}
 };
+
+Ray transformRay(glm::mat4 const& mat, Ray const& ray);
+
 #endif

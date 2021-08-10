@@ -6,7 +6,7 @@ add_executable(example
 		../framework/triangle.hpp ../framework/triangle.cpp
 		../framework/composite.hpp ../framework/composite.cpp
 
-        ../framework/ray.hpp
+        ../framework/ray.hpp ../framework/ray.cpp
         ../framework/hitPoint.hpp
         ../framework/material.hpp ../framework/material.cpp
         ../framework/scene.hpp ../framework/scene.cpp
