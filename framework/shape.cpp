@@ -1,4 +1,6 @@
 #include "shape.hpp"
+#include "glm/gtx/transform.hpp"
+#include <glm/gtx/string_cast.hpp>
 
 Shape::Shape(std::string const& name, std::shared_ptr<Material> material) :
 		name_{name},
@@ -8,6 +10,25 @@ Shape::Shape(std::string const& name, std::shared_ptr<Material> material) :
 
 std::string Shape::get_name() const {
 	return name_;
+}
+
+void Shape::translate(float d_x, float d_y, float d_z) {
+	glm::mat4 translation(1);
+	translation[3][0] = d_x;
+	translation[3][1] = d_y;
+	translation[3][2] = d_z;
+	
+	world_transformation_ = world_transformation_ * translation;
+	std::cout << glm::to_string(world_transformation_) << std::endl;
+	//world_transformation_ = glm::translate(world_transformation_, { d_x, d_y, d_z });
+}
+
+void Shape::rotate(float roll, float pitch, float yaw) {
+
+}
+
+void Shape::scale(float scale_x, float scale_y, float scale_z) {
+
 }
 
 //Aufgabe 5.4

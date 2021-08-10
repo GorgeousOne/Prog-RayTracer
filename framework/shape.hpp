@@ -23,6 +23,10 @@ public:
 	virtual glm::vec3 max() const = 0;
 	virtual HitPoint intersect(Ray const& ray) const = 0;
 
+	virtual void translate(float d_x, float d_y, float d_z);
+	virtual void rotate(float roll, float pitch, float yaw);
+	virtual void scale(float scale_x, float scale_y, float scale_z);
+
 	virtual std::ostream& print (std::ostream& os) const;
 
 protected:

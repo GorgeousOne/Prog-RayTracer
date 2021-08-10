@@ -83,12 +83,7 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 			u.y, v.y, -cam.direction.y, cam.position.y,
 			u.z, v.z, -cam.direction.z, cam.position.z,
 			0, 0, 0, 1
-			/*glm::vec4{u, 0},
-			glm::vec4{v, 0},
-			glm::vec4{-cam.direction, 0},
-			glm::vec4{cam.position, 1}*/
 	};
-	std::cout << glm::to_string(trans_mat) << std::endl;
 
 
 	// corner of img_plane relative to camera

@@ -128,7 +128,7 @@ void load_transformation(std::istringstream& arg_stream, Scene const& scene) {
 		float d_z;
 
 		arg_stream >> d_x >> d_y >> d_z;
-		it.translate(d_x, d_y, d_z);
+		it->translate(d_x, d_y, d_z);
 	}
 	//rotation with euler angles
 	else if ("rotate" == token) {
@@ -137,7 +137,7 @@ void load_transformation(std::istringstream& arg_stream, Scene const& scene) {
 		float pitch;
 
 		arg_stream >> roll >> yaw >> pitch;
-		it.rotate(roll, yaw, pitch);
+		it->rotate(roll, pitch, yaw);
 	}
 	else if ("scale" == token) {
 		float scale_x;
@@ -145,7 +145,7 @@ void load_transformation(std::istringstream& arg_stream, Scene const& scene) {
 		float scale_z;
 
 		arg_stream >> scale_x >> scale_y >> scale_z;
-		it.scale(scale_x, scale_y, scale_z);
+		it->scale(scale_x, scale_y, scale_z);
 	}
 }
 

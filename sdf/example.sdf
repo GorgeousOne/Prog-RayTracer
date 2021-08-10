@@ -6,6 +6,7 @@ define material blue 0 0 1 0 0 1 0 0 1 10
 define material yellow 1 1 0 1 1 0 0 0 0 10
 
 geometry
+define shape box blue_box 0 0 0 1 1 1 blue
 define shape box red_box 1 1 -12 3 3 -10 red
 define shape box green_box -5 -10 -15 5 -5 -11 green
 define shape sphere blue_sphere -2 0 -10 1 blue
@@ -19,3 +20,8 @@ define light sun2 3 20 10 .2 .2 .2 16
 
 # camera
 define camera eye 60.0 0 -60 20 0 1 0 0 0 -1
+
+# transform
+transform blue_box translate 1 2 -13
+transform blue_box rotate 10 10 10
+transform blue_box scale 2 2 2
