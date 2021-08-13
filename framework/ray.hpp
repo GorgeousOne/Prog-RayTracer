@@ -12,4 +12,8 @@ struct Ray {
 		return origin + direction * distance;
 	}
 };
+
+Ray transform_ray(glm::mat4 const& mat, Ray const& ray);
+glm::vec3 transform_vec3(glm::mat4 const& mat, glm::vec3 const& v, bool is_origin = false);
+
 #endif

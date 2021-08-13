@@ -17,7 +17,8 @@ struct Scene {
 	Light ambient{};
 	Camera camera{};
 
-	[[nodiscard]] std::shared_ptr<Material> find_mat(std::string const& name) const;
+	std::shared_ptr<Material> find_mat(std::string const& name) const;
+	std::shared_ptr<Shape> find_shape(std::string const& name) const;
 };
 
 std::shared_ptr<Material> load_mat(std::istringstream& arg_stream);

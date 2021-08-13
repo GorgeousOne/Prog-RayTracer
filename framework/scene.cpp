@@ -10,6 +10,10 @@ std::shared_ptr<Material> Scene::find_mat(std::string const& name) const {
 	return materials.find(name)->second;
 }
 
+std::shared_ptr<Shape> Scene::find_shape(std::string const& name) const {
+	return shapes.find(name)->second;
+}
+
 glm::vec3 load_vec(std::istringstream& arg_stream) {
 	glm::vec3 v;
 	arg_stream >> v.x >> v.y >> v.z;
@@ -108,6 +112,41 @@ Camera load_camera(std::istringstream& arg_stream) {
 	arg_stream >> up.x >> up.y >> up.z;
 
 	return {name, fov_x, pos, glm::normalize(dir), glm::normalize(up)};
+}
+
+void load_transformation(std::istringstream& arg_stream, Scene const& scene) {
+	std::string name;
+	
+	arg_stream >> name;
+	auto it = scene.find_shape(name);
+
+	std::string token;
+	arg_stream >> token;
+	if ("translate" == token) {
+		float d_x;
+		float d_y;
+		float d_z;
+
+		arg_stream >> d_x >> d_y >> d_z;
+		it->translate(d_x, d_y, d_z);
+	}
+	//rotation with euler angles
+	else if ("rotate" == token) {
+		float roll;
+		float yaw;
+		float pitch;
+
+		arg_stream >> roll >> yaw >> pitch;
+		it->rotate(roll, pitch, yaw);
+	}
+	else if ("scale" == token) {
+		float scale_x;
+		float scale_y;
+		float scale_z;
+
+		arg_stream >> scale_x >> scale_y >> scale_z;
+		it->scale(scale_x, scale_y, scale_z);
+	}
 }
 
 std::map<std::string, std::shared_ptr<Material>> load_obj_materials(std::string const& file_path) {
@@ -322,7 +361,9 @@ Scene load_scene(std::string const& file_path) {
 		}
 		if ("define" == token_str) {
 			add_to_scene(words_stream, new_scene);
-		} else if ("render") {
+		} else if ("transform" == token_str) {
+			load_transformation(words_stream, new_scene);
+		} else if ("render" == token_str) {
 			render(words_stream);
 		}
 	}

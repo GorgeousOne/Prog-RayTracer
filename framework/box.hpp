@@ -22,11 +22,11 @@ public:
 	bool intersects_bounds(std::shared_ptr<Shape> const &shape) const;
 	bool contains(glm::vec3 const &v) const;
 	HitPoint intersect(Ray const& ray) const override;
-	bool intersect(Ray const &ray, float &t) const;
+	bool intersect(Ray const &ray_inv, float &t) const;
 
 private:
 	glm::vec3 min_;
 	glm::vec3 max_;
-	glm::vec3 get_surface_normal(glm::vec3 const& intersection) const;
+	glm::vec3 get_surface_normal(glm::vec3 const& intersection_inv) const;
 };
 #endif
