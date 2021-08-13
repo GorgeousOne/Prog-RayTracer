@@ -16,17 +16,12 @@ int main(int argc, const char** argv) {
 	Renderer renderer{img_width, img_height, "../../../sdf/img.ppm"};
 	std::cout << "shapes " << scene.shapes.size() << "\n";
 	std::cout << "lights " << scene.lights.size() << "\n";
-	auto start = std::chrono::steady_clock::now();
 
 	try {
 		renderer.render(scene, scene.camera);
 	} catch (const char *str) {
 		std::cout << "Exception: " << str << std::endl;
 	}
-	auto end = std::chrono::steady_clock::now();
-	std::chrono::duration<double> elapsed_seconds = end-start;
-	std::cout << elapsed_seconds.count() << "s\n";
-
 	Window window{{img_width, img_height}};
 
 	while (!window.should_close()) {

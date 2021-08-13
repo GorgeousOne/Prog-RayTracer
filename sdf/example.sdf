@@ -19,7 +19,8 @@ define light sun -5 20 0 .2 .2 .2 32
 define light sun2 3 20 10 .2 .2 .2 16
 
 # camera
-define camera eye 60.0 0 0 0 0 0 -1 0 1 0
+# define camera eye 60.0 0 0 0 0 0 -1 0 1 0
+define camera eye 60.0 0 10 0 0 -1 -1 0 1 0
 
 # transform
 transform blue_box translate -1 2 -13
