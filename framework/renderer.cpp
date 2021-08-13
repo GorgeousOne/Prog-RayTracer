@@ -7,6 +7,7 @@
 // Renderer
 // -----------------------------------------------------------------------------
 
+#define GLM_FORCE_RADIANS
 #include <chrono>
 #include <glm/gtx/string_cast.hpp>
 #include "renderer.hpp"

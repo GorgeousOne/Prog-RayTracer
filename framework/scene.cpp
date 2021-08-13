@@ -5,6 +5,7 @@
 
 #include "scene.hpp"
 #include "sphere.hpp"
+#include "renderer.hpp"
 
 std::shared_ptr<Material> Scene::find_mat(std::string const& name) const {
 	return materials.find(name)->second;
@@ -295,18 +296,17 @@ std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::stri
 	return composite;
 };
 
-void render(std::istringstream& arg_stream) {
-	std::string cam_name;
+void render(std::istringstream& arg_stream, Scene const& scene) {
 	std::string file_name;
 	unsigned int res_x;
 	unsigned int res_y;
 
-	arg_stream >> cam_name;
 	arg_stream >> file_name;
 	arg_stream >> res_x;
 	arg_stream >> res_y;
 
-	//NOT IMPLEMENTED FOR THIS ASSIGNMENT
+	Renderer renderer{res_x, res_y, file_name};
+	renderer.render(scene, scene.camera);
 }
 
 void add_to_scene(std::istringstream& arg_stream, Scene& new_scene) {
@@ -364,7 +364,7 @@ Scene load_scene(std::string const& file_path) {
 		} else if ("transform" == token_str) {
 			load_transformation(words_stream, new_scene);
 		} else if ("render" == token_str) {
-			render(words_stream);
+			render(words_stream, new_scene);
 		}
 	}
 	return new_scene;

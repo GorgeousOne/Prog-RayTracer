@@ -1,5 +1,6 @@
+#define GLM_FORCE_RADIANS
 #include "shape.hpp"
-#include "glm/gtx/transform.hpp"
+#include <glm/gtx/transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 Shape::Shape(std::string const& name, std::shared_ptr<Material> material) :
