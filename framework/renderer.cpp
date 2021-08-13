@@ -41,12 +41,12 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 	glm::vec3 u = glm::cross(cam.direction, cam.up);
 	glm::vec3 v = glm::cross(u, cam.direction);
 	glm::mat4 trans_mat{
-			u.x, v.x, -cam.direction.x, cam.position.x,
-			u.y, v.y, -cam.direction.y, cam.position.y,
-			u.z, v.z, -cam.direction.z, cam.position.z,
-			0, 0, 0, 1
+			glm::vec4{u, 0},
+			glm::vec4{v, 0},
+			glm::vec4{-cam.direction, 0},
+			glm::vec4{cam.position, 1}
 	};
-
+  
 	// corner of img_plane relative to camera
 	glm::vec3 min_corner{ -(width_/2.0f), -(height_/2.0f), -img_plane_dist };
 
