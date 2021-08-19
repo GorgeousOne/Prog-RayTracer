@@ -161,7 +161,9 @@ Color Renderer::diffuse_color(HitPoint const& hitPoint, Scene const& scene) {
 Color Renderer::specular_color(HitPoint const& hitPoint, Scene const& scene) {
 	Color specular_color{};
 
+	for (PointLight const& light : scene.lights) {
 
+	}
 }
 
 Color Renderer::normal_color(HitPoint const& hitPoint) {
