@@ -44,6 +44,7 @@ private:
 	Color shade(HitPoint const& hitPoint, Scene const& scene);
 	Color ambient_color(HitPoint const& , Light const& ambient);
 	Color diffuse_color(HitPoint const& hitPoint, Scene const& scene);
+	Color specular_color(HitPoint const& hitPoint, Scene const& scene);
 	Color normal_color(HitPoint const& hitPoint);
 	Color& tone_map_color(Color &color) const;
 };
