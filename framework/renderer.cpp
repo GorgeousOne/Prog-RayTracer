@@ -162,8 +162,24 @@ Color Renderer::specular_color(HitPoint const& hitPoint, Scene const& scene) {
 	Color specular_color{};
 
 	for (PointLight const& light : scene.lights) {
+		glm::vec3 light_dir = light.position - hitPoint.position;
+		float distance = glm::length(light_dir);
 
+		Ray light_ray{ hitPoint.position, glm::normalize(light_dir) };
+		HitPoint light_block = find_light_block(light_ray, distance, scene);
+
+		if (light_block.does_intersect) {
+			continue;
+		}
+		
+		glm::vec3 projected_light = glm::dot(glm::normalize(light_dir), hitPoint.surface_normal) * hitPoint.surface_normal;
+		glm::vec3 reflected_light = glm::normalize(light_dir - (projected_light + projected_light));
+		glm::vec3 cam_direction = glm::normalize(scene.camera.position - hitPoint.position);
+
+		Color light_brightness{ light.brightness, light.brightness, light.brightness };
+		specular_color += light_brightness * hitPoint.hit_material->ks * pow((glm::dot(reflected_light, cam_direction)), hitPoint.hit_material->m);
 	}
+	return specular_color;
 }
 
 Color Renderer::normal_color(HitPoint const& hitPoint) {
