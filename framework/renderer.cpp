@@ -127,6 +127,11 @@ Color Renderer::shade(HitPoint const& hitPoint, Scene const& scene) {
 //	shaded_color += normal_color(hitPoint);
 	shaded_color += ambient_color(hitPoint, scene.ambient);
 	shaded_color += diffuse_color(hitPoint, scene);
+
+	if (hitPoint.hit_material->m > 0) {
+		shaded_color += specular_color(hitPoint, scene);
+	}
+	//std::cout << "calc spec color\n";
 	return tone_map_color(shaded_color);
 }
 
@@ -159,7 +164,7 @@ Color Renderer::diffuse_color(HitPoint const& hitPoint, Scene const& scene) {
 }
 
 Color Renderer::specular_color(HitPoint const& hitPoint, Scene const& scene) {
-	Color specular_color{};
+	Color specular_color {};
 
 	for (PointLight const& light : scene.lights) {
 		glm::vec3 light_dir = light.position - hitPoint.position;
@@ -171,13 +176,18 @@ Color Renderer::specular_color(HitPoint const& hitPoint, Scene const& scene) {
 		if (light_block.does_intersect) {
 			continue;
 		}
-		
-		glm::vec3 projected_light = glm::dot(glm::normalize(light_dir), hitPoint.surface_normal) * hitPoint.surface_normal;
-		glm::vec3 reflected_light = glm::normalize(light_dir - (projected_light + projected_light));
-		glm::vec3 cam_direction = glm::normalize(scene.camera.position - hitPoint.position);
+		light_dir = glm::normalize(light_dir);
 
-		Color light_brightness{ light.brightness, light.brightness, light.brightness };
-		specular_color += light_brightness * hitPoint.hit_material->ks * pow((glm::dot(reflected_light, cam_direction)), hitPoint.hit_material->m);
+		glm::vec3 reflected_light = 2 * glm::dot(hitPoint.surface_normal, light_dir) * hitPoint.surface_normal - light_dir;
+		
+		float cos_specular_angle = glm::dot(reflected_light, hitPoint.ray_direction * -1.0f);
+		
+
+		if (cos_specular_angle <= 0) {
+			continue;
+		}
+		Color light_intensity = light.color * light.brightness;
+		specular_color += light_intensity * hitPoint.hit_material->ks * pow(cos_specular_angle, hitPoint.hit_material->m);
 	}
 	return specular_color;
 }
