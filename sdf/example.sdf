@@ -1,9 +1,9 @@
-# materials
+# materials name ka kd ks m
 define ambient ambient 1 1 1 1
-define material red 1 0 0 1 0 0 1 0 0 20
-define material green 0 1 0 0 1 0 0 1 0 50
-define material blue 0 0 1 0 0 1 0 0 1 10
-define material yellow 1 1 0 1 1 0 0 0 0 10
+define material red 1 0 0 1 0 0 1 1 1 20
+define material green 0 1 0 0 1 0 1 1 1 50
+define material blue 0 0 1 0 0 1 1 1 1 100
+define material yellow 1 1 0 1 1 0 1 1 1 10
 
 # geometry
 define shape box blue_box 0 0 0 1 1 1 blue
@@ -16,7 +16,7 @@ define shape triangle face -2 -3 -11 1 -3 -11 -0.5 -2 -13 yellow
 
 # light - from right above
 define light sun -5 20 0 .2 .2 .2 32
-define light sun2 3 20 10 .2 .2 .2 16
+define light sun2 1 0 0 .2 .2 .2 16
 
 # camera
 # define camera eye 60.0 0 0 0 0 0 -1 0 1 0
