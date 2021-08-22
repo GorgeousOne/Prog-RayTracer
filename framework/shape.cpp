@@ -14,21 +14,38 @@ std::string Shape::get_name() const {
 }
 
 void Shape::translate(float d_x, float d_y, float d_z) {
-	glm::mat4 translation(1);
-	translation[3][0] += d_x;
-	translation[3][1] += d_y;
-	translation[3][2] += d_z;
-//	std::cout << glm::to_string(translation) << std::endl;
+//  thats our own function but there is a glm function
+//	glm::mat4 translation(1);
+//	translation[3][0] = d_x;
+//	translation[3][1] = d_y;
+//	translation[3][2] = d_z;
 //	world_transformation_ = world_transformation_ * translation;
+
 	world_transformation_ = glm::translate(world_transformation_, { d_x, d_y, d_z });
 	world_transformation_inv_ = glm::inverse(world_transformation_);
-
-	std::cout << glm::to_string(world_transformation_) << std::endl;
-//	std::cout << glm::to_string() << std::endl;
 }
 
 void Shape::rotate(float roll, float pitch, float yaw) {
+	glm::mat4 rotation_z(1);
+	rotation_z[0][0] =  cos(roll);
+	rotation_z[0][1] =  sin(roll);
+	rotation_z[1][0] = -sin(roll);
+	rotation_z[1][1] =  cos(roll);
 
+	glm::mat4 rotation_x(1);
+	rotation_x[1][1] =  cos(pitch);
+	rotation_x[1][2] =  sin(pitch);
+	rotation_x[2][1] = -sin(pitch);
+	rotation_x[2][2] =  cos(pitch);
+
+	glm::mat4 rotation_y(1);
+	rotation_y[0][2] =  sin(yaw);
+	rotation_y[2][0] = -sin(yaw);
+	rotation_y[0][0] =  cos(yaw);
+	rotation_y[2][2] =  cos(yaw);
+
+	world_transformation_ = world_transformation_ * rotation_z * rotation_x * rotation_y;
+	world_transformation_inv_ = glm::inverse(world_transformation_);
 }
 
 void Shape::scale(float scale_x, float scale_y, float scale_z) {

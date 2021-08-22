@@ -19,14 +19,18 @@ define light sun -5 20 0 .2 .2 .2 32
 define light sun2 1 0 0 .2 .2 .2 16
 
 # camera
-# define camera eye 60.0 0 0 0 0 0 -1 0 1 0
-define camera eye 60.0 0 10 0 0 -1 -1 0 1 0
+define camera eye 60.0 0 0 0 0 0 -1 0 1 0
 
-# transform
-transform blue_box translate -1 2 -13
-# transform blue_box rotate 10 10 10
+# transform 
+# Rotation: roll(z) pitch(x) yaw(y)
+# Translation: x y z
+# Scale: x y z
+
+transform blue_box translate -1 2 -9
+transform blue_box rotate 30 30 30
 # transform blue_box scale 2 2 2
 
 transform blue_sphere translate -2 0 -10
 
 transform face translate -2 -3 -11
+transform face rotate 0 20 0

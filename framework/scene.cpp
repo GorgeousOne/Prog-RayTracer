@@ -137,8 +137,8 @@ void load_transformation(std::istringstream& arg_stream, Scene const& scene) {
 		float yaw;
 		float pitch;
 
-		arg_stream >> roll >> yaw >> pitch;
-		it->rotate(roll, pitch, yaw);
+		arg_stream >> roll >> pitch >> yaw;
+		it->rotate(glm::radians(roll), glm::radians(pitch), glm::radians(yaw));
 	}
 	else if ("scale" == token) {
 		float scale_x;
