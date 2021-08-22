@@ -49,7 +49,13 @@ void Shape::rotate(float roll, float pitch, float yaw) {
 }
 
 void Shape::scale(float scale_x, float scale_y, float scale_z) {
+	glm::mat4 scaling(1);
+	scaling[0][0] = scale_x;
+	scaling[1][1] = scale_y;
+	scaling[2][2] = scale_z;
 
+	world_transformation_ = world_transformation_ * scaling;
+	world_transformation_inv_ = glm::inverse(world_transformation_);
 }
 
 //Aufgabe 5.4
