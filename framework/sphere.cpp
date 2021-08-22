@@ -20,12 +20,16 @@ float Sphere::volume() const {
 	return 4.0f / 3.0f * PI * std::abs(pow(radius_, 3));
 }
 
-glm::vec3 Sphere::min() const {
-	return center_ - glm::vec3 {radius_, radius_, radius_};
+glm::vec3 Sphere::min(glm::mat4 transformation) const {
+	transformation *= world_transformation_;
+	glm::vec3 radius_trans = transform_vec3(transformation, { radius_, radius_, radius_ });
+	return center_ + glm::vec3{ transformation[3] } - radius_trans;
 }
 
-glm::vec3 Sphere::max() const {
-	return center_ + glm::vec3 {radius_, radius_, radius_};
+glm::vec3 Sphere::max(glm::mat4 transformation) const {
+	transformation *= world_transformation_;
+	glm::vec3 radius_trans = transform_vec3(transformation, { radius_, radius_, radius_ });
+	return center_ + glm::vec3{ transformation[3] } + radius_trans;
 }
 
 //Aufgabe 5.5

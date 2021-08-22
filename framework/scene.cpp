@@ -331,7 +331,7 @@ void add_to_scene(std::istringstream& arg_stream, Scene& new_scene) {
 		} else if ("obj" == token) {
 			std::string obj_file_name;
 			arg_stream >> obj_file_name;
-			auto new_composite = load_obj("../../sdf/", obj_file_name);
+			auto new_composite = load_obj("../../../sdf/", obj_file_name);
 			new_scene.shapes.emplace(new_composite->get_name(), new_composite);
 		}
 	} else if ("light" == token) {

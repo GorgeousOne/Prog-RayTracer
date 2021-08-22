@@ -38,12 +38,30 @@ float Box::volume() const {
 	return size_x() * size_y() * size_z();
 }
 
-glm::vec3 Box::min() const {
-	return min_;
+glm::vec3 Box::min(glm::mat4 transformation) const {
+	transformation *= world_transformation_;
+	glm::vec3 min_trans = transform_vec3(transformation, min_);
+	min_trans = glm::min(min_trans, transform_vec3(transformation, {min_.x, min_.y, max_.z}));
+	min_trans = glm::min(min_trans, transform_vec3(transformation, {max_.x, min_.y, max_.z}));
+	min_trans = glm::min(min_trans, transform_vec3(transformation, {min_.x, max_.y, max_.z}));
+	min_trans = glm::min(min_trans, transform_vec3(transformation, {max_.x, max_.y, min_.z}));
+	min_trans = glm::min(min_trans, transform_vec3(transformation, {max_.x, min_.y, min_.z}));
+	min_trans = glm::min(min_trans, transform_vec3(transformation, {min_.x, max_.y, min_.z}));
+	min_trans = glm::min(min_trans, transform_vec3(transformation, {max_}));
+	return min_trans;
 }
 
-glm::vec3 Box::max() const {
-	return max_;
+glm::vec3 Box::max(glm::mat4 transformation) const {
+	transformation *= world_transformation_;
+	glm::vec3 max_trans = transform_vec3(transformation, min_);
+	max_trans = glm::max(max_trans, transform_vec3(transformation, { min_.x, min_.y, max_.z }));
+	max_trans = glm::max(max_trans, transform_vec3(transformation, { max_.x, min_.y, max_.z }));
+	max_trans = glm::max(max_trans, transform_vec3(transformation, { min_.x, max_.y, max_.z }));
+	max_trans = glm::max(max_trans, transform_vec3(transformation, { max_.x, max_.y, min_.z }));
+	max_trans = glm::max(max_trans, transform_vec3(transformation, { max_.x, min_.y, min_.z }));
+	max_trans = glm::max(max_trans, transform_vec3(transformation, { min_.x, max_.y, min_.z }));
+	max_trans = glm::max(max_trans, transform_vec3(transformation, max_));
+	return max_trans;
 }
 
 std::ostream &Box::print(std::ostream &os) const {
@@ -52,8 +70,8 @@ std::ostream &Box::print(std::ostream &os) const {
 }
 
 bool Box::intersects_bounds(std::shared_ptr<Shape> const& shape) const {
-	glm::vec3 min = shape->min();
-	glm::vec3 max = shape->max();
+	glm::vec3 min = shape->min(glm::mat4(1));
+	glm::vec3 max = shape->max(glm::mat4(1));
 	return
 		(min.x >= min_.x && min.x <= max_.x || max.x >= min_.x && max.x <= max_.x || min.x < min_.x && max.x > max_.x) &&
 		(min.y >= min_.y && min.y <= max_.y || max.y >= min_.y && max.y <= max_.y || min.y < min_.y && max.y > max_.y) &&

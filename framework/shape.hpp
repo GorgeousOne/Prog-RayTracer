@@ -19,8 +19,8 @@ public:
 
 	virtual float area() const = 0;
 	virtual float volume() const = 0;
-	virtual glm::vec3 min() const = 0;
-	virtual glm::vec3 max() const = 0;
+	virtual glm::vec3 min(glm::mat4 transformation) const = 0;
+	virtual glm::vec3 max(glm::mat4 transformation) const = 0;
 	virtual HitPoint intersect(Ray const& ray) const = 0;
 
 	virtual void translate(float d_x, float d_y, float d_z);

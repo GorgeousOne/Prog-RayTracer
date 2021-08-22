@@ -34,18 +34,22 @@ float Triangle::volume() const {
 	return 0;
 }
 
-glm::vec3 Triangle::min() const {
-	return glm::vec3 {
-		std::min(std::min(v0_.x, v1_.x), v2_.x),
-		std::min(std::min(v0_.y, v1_.y), v2_.y),
-		std::min(std::min(v0_.z, v1_.z), v2_.z)};
+glm::vec3 Triangle::min(glm::mat4 transformation) const {
+	transformation *= world_transformation_;
+	glm::vec3 v0_trans = transform_vec3(transformation, v0_);
+	glm::vec3 v1_trans = transform_vec3(transformation, v1_);
+	glm::vec3 v2_trans = transform_vec3(transformation, v2_);
+
+	return glm::min(glm::min(v0_trans, v1_trans), v2_trans);
 }
 
-glm::vec3 Triangle::max() const {
-	return glm::vec3 {
-		std::max(std::max(v0_.x, v1_.x), v2_.x),
-		std::max(std::max(v0_.y, v1_.y), v2_.y),
-		std::max(std::max(v0_.z, v1_.z), v2_.z)};
+glm::vec3 Triangle::max(glm::mat4 transformation) const {
+	transformation *= world_transformation_;
+	glm::vec3 v0_trans = transform_vec3(transformation, v0_);
+	glm::vec3 v1_trans = transform_vec3(transformation, v1_);
+	glm::vec3 v2_trans = transform_vec3(transformation, v2_);
+
+	return glm::max(glm::max(v0_trans, v1_trans), v2_trans);
 }
 
 std::ostream &Triangle::print(std::ostream &os) const {
