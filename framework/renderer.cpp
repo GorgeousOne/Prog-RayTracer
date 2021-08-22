@@ -7,6 +7,7 @@
 // Renderer
 // -----------------------------------------------------------------------------
 
+#define GLM_FORCE_RADIANS
 #include <chrono>
 #include <glm/gtx/string_cast.hpp>
 #include "renderer.hpp"
@@ -46,29 +47,50 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 			glm::vec4{-cam.direction, 0},
 			glm::vec4{cam.position, 1}
 	};
-  
-	// corner of img_plane relative to camera
-	glm::vec3 min_corner{ -(width_/2.0f), -(height_/2.0f), -img_plane_dist };
+	//gets amount of parallel threads supported by hardware
+	size_t core_count = std::thread::hardware_concurrency();
+	std::vector<std::thread> threads;
+	threads.resize(core_count);
 
-	for (unsigned x = 0; x < width_; ++x) {
-		for (unsigned y = 0; y < height_; ++y) {
-
-			// vector for 3D position of 2D pixel relative to camera
-			glm::vec3 pixel_pos = min_corner + glm::vec3{x, y, 0};
-
-			glm::vec4 trans_ray_dir = trans_mat * glm::vec4{ glm::normalize(pixel_pos), 0 };
-			Ray ray{ cam.position, glm::vec3{trans_ray_dir} };
-			Pixel pixel{ x, y };
-			pixel.color = get_intersection_color(ray, scene);
-			write(pixel);
-		}
-	}
 	auto start = std::chrono::steady_clock::now();
-	ppm_.save(filename_);
+	pixel_index_ = 0;
+
+	//starts parallel threads all doing the same task
+	for (std::thread& t : threads) {
+		t = std::thread(&Renderer::thread_function, this, scene, img_plane_dist, trans_mat);
+	}
+	//lets main thread wait until all parallel threads finished
+	for (std::thread& t : threads) {
+		t.join();
+	}
 	auto end = std::chrono::steady_clock::now();
-	std::chrono::duration<double> elapsed_seconds = end - start;
-	std::cout << "save " << filename_ << "\n";
-	std::cout << elapsed_seconds.count() << "s save time\n";
+	std::chrono::duration<double> elapsed_seconds = end-start;
+	std::cout << elapsed_seconds.count() << "s rendering\n";
+
+	ppm_.save(filename_);
+}
+
+void Renderer::thread_function(Scene const& scene, float img_plane_dist, glm::mat4 const& trans_mat) {
+	//continuously picks pixels to render
+	while (true) {
+		unsigned current_pixel = pixel_index_++;
+		unsigned x = current_pixel % width_;
+		unsigned y = current_pixel / width_;
+
+		if (current_pixel >= width_ * height_) {
+			return;
+		}
+		glm::vec3 pixel_pos = glm::vec3{
+			x - (width_ * 0.5f),
+			y - (height_ * 0.5f),
+			-img_plane_dist};
+
+		glm::vec4 trans_ray_dir = trans_mat * glm::vec4{ glm::normalize(pixel_pos), 0 };
+		Ray ray{ glm::vec3{trans_mat[3]}, glm::vec3{trans_ray_dir} };
+		Pixel pixel{ x, y };
+		pixel.color = get_intersection_color(ray, scene);
+		write(pixel);
+	}
 }
 
 void Renderer::write(Pixel const& p) {

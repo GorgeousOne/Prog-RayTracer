@@ -11,6 +11,8 @@
 #define BUW_RENDERER_HPP
 
 #include <string>
+#include <thread>
+#include <atomic>
 #include <glm/glm.hpp>
 #include "color.hpp"
 #include "pixel.hpp"
@@ -36,6 +38,9 @@ private:
 	std::vector<Color> color_buffer_;
 	std::string filename_;
 	PpmWriter ppm_;
+
+	std::atomic_uint pixel_index_;
+	void thread_function(Scene const& scene, float img_plane_dist, glm::mat4 const& trans_mat);
 
 	Color get_intersection_color(Ray const& ray, Scene const& scene);
 	HitPoint get_closest_hit(Ray const& ray, Scene const& scene);
