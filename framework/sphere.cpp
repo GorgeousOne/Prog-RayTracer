@@ -37,21 +37,26 @@ std::ostream& Sphere::print(std::ostream &os) const {
 //Aufgabe 5.6
 HitPoint Sphere::intersect(Ray const& ray) const {
 	float t;
+
+	Ray ray_inv = transform_ray(world_transformation_inv_, ray);
+
 	bool does_intersect = glm::intersectRaySphere(
-			ray.origin, glm::normalize(ray.direction),
+			ray_inv.origin, ray_inv.direction,
 			center_,
 			radius_ * radius_,
 			t);
 
 	if (does_intersect) {
 		t -= EPSILON;
-		glm::vec3 intersection = ray.point(t);
-		return {does_intersect, t, name_, material_, intersection, ray.direction, get_surface_normal(intersection)};
+		//calculate the intersection point with found t
+		glm::vec3 surface_normal_inv = get_surface_normal(ray_inv.point(t));
+		glm::vec3 surface_normal = transform_vec3(world_transformation_, surface_normal_inv);
+		return HitPoint{ true, t, name_, material_, ray.point(t), ray.direction, glm::normalize(surface_normal) };
 	}else {
 		return {};
 	}
 }
 
-glm::vec3 Sphere::get_surface_normal(glm::vec3 const& intersection) const {
-	return glm::normalize(intersection - center_);
+glm::vec3 Sphere::get_surface_normal(glm::vec3 const& intersection_inv) const {
+	return glm::normalize(intersection_inv - center_);
 }

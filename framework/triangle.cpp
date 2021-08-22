@@ -55,9 +55,11 @@ std::ostream &Triangle::print(std::ostream &os) const {
 
 //https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection
 HitPoint Triangle::intersect(Ray const& ray) const {
+	Ray ray_inv = transform_ray(world_transformation_inv_, ray);
+
 	glm::vec3 v0v1 = v1_ - v0_;
 	glm::vec3 v0v2 = v2_ - v0_;
-	glm::vec3 p_vec = glm::cross(ray.direction, (v0v2));
+	glm::vec3 p_vec = glm::cross(ray_inv.direction, (v0v2));
 	float det = glm::dot(v0v1, p_vec);
 
 	//returns if the ray is parallel to the triangle
@@ -65,14 +67,14 @@ HitPoint Triangle::intersect(Ray const& ray) const {
     	return {};
     }
 	float inv_det = 1 / det;
-	glm::vec3 t_vec = ray.origin - v0_;
+	glm::vec3 t_vec = ray_inv.origin - v0_;
 	float u = glm::dot(t_vec, p_vec) * inv_det;
 
 	if (u < 0 || u > 1) {
 		return {};
 	}
 	glm::vec3 q_vec = glm::cross(t_vec, v0v1);
-	float v = glm::dot(ray.direction, q_vec) * inv_det;
+	float v = glm::dot(ray_inv.direction, q_vec) * inv_det;
 
 	if (v < 0 || u + v > 1) {
 		return {};
@@ -83,6 +85,7 @@ HitPoint Triangle::intersect(Ray const& ray) const {
 		return {};
 	}else {
 		t -= EPSILON;
-		return {true, t, name_, material_, ray.point(t), ray.direction, n_};
+		glm::vec3 surface_normal = transform_vec3(world_transformation_, n_);
+		return {true, t, name_, material_, ray.point(t), ray.direction, glm::normalize(surface_normal)};
 	}
 }
