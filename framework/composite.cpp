@@ -64,7 +64,23 @@ std::ostream &Composite::print(std::ostream &os) const {
 	return os;
 }
 
-HitPoint Composite::intersect(Ray const &ray) const {
+void Composite::scale(float sx, float sy, float sz) {
+	Shape::scale(sx, sy, sz);
+	build_octree();
+}
+
+void Composite::rotate(float yaw, float pitch, float roll) {
+	Shape::rotate(yaw, pitch, roll);
+	build_octree();
+}
+
+void Composite::translate(float x, float y, float z) {
+	Shape::translate(x, y, z);
+	build_octree();
+}
+
+HitPoint Composite::intersect(Ray const& ray) const {
+	assert(nullptr != bounds_);
 	float t;
 	bool bounds_hit = bounds_->intersect(ray, t);
 
@@ -74,10 +90,11 @@ HitPoint Composite::intersect(Ray const &ray) const {
 	}
 	float min_t = -1;
 	HitPoint min_hit {};
+	Ray ray_inv = transform_ray(world_transformation_inv_, ray);
 
-	//find closest child that the ray intersects with
+	//find closest child that the ray_inv intersects with
 	for (auto const& child : children_) {
-		HitPoint hit = child->intersect(ray);
+		HitPoint hit = child->intersect(ray_inv);
 
 		if (!hit.does_intersect) {
 			continue;
@@ -99,9 +116,10 @@ unsigned Composite::child_count() {
 }
 
 void Composite::build_octree() {
-	if (nullptr == bounds_) {
-		bounds_ = std::make_shared<Box>(min(glm::mat4(1)), max(glm::mat4(1)));
-	}
+	bounds_ = nullptr;
+	bounds_ = std::make_shared<Box>(min(glm::mat4(1)), max(glm::mat4(1)));
+//	bounds_ = std::make_shared<Box>(min(), max(), "bound", std::make_shared<Material>());
+
 	if (children_.size() <= 64) {
 		return;
 	}

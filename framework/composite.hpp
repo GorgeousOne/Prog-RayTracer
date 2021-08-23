@@ -15,8 +15,12 @@ public:
 	glm::vec3 min(glm::mat4 transformation) const override;
 	glm::vec3 max(glm::mat4 transformation) const override;
 
+	virtual void scale(float sx, float sy, float sz) override;
+	virtual void rotate(float yaw, float pitch, float roll) override;
+	virtual void translate(float x, float y, float z) override;
+
 	std::ostream& print(std::ostream &os) const override;
-	HitPoint intersect(Ray const& ray) const override;
+	HitPoint intersect(Ray const& ray_inv) const override;
 
 	void add_child(std::shared_ptr<Shape> shape);
 	void build_octree();

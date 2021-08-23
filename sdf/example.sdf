@@ -20,7 +20,7 @@ define light sun -5 20 0 .2 .2 .2 32
 define light sun2 1 0 0 .2 .2 .2 16
 
 # camera
-define camera eye 60.0 0 0 20 0 0 -1 0 1 0
+define camera eye 60.0 0 0 10 0 0 -1 0 1 0
 
 # transform: translate, rotate, scale
 # Rotation: roll(z) pitch(x) yaw(y)
@@ -39,4 +39,4 @@ transform face translate -2 -3 -11
 transform face scale 1.5 1 1
 
 transform superhot translate 0 0 -10
-transform superhot rotate 0 0 90
+transform superhot rotate 0 0 -90
