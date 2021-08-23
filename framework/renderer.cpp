@@ -12,8 +12,14 @@
 #include <glm/gtx/string_cast.hpp>
 #include "renderer.hpp"
 
-Renderer::Renderer(unsigned w, unsigned h, std::string const& file, unsigned AA_steps)
-		: width_(w), height_(h), color_buffer_(w * h, Color{0.0, 0.0, 0.0}), filename_(file), ppm_(width_, height_), AA_steps_(AA_steps) {}
+Renderer::Renderer(unsigned w, unsigned h, std::string const& file, unsigned AA_steps, unsigned max_ray_bounces):
+		width_(w),
+		height_(h),
+		color_buffer_(w * h, Color{0.0, 0.0, 0.0}),
+		filename_(file),
+		ppm_(width_, height_),
+		AA_steps_(AA_steps),
+		max_ray_bounces_(max_ray_bounces) {}
 
 void Renderer::render() {
 	std::size_t const checker_pattern_size = 20;
@@ -91,7 +97,7 @@ void Renderer::thread_function(Scene const& scene, float img_plane_dist, glm::ma
 
 				glm::vec4 trans_ray_dir = trans_mat * glm::vec4{ glm::normalize(pixel_pos), 0 };
 				Ray ray{ glm::vec3{trans_mat[3]}, glm::vec3{trans_ray_dir} };
-				pixel.color += get_intersection_color(ray, scene);
+				pixel.color += trace_color(ray, scene, 0);
 			}
 		}
 		pixel.color *= 1.0f / (AA_steps_ * AA_steps_);
@@ -141,25 +147,26 @@ HitPoint Renderer::find_light_block(Ray const& light_ray, float range, Scene con
 	return HitPoint {};
 }
 
-Color Renderer::get_intersection_color(Ray const& ray, Scene const& scene) {
+Color Renderer::trace_color(Ray const& ray, Scene const& scene, unsigned ray_bounces) {
 	HitPoint closest_hit = get_closest_hit(ray, scene);
-	return closest_hit.does_intersect ? shade(closest_hit, scene) : Color {};
+	return closest_hit.does_intersect ? shade(closest_hit, scene, ray_bounces) : Color {};
 }
 
-Color Renderer::shade(HitPoint const& hitPoint, Scene const& scene) {
+Color Renderer::shade(HitPoint const& hitPoint, Scene const& scene, unsigned ray_bounces) {
 	Color shaded_color {0, 0, 0};
-//	shaded_color.r = hitPoint.hit_material->kd.x;
-//	shaded_color.g = hitPoint.hit_material->kd.y;
-//	shaded_color.b = hitPoint.hit_material->kd.z;
+	auto material = hitPoint.hit_material;
 
 //	shaded_color += normal_color(hitPoint);
 	shaded_color += ambient_color(hitPoint, scene.ambient);
 	shaded_color += diffuse_color(hitPoint, scene);
+	shaded_color *= 1 - material->glossy;
 
-	if (hitPoint.hit_material->m > 0) {
+	if (material->m > 0) {
 		shaded_color += specular_color(hitPoint, scene);
 	}
-	//std::cout << "calc spec color\n";
+	if (hitPoint.hit_material->glossy > 0) {
+		shaded_color += reflection_color(hitPoint, scene, ray_bounces) * material->glossy;
+	}
 	return tone_map_color(shaded_color);
 }
 
@@ -205,11 +212,8 @@ Color Renderer::specular_color(HitPoint const& hitPoint, Scene const& scene) {
 			continue;
 		}
 		light_dir = glm::normalize(light_dir);
-
 		glm::vec3 reflected_light = 2 * glm::dot(hitPoint.surface_normal, light_dir) * hitPoint.surface_normal - light_dir;
-		
 		float cos_specular_angle = glm::dot(reflected_light, hitPoint.ray_direction * -1.0f);
-		
 
 		if (cos_specular_angle <= 0) {
 			continue;
@@ -218,6 +222,16 @@ Color Renderer::specular_color(HitPoint const& hitPoint, Scene const& scene) {
 		specular_color += light_intensity * hitPoint.hit_material->ks * pow(cos_specular_angle, hitPoint.hit_material->m);
 	}
 	return specular_color;
+}
+
+Color Renderer::reflection_color(HitPoint const& hitPoint, Scene const& scene, unsigned ray_bounces) {
+	if (ray_bounces >= max_ray_bounces_) {
+		return {};
+	}
+	glm::vec3 ray_dir = hitPoint.ray_direction;
+	float cos_incidence_angle = glm::dot(hitPoint.surface_normal, ray_dir);
+	glm::vec3 reflect_dir = ray_dir - 2 * cos_incidence_angle * hitPoint.surface_normal;
+	return trace_color({hitPoint.position, reflect_dir}, scene, ray_bounces + 1);
 }
 
 Color Renderer::normal_color(HitPoint const& hitPoint) {

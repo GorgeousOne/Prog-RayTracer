@@ -38,7 +38,7 @@ define shape box box1 -1.5 0.01 -1.5 1.5 5.8 1.5 yellow
 
 transform ball1 translate 1.5 0 2
 transform box1 translate -1.5 0 -1
-transform box1 rotate 0 0 35
+transform box1 rotate 0 0 60
 
 # camera
 define camera eye 60.0 0 5 13.66 0 0 -1 0 1 0
