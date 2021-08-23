@@ -315,7 +315,7 @@ void render(std::istringstream& arg_stream, Scene const& scene) {
 	renderer.render(scene, scene.camera);
 }
 
-void add_to_scene(std::istringstream& arg_stream, Scene& new_scene) {
+void add_to_scene(std::istringstream& arg_stream, Scene& new_scene, std::string const& resource_directory) {
 	std::string token;
 	arg_stream >> token;
 
@@ -337,7 +337,7 @@ void add_to_scene(std::istringstream& arg_stream, Scene& new_scene) {
 		} else if ("obj" == token) {
 			std::string obj_file_name;
 			arg_stream >> obj_file_name;
-			auto new_composite = load_obj("../../../sdf/", obj_file_name);
+			auto new_composite = load_obj(resource_directory, obj_file_name);
 			new_scene.shapes.emplace(new_composite->get_name(), new_composite);
 		}
 	} else if ("light" == token) {
@@ -350,7 +350,7 @@ void add_to_scene(std::istringstream& arg_stream, Scene& new_scene) {
 	}
 }
 
-Scene load_scene(std::string const& file_path) {
+Scene load_scene(std::string const& file_path, std::string const& resource_directory) {
 	Scene new_scene{};
 	std::ifstream input_sdf_file(file_path);
 	std::string line_buffer;
@@ -366,7 +366,7 @@ Scene load_scene(std::string const& file_path) {
 			continue;
 		}
 		if ("define" == token_str) {
-			add_to_scene(words_stream, new_scene);
+			add_to_scene(words_stream, new_scene, resource_directory);
 		} else if ("transform" == token_str) {
 			load_transformation(words_stream, new_scene);
 		} else if ("render" == token_str) {

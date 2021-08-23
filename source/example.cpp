@@ -4,6 +4,7 @@
 #include <iostream>
 #include <chrono>
 #include <window.hpp>
+#include <fstream>
 
 #include "scene.hpp"
 #include "renderer.hpp"
@@ -12,8 +13,13 @@ int main(int argc, const char** argv) {
 	unsigned img_width = 800;
 	unsigned img_height = 800;
 
-	Scene scene = load_scene("../../../sdf/cornell.sdf");
-	Renderer renderer{img_width, img_height, "../../../sdf/img.ppm", 2};
+	std::ifstream resource_paths_file("resource-paths.txt");
+	std::string sdf_directory_path;
+	std::getline(resource_paths_file, sdf_directory_path);
+	std::cout << "resource directory: " << sdf_directory_path << std::endl;
+
+	Scene scene = load_scene(sdf_directory_path + "/cornell.sdf", sdf_directory_path);
+	Renderer renderer{img_width, img_height, sdf_directory_path + "/img.ppm", 2, 5};
 	std::cout << "shapes " << scene.shapes.size() << "\n";
 	std::cout << "lights " << scene.lights.size() << "\n";
 
