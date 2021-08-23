@@ -10,8 +10,8 @@ public:
 
 	float area() const override;
 	float volume() const override;
-	glm::vec3 min() const override;
-	glm::vec3 max() const override;
+	glm::vec3 min(glm::mat4 transformation) const override;
+	glm::vec3 max(glm::mat4 transformation) const override;
 
 	float size_x() const;
 	float size_y() const;

@@ -27,32 +27,30 @@ float Composite::volume() const {
 	return volume_sum;
 }
 
-glm::vec3 Composite::min() const {
+glm::vec3 Composite::min(glm::mat4 transformation) const {
 	if (nullptr != bounds_) {
-		return bounds_->min();
+		return bounds_->min(transformation);
 	}
 	glm::vec3 min{};
+	transformation *= world_transformation_;
 
 	for (auto child : children_) {
-		glm::vec3 child_min = child->min();
-		min.x = std::min(min.x, child_min.x);
-		min.y = std::min(min.y, child_min.y);
-		min.z = std::min(min.z, child_min.z);
+		glm::vec3 child_min = child->min(transformation);
+		min = glm::min(min, child_min);
 	}
 	return min;
 }
 
-glm::vec3 Composite::max() const {
+glm::vec3 Composite::max(glm::mat4 transformation) const {
 	if (nullptr != bounds_) {
-		return bounds_->max();
+		return bounds_->max(transformation);
 	}
 	glm::vec3 max{};
+	transformation *= world_transformation_;
 
 	for (auto child : children_) {
-		glm::vec3 child_max = child->max();
-		max.x = std::max(max.x, child_max.x);
-		max.y = std::max(max.y, child_max.y);
-		max.z = std::max(max.z, child_max.z);
+		glm::vec3 child_max = child->max(transformation);
+		max = glm::max(max, child_max);
 	}
 	return max;
 }
@@ -66,7 +64,23 @@ std::ostream &Composite::print(std::ostream &os) const {
 	return os;
 }
 
-HitPoint Composite::intersect(Ray const &ray) const {
+void Composite::scale(float sx, float sy, float sz) {
+	Shape::scale(sx, sy, sz);
+	build_octree();
+}
+
+void Composite::rotate(float yaw, float pitch, float roll) {
+	Shape::rotate(yaw, pitch, roll);
+	build_octree();
+}
+
+void Composite::translate(float x, float y, float z) {
+	Shape::translate(x, y, z);
+	build_octree();
+}
+
+HitPoint Composite::intersect(Ray const& ray) const {
+	assert(nullptr != bounds_);
 	float t;
 	bool bounds_hit = bounds_->intersect(ray, t);
 
@@ -76,10 +90,11 @@ HitPoint Composite::intersect(Ray const &ray) const {
 	}
 	float min_t = -1;
 	HitPoint min_hit {};
+	Ray ray_inv = transform_ray(world_transformation_inv_, ray);
 
-	//find closest child that the ray intersects with
+	//find closest child that the ray_inv intersects with
 	for (auto const& child : children_) {
-		HitPoint hit = child->intersect(ray);
+		HitPoint hit = child->intersect(ray_inv);
 
 		if (!hit.does_intersect) {
 			continue;
@@ -101,21 +116,22 @@ unsigned Composite::child_count() {
 }
 
 void Composite::build_octree() {
-	if (nullptr == bounds_) {
-		bounds_ = std::make_shared<Box>(min(), max());
-	}
+	bounds_ = nullptr;
+	bounds_ = std::make_shared<Box>(min(glm::mat4(1)), max(glm::mat4(1)));
+//	bounds_ = std::make_shared<Box>(min(), max(), "bound", std::make_shared<Material>());
+
 	if (children_.size() <= 64) {
 		return;
 	}
-	glm::vec3 oct_size = (max() - min()) * 0.5f;
+	glm::vec3 oct_size = (max(glm::mat4(1)) - min(glm::mat4(1))) * 0.5f;
 	std::vector<std::shared_ptr<Composite>> subdivisions;
 
 	//create 8 smaller boxes
 	for (int x = 0; x < 2; ++x) {
 		for (int y = 0; y < 2; ++y) {
 			for (int z = 0; z < 2; ++z) {
-				glm::vec3 oct_min = min() + glm::vec3 {x * oct_size.x, y * oct_size.y, z * oct_size.z};
-				glm::vec3 oct_max = min() + glm::vec3 {(x + 1) * oct_size.x, (y + 1) * oct_size.y, (z + 1) * oct_size.z};
+				glm::vec3 oct_min = min(glm::mat4(1)) + glm::vec3 {x * oct_size.x, y * oct_size.y, z * oct_size.z};
+				glm::vec3 oct_max = min(glm::mat4(1)) + glm::vec3 {(x + 1) * oct_size.x, (y + 1) * oct_size.y, (z + 1) * oct_size.z};
 				subdivisions.push_back(std::make_shared<Composite>(Composite{std::make_shared<Box>(Box{oct_min, oct_max})}));
 			}
 		}
