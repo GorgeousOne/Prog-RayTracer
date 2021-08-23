@@ -21,7 +21,7 @@
 
 class Renderer {
 public:
-	Renderer(unsigned w, unsigned h, std::string const& file, unsigned AA_steps);
+	Renderer(unsigned w, unsigned h, std::string const& file, unsigned AA_steps, unsigned max_ray_bounces);
 
 	void render();
 	void render(Scene const& scene, Camera const& cam);
@@ -39,20 +39,25 @@ private:
 	std::string filename_;
 	PpmWriter ppm_;
 	unsigned AA_steps_;
+	unsigned max_ray_bounces_;
 
 	std::atomic_uint pixel_index_;
 	void thread_function(Scene const& scene, float img_plane_dist, glm::mat4 const& trans_mat);
 
-	Color get_intersection_color(Ray const& ray, Scene const& scene);
+	Color trace_color(Ray const& ray, Scene const& scene, unsigned ray_bounces);
 	HitPoint get_closest_hit(Ray const& ray, Scene const& scene);
 	HitPoint find_light_block(Ray const& light_ray, float range, Scene const& scene);
 
-	Color shade(HitPoint const& hitPoint, Scene const& scene);
+	Color shade(HitPoint const& hitPoint, Scene const& scene, unsigned ray_bounces);
 	Color ambient_color(HitPoint const& , Light const& ambient);
 	Color diffuse_color(HitPoint const& hitPoint, Scene const& scene);
 	Color specular_color(HitPoint const& hitPoint, Scene const& scene);
+
+	Color reflection_color(const HitPoint &hitPoint, const Scene &scene, unsigned int ray_bounces);
+
 	Color normal_color(HitPoint const& hitPoint);
 	Color& tone_map_color(Color &color) const;
+
 };
 
 #endif // #ifndef BUW_RENDERER_HPP

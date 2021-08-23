@@ -300,16 +300,18 @@ std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::stri
 
 void render(std::istringstream& arg_stream, Scene const& scene) {
 	std::string file_name;
-	unsigned int res_x;
-	unsigned int res_y;
-	unsigned int AA_steps;
+	unsigned res_x;
+	unsigned res_y;
+	unsigned AA_steps;
+	unsigned ray_bounces;
 
 	arg_stream >> file_name;
 	arg_stream >> res_x;
 	arg_stream >> res_y;
 	arg_stream >> AA_steps;
+	arg_stream >> ray_bounces;
 
-	Renderer renderer{res_x, res_y, file_name, AA_steps};
+	Renderer renderer{res_x, res_y, file_name, AA_steps, ray_bounces};
 	renderer.render(scene, scene.camera);
 }
 
