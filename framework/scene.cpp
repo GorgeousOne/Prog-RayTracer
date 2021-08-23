@@ -238,7 +238,7 @@ std::shared_ptr<Triangle> load_obj_face(
  * @return
  */
 std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::string const& name) {
-	std::ifstream input_obj_file(directory_path + name + ".obj");
+	std::ifstream input_obj_file(directory_path + "/" + name + ".obj");
 	std::string line_buffer;
 
 	std::map<std::string, std::shared_ptr<Material>> materials;
@@ -262,7 +262,7 @@ std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::stri
 		if ("mtllib" == token) {
 			std::string mtl_file_name;
 			arg_stream >> mtl_file_name;
-			materials = load_obj_materials(directory_path + mtl_file_name);
+			materials = load_obj_materials(directory_path + "/" + mtl_file_name);
 			//creates new sub object
 		} else if ("o" == token) {
 			//adds the previously composed mesh after all faces have been added so it's min max bounds are calculated correctly
