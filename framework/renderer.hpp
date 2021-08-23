@@ -21,7 +21,7 @@
 
 class Renderer {
 public:
-	Renderer(unsigned w, unsigned h, std::string const& file);
+	Renderer(unsigned w, unsigned h, std::string const& file, unsigned AA_steps);
 
 	void render();
 	void render(Scene const& scene, Camera const& cam);
@@ -38,6 +38,7 @@ private:
 	std::vector<Color> color_buffer_;
 	std::string filename_;
 	PpmWriter ppm_;
+	unsigned AA_steps_;
 
 	std::atomic_uint pixel_index_;
 	void thread_function(Scene const& scene, float img_plane_dist, glm::mat4 const& trans_mat);

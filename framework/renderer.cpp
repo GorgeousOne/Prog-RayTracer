@@ -12,8 +12,8 @@
 #include <glm/gtx/string_cast.hpp>
 #include "renderer.hpp"
 
-Renderer::Renderer(unsigned w, unsigned h, std::string const& file)
-		: width_(w), height_(h), color_buffer_(w * h, Color{0.0, 0.0, 0.0}), filename_(file), ppm_(width_, height_) {}
+Renderer::Renderer(unsigned w, unsigned h, std::string const& file, unsigned AA_steps)
+		: width_(w), height_(h), color_buffer_(w * h, Color{0.0, 0.0, 0.0}), filename_(file), ppm_(width_, height_), AA_steps_(AA_steps) {}
 
 void Renderer::render() {
 	std::size_t const checker_pattern_size = 20;
@@ -72,6 +72,7 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 
 void Renderer::thread_function(Scene const& scene, float img_plane_dist, glm::mat4 const& trans_mat) {
 	//continuously picks pixels to render
+	float AA_unit = 1.0f / AA_steps_;
 	while (true) {
 		unsigned current_pixel = pixel_index_++;
 		unsigned x = current_pixel % width_;
@@ -80,15 +81,20 @@ void Renderer::thread_function(Scene const& scene, float img_plane_dist, glm::ma
 		if (current_pixel >= width_ * height_) {
 			return;
 		}
-		glm::vec3 pixel_pos = glm::vec3{
-			x - (width_ * 0.5f),
-			y - (height_ * 0.5f),
-			-img_plane_dist};
-
-		glm::vec4 trans_ray_dir = trans_mat * glm::vec4{ glm::normalize(pixel_pos), 0 };
-		Ray ray{ glm::vec3{trans_mat[3]}, glm::vec3{trans_ray_dir} };
 		Pixel pixel{ x, y };
-		pixel.color = get_intersection_color(ray, scene);
+		for (int x_count = 0; x_count < AA_steps_; x_count++) {
+			for (int y_count = 0; y_count < AA_steps_; y_count++) {
+				glm::vec3 pixel_pos = glm::vec3{
+					x + x_count * AA_unit - (width_ * 0.5f),
+					y + y_count * AA_unit - (height_ * 0.5f),
+					-img_plane_dist };
+
+				glm::vec4 trans_ray_dir = trans_mat * glm::vec4{ glm::normalize(pixel_pos), 0 };
+				Ray ray{ glm::vec3{trans_mat[3]}, glm::vec3{trans_ray_dir} };
+				pixel.color += get_intersection_color(ray, scene);
+			}
+		}
+		pixel.color *= 1.0f / (AA_steps_ * AA_steps_);
 		write(pixel);
 	}
 }
