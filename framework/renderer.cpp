@@ -12,6 +12,8 @@
 #include <glm/gtx/string_cast.hpp>
 #include "renderer.hpp"
 
+#define EPSILON 0.001f
+
 Renderer::Renderer(unsigned w, unsigned h, std::string const& file, unsigned AA_steps, unsigned max_ray_bounces):
 		width_(w),
 		height_(h),
@@ -97,7 +99,7 @@ void Renderer::thread_function(Scene const& scene, float img_plane_dist, glm::ma
 
 				glm::vec4 trans_ray_dir = trans_mat * glm::vec4{ glm::normalize(pixel_pos), 0 };
 				Ray ray{ glm::vec3{trans_mat[3]}, glm::vec3{trans_ray_dir} };
-				pixel.color += trace_color(ray, scene, 0);
+				pixel.color += tone_map_color(trace_color(ray, scene, 0));
 			}
 		}
 		pixel.color *= 1.0f / (AA_steps_ * AA_steps_);
@@ -120,7 +122,7 @@ void Renderer::write(Pixel const& p) {
 	ppm_.write(p);
 }
 
-HitPoint Renderer::get_closest_hit(Ray const& ray, Scene const& scene) {
+HitPoint Renderer::get_closest_hit(Ray const& ray, Scene const& scene) const {
 	HitPoint closest_hit{};
 
 	for (auto const& it : scene.shapes) {
@@ -136,7 +138,7 @@ HitPoint Renderer::get_closest_hit(Ray const& ray, Scene const& scene) {
 	return closest_hit;
 }
 
-HitPoint Renderer::find_light_block(Ray const& light_ray, float range, Scene const& scene) {
+HitPoint Renderer::find_light_block(Ray const& light_ray, float range, Scene const& scene) const {
 	for (auto const& it : scene.shapes) {
 		HitPoint hit = it.second->intersect(light_ray);
 
@@ -147,34 +149,42 @@ HitPoint Renderer::find_light_block(Ray const& light_ray, float range, Scene con
 	return HitPoint {};
 }
 
-Color Renderer::trace_color(Ray const& ray, Scene const& scene, unsigned ray_bounces) {
+Color Renderer::trace_color(Ray const& ray, Scene const& scene, unsigned ray_bounces) const {
 	HitPoint closest_hit = get_closest_hit(ray, scene);
 	return closest_hit.does_intersect ? shade(closest_hit, scene, ray_bounces) : Color {};
 }
 
-Color Renderer::shade(HitPoint const& hitPoint, Scene const& scene, unsigned ray_bounces) {
-	Color shaded_color {0, 0, 0};
+Color Renderer::shade(HitPoint const& hitPoint, Scene const& scene, unsigned ray_bounces) const {
 	auto material = hitPoint.hit_material;
 
-//	shaded_color += normal_color(hitPoint);
-	shaded_color += ambient_color(hitPoint, scene.ambient);
+	Color shaded_color = ambient_color(hitPoint, scene.ambient);
 	shaded_color += diffuse_color(hitPoint, scene);
+
 	shaded_color *= 1 - material->glossy;
+	shaded_color *= material->opacity;
+
+//	if (material->glossy > 0 && material->opacity < 1) {
+
+	if (material->glossy > 0) {
+		shaded_color += reflection_color(hitPoint, scene, ray_bounces) * material->glossy;
+	}
+
+	if (material->opacity < 1) {
+		shaded_color += refraction_color(hitPoint, scene, ray_bounces) * (1 - material->opacity);
+	}
 
 	if (material->m > 0) {
 		shaded_color += specular_color(hitPoint, scene);
 	}
-	if (hitPoint.hit_material->glossy > 0) {
-		shaded_color += reflection_color(hitPoint, scene, ray_bounces) * material->glossy;
-	}
-	return tone_map_color(shaded_color);
+
+	return shaded_color;
 }
 
-Color Renderer::ambient_color(HitPoint const& intersection, Light const& ambient) {
+Color Renderer::ambient_color(HitPoint const& intersection, Light const& ambient) const {
 	return ambient.color * ambient.brightness * intersection.hit_material->ka;
 }
 
-Color Renderer::diffuse_color(HitPoint const& hitPoint, Scene const& scene) {
+Color Renderer::diffuse_color(HitPoint const& hitPoint, Scene const& scene) const {
 	Color diffuse_color {};
 
 	for (PointLight const& light : scene.lights)  {
@@ -198,7 +208,7 @@ Color Renderer::diffuse_color(HitPoint const& hitPoint, Scene const& scene) {
 	return diffuse_color;
 }
 
-Color Renderer::specular_color(HitPoint const& hitPoint, Scene const& scene) {
+Color Renderer::specular_color(HitPoint const& hitPoint, Scene const& scene) const {
 	Color specular_color {};
 
 	for (PointLight const& light : scene.lights) {
@@ -224,7 +234,7 @@ Color Renderer::specular_color(HitPoint const& hitPoint, Scene const& scene) {
 	return specular_color;
 }
 
-Color Renderer::reflection_color(HitPoint const& hitPoint, Scene const& scene, unsigned ray_bounces) {
+Color Renderer::reflection_color(HitPoint const& hitPoint, Scene const& scene, unsigned ray_bounces) const {
 	if (ray_bounces >= max_ray_bounces_) {
 		return {};
 	}
@@ -232,6 +242,31 @@ Color Renderer::reflection_color(HitPoint const& hitPoint, Scene const& scene, u
 	float cos_incidence_angle = glm::dot(hitPoint.surface_normal, ray_dir);
 	glm::vec3 reflect_dir = ray_dir - 2 * cos_incidence_angle * hitPoint.surface_normal;
 	return trace_color({hitPoint.position, reflect_dir}, scene, ray_bounces + 1);
+}
+
+Color Renderer::refraction_color(HitPoint const& hit_point, Scene const& scene, unsigned ray_bounces) const {
+	glm::vec3 ray_dir = hit_point.ray_direction;
+	glm::vec3 normal = hit_point.surface_normal;
+	float eta = 1 / hit_point.hit_material->ior;
+	float cos_incoming = -glm::dot(normal, ray_dir);
+
+	//inverts negative incoming angle and normal vector if surface is hit from behind
+	if (cos_incoming < 0) {
+		eta = 1 / eta;
+		cos_incoming *= -1;
+		normal *= -1;
+	}
+	float cos_outgoing_squared = 1 - eta * eta * (1 - cos_incoming * cos_incoming);
+
+	//returns total reflection if critical angle is reached
+	if (cos_outgoing_squared < 0) {
+		return reflection_color(hit_point, scene, ray_bounces);
+	}else {
+		//glm::vec3 refract_dir = glm::refract(ray_dir, normal, eta);
+		glm::vec3 refract_dir = ray_dir * eta + normal * (eta * cos_incoming - sqrtf(cos_outgoing_squared));
+		Ray refract_ray {hit_point.position - normal * (2 * EPSILON), refract_dir};
+		return trace_color(refract_ray, scene, ray_bounces + 1) * hit_point.hit_material->kd;
+	}
 }
 
 Color Renderer::normal_color(HitPoint const& hitPoint) {
@@ -242,7 +277,7 @@ Color Renderer::normal_color(HitPoint const& hitPoint) {
 	};
 }
 
-Color& Renderer::tone_map_color(Color& color) const {
+Color Renderer::tone_map_color(Color color) const {
 	color.r /= color.r + 1;
 	color.g /= color.g + 1;
 	color.b /= color.b + 1;

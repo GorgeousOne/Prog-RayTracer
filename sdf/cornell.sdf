@@ -4,26 +4,18 @@ define light bulb 0 9 0 .2 .2 .2 32
 
 
 # materials name ka kd ks m glossiness
-define material red 1 0 0 1 0 0 0 0 0 1 0
-define material green 0 1 0 0 1 0 1 1 1 50 0
-define material blue 0 0 1 0 0 1 1 1 1 100 0.5
-define material yellow 1 1 0 1 1 0 1 1 1 50 0.8
-define material white 1 1 1 1 1 1 0 0 0 1 0
-
-# materials name ka kd ks m glossiness
-# define material red .8 .2 .2 .8 .2 .2 .8 0 0 0 0
-# define material green 0 1 0 0 1 0 1 1 1 50 0
-# define material blue 0 0 1 0 0 1 1 1 1 100 0.5
-# define material yellow 1 1 0 1 1 0 1 1 1 10 0.8
-# define material glass 0 0 1 0 0 1 1 1 1 500 .01
-# define material white 1 1 1 1 1 1 1 1 1 0 0
+define material red 1 0 0 1 0 0 0 0 0 1 0 1 1
+define material green 0 1 0 0 1 0 1 1 1 50 0 1 1
+define material blue .8 .8 1 1 1 1 1 1 1 100 0.05 0 1.4
+define material yellow 1 1 0 1 1 0 1 1 1 50 0 1 1
+define material white 1 1 1 1 1 1 0 0 0 1 0 1 1
 
 # geometry
 define shape box red_wall 0 0 0 1 10 25 red
 define shape box green_wall 0 0 0 1 10 25 green
 define shape box floor 0 0 0 10 1 25 white
 define shape box ceiling 0 0 0 10 1 25 white
-define shape box back 0 0 0 10 10 1 white
+define shape box back 0 0 0 10 10 1 yellow
 define shape box front 0 0 0 10 10 1 white
 
 transform red_wall translate -6 0 -5
