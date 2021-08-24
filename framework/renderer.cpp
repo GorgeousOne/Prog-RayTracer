@@ -160,23 +160,26 @@ Color Renderer::shade(HitPoint const& hitPoint, Scene const& scene, unsigned ray
 	Color shaded_color = ambient_color(hitPoint, scene.ambient);
 	shaded_color += diffuse_color(hitPoint, scene);
 
-	shaded_color *= 1 - material->glossy;
-	shaded_color *= material->opacity;
+	//reflective transparent materials
+	if (material->glossy > 0 && material->opacity < 1) {
+		float reflectance = schlick_reflection_ratio(hitPoint.ray_direction, hitPoint.surface_normal, material->ior, material->glossy);
+		shaded_color *= (1 - reflectance) * material->opacity;
+		shaded_color += reflection_color(hitPoint, scene, ray_bounces) * reflectance;
+		shaded_color += refraction_color(hitPoint, scene, ray_bounces) * (1 - reflectance);
+		shaded_color += specular_color(hitPoint, scene) * reflectance;
 
-//	if (material->glossy > 0 && material->opacity < 1) {
+	//reflective materials
+	} else if (material->glossy > 0) {
+		float reflectance = schlick_reflection_ratio(hitPoint.ray_direction, hitPoint.surface_normal, material->ior, material->glossy);
+		shaded_color *= (1 - reflectance);
+		shaded_color += reflection_color(hitPoint, scene, ray_bounces) * reflectance;
+		shaded_color += specular_color(hitPoint, scene) * reflectance;
 
-	if (material->glossy > 0) {
-		shaded_color += reflection_color(hitPoint, scene, ray_bounces) * material->glossy;
-	}
-
-	if (material->opacity < 1) {
+	//transparent materials
+	} else if (material->opacity < 1) {
+		shaded_color *= material->opacity;
 		shaded_color += refraction_color(hitPoint, scene, ray_bounces) * (1 - material->opacity);
 	}
-
-	if (material->m > 0) {
-		shaded_color += specular_color(hitPoint, scene);
-	}
-
 	return shaded_color;
 }
 
@@ -241,7 +244,7 @@ Color Renderer::reflection_color(HitPoint const& hitPoint, Scene const& scene, u
 	glm::vec3 ray_dir = hitPoint.ray_direction;
 	float cos_incidence_angle = glm::dot(hitPoint.surface_normal, ray_dir);
 	glm::vec3 reflect_dir = ray_dir - 2 * cos_incidence_angle * hitPoint.surface_normal;
-	return trace_color({hitPoint.position, reflect_dir}, scene, ray_bounces + 1);
+	return trace_color({hitPoint.position, reflect_dir}, scene, ray_bounces + 1) * hitPoint.hit_material->ks;
 }
 
 Color Renderer::refraction_color(HitPoint const& hit_point, Scene const& scene, unsigned ray_bounces) const {
@@ -265,8 +268,36 @@ Color Renderer::refraction_color(HitPoint const& hit_point, Scene const& scene, 
 		//glm::vec3 refract_dir = glm::refract(ray_dir, normal, eta);
 		glm::vec3 refract_dir = ray_dir * eta + normal * (eta * cos_incoming - sqrtf(cos_outgoing_squared));
 		Ray refract_ray {hit_point.position - normal * (2 * EPSILON), refract_dir};
-		return trace_color(refract_ray, scene, ray_bounces + 1) * hit_point.hit_material->kd;
+		return trace_color(refract_ray, scene, ray_bounces + 1) * hit_point.hit_material->kd * (1 - hit_point.hit_material->opacity);
 	}
+}
+
+//https://blog.demofox.org/2017/01/09/raytracing-reflection-refraction-fresnel-total-internal-reflection-and-beers-law/
+//https://en.wikipedia.org/wiki/Schlick%27s_approximation
+float Renderer::schlick_reflection_ratio(glm::vec3 const& ray_dir, glm::vec3 const& normal, float ior, float min_reflectance) const {
+	float n1 = 1;
+	float n2 = ior;
+	float cos_incoming = -glm::dot(normal, ray_dir);
+
+	if (cos_incoming < 0) {
+		std::swap(n1, n2);
+	}
+	if (n1 > n2) {
+		float eta = n1 / n2;
+		float sin_outgoing_squared = eta * eta * (1 - cos_incoming * cos_incoming);
+
+		if (sin_outgoing_squared >= 1) {
+			return 1;
+		}
+		cos_incoming = sqrtf(1 - sin_outgoing_squared);
+	}
+	//minimum reflectance is defined by material glossiness instead of refraction indices
+//	float min_reflectance = (1 - ior) / (1 + ior);
+//	min_reflectance *= min_reflectance;
+
+	float factor = 1 - cos_incoming;
+	float ratio = min_reflectance + (1 - min_reflectance) * factor * factor * factor * factor * factor;
+	return ratio;
 }
 
 Color Renderer::normal_color(HitPoint const& hitPoint) {

@@ -54,11 +54,12 @@ private:
 	Color specular_color(HitPoint const& hitPoint, Scene const& scene) const;
 
 	Color reflection_color(const HitPoint &hitPoint, const Scene &scene, unsigned int ray_bounces) const;
+	Color refraction_color(HitPoint const& hit_point, const Scene &scene, unsigned int ray_bounces) const;
+	float schlick_reflection_ratio(glm::vec3 const& ray_dir, glm::vec3 const& normal, float ior, float min_reflectance) const;
 
 	Color normal_color(HitPoint const& hitPoint);
 	Color tone_map_color(Color color) const;
 
-	Color refraction_color(const HitPoint &hit_point, const Scene &scene, unsigned int ray_bounces) const;
 };
 
 #endif // #ifndef BUW_RENDERER_HPP
