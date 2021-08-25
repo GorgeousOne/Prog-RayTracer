@@ -9,6 +9,8 @@
 */
 
 #include <iostream>
+#include <iomanip>
+#include <fstream> 
 # include <map>
 # include <string>
 #include <sstream>
@@ -18,54 +20,64 @@ struct Interval {
 	float start_time = 0.0f;
 	float duration = 1.0f;
 
-	bool is_active(float current_time) {
+	bool is_active(float current_time) const {
 		return current_time >= start_time && current_time < start_time + duration;
 	}
 };
 
-struct Transformation {
+struct Animation {
 	std::string name;
 	std::string type;
-	float v1;
-	float v2;
-	float v3;
-	float time_stamp;
+	float start1;
+	float start2;
+	float start3;
+	float end1;
+	float end2;
+	float end3;
+	Interval time;
 };
 
-std::vector<std::string> get_transform_steps(Transformation t1, Transformation t2, float frame_duration) {
-	if (t1.name != t2.name || t1.type != t2.type || t1.time_stamp > t2.time_stamp) {
-		return {};
-	}
-	int number_of_frames = (t2.time_stamp - t1.time_stamp) / frame_duration;
-	float change_1 = (t2.v1 - t1.v1) / number_of_frames;
-	float change_2 = (t2.v2 - t1.v2) / number_of_frames;
-	float change_3 = (t2.v3 - t1.v3) / number_of_frames;
+std::string get_current_transform(Animation const& a1, float current_time) {
 
-	float new_v1 = t1.v1;
-	float new_v2 = t1.v2;
-	float new_v3 = t1.v3;
+	float progress = (current_time - a1.time.start_time) / a1.time.duration;
+	float change_1 = (a1.end1 - a1.start1) * progress;
+	float change_2 = (a1.end2 - a1.start2) * progress;
+	float change_3 = (a1.end3 - a1.start3) * progress;
 
-	std::vector<std::string> transformations;
-	for (int i = 0; i < number_of_frames; ++i) {
-		new_v1 += change_1;
-		new_v2 += change_2;
-		new_v3 += change_3;
+	float new_v1 = a1.start1 + change_1;
+	float new_v2 = a1.start2 + change_2;
+	float new_v3 = a1.start3 + change_3;
 
-		std::stringstream ss;
-		ss << "transform " << t1.name << " " << t1.type << " ";
-		ss << new_v1 << " " << new_v2 << " " << new_v3;
-		transformations.push_back(ss.str());
-		std::cout << ss.str() << std::endl;
-	}
-	return transformations;
+	std::stringstream current_transform;
+	current_transform << "transform " << a1.name << " " << a1.type << " ";
+	current_transform << new_v1 << " " << new_v2 << " " << new_v3;
+	
+	return current_transform.str();
 }
 
-void write_to_sdf(std::map<std::string, Interval> object_map, unsigned fps, float movie_duration, std::string directory) {
+void write_to_sdf(std::map<std::string, Interval> const& object_map, std::vector<Animation> const& animations, unsigned fps, float movie_duration, std::string const& directory) {
 	float frame_duration = 1.0f / fps;
 	int total_frame_count = movie_duration * fps;
 
 	for (int frame = 0; frame < total_frame_count; ++frame) {
-	
+		float current_time = frame * frame_duration;
+
+		std::stringstream file_name;
+		file_name << "frame" << std::setfill('0') << std::setw(4) << frame+1 << ".sdf";
+		std::ofstream sdf_file(directory + "/" + file_name.str());
+
+		for (auto object : object_map) {
+			if (object.second.is_active(current_time)) {
+				sdf_file << object.first << std::endl;
+			}
+		}
+
+		for (auto animation : animations) {
+			if (animation.time.is_active(current_time)) {
+				sdf_file << get_current_transform(animation, current_time) << std::endl;
+			}
+		}
+		sdf_file.close();
 	};
 }
 
@@ -75,15 +87,12 @@ void generate_movie() {
 	std::string directory = "./movie/files";
 
 	std::map<std::string, Interval> object_map;
-	std::vector<std::pair<Transformation, Transformation>> transform_vec;
+	std::vector<Animation> animations;
 
 
-	write_to_sdf(object_map, fps, movie_duration, directory);
+	write_to_sdf(object_map, animations, fps, movie_duration, directory);
 }
 
 int main() {
-	Transformation t1{"ball", "translate", 0, 0, 0, 0.0f};
-	Transformation t2{"ball", "translate", 1, 1, 1, 1.0f};
-	get_transform_steps(t1, t2, (1.0f / 24.0f));
 	return 0;
 }
