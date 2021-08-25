@@ -16,6 +16,7 @@
 #include <sstream>
 #include <vector>
 #include <glm/glm.hpp>
+#include <scene.hpp>
 
 struct Interval {
 	float start_time = 0.0f;
@@ -124,14 +125,14 @@ void write_to_sdf(
 		for (auto const& animation : cam_animations) {
 			sdf_file << get_current_cam(animation, current_time) << std::endl;
 		}
-		sdf_file << "render " << file_name.str() << " " << res_x << " " << res_y  << " " << aa_steps  << " " << ray_bounces << std::endl;
+		sdf_file << "render " << file_name.str() << ".ppm " << res_x << " " << res_y  << " " << aa_steps  << " " << ray_bounces << std::endl;
 		sdf_file.close();
 	};
 }
 
 void generate_movie() {
 	float movie_duration = 5.0f;
-	unsigned fps = 2;
+	unsigned fps = 24;
 	std::string directory = "./movie/files";
 
 	std::map<std::string, Interval> object_map;
@@ -139,9 +140,11 @@ void generate_movie() {
 	std::vector<Cam_Animation> cam_animations;
 
 	object_map.insert({"define material white 1 1 1 1 1 1 0 0 0 1 0 1 1", {0, 5}});
-	object_map.insert({"define object sphere s 0 0 0 1 white", {0, 5}});
-	object_map.insert({"define object box b -1 -1 -1 1 1 1 white", {0, 5}});
-	object_map.insert({"define camera eye 60 0 0 0 0 0 -1 0 1 0", {0, 5}});
+	object_map.insert({"define ambient amb 1 1 1 1", {0, 5}});
+	object_map.insert({"define light bulb 0 9 0 .2 .2 .2 32", {0, 5}});
+	object_map.insert({"define shape sphere s 0 0 0 1 white", {0, 5}});
+	object_map.insert({"define shape box b -1 -1 -1 1 1 1 white", {0, 5}});
+	object_map.insert({"define camera eye 60 0 0 20 0 0 -1 0 1 0", {0, 5}});
 
 	animations.emplace_back(Animation{"b", "translate", {0, 5}, 2, -5, 0, 2, 5, 0});
 	animations.emplace_back(Animation{"s", "translate", {0, 5}, -2, 5, 0, -2, -5, 0});
@@ -158,7 +161,31 @@ void generate_movie() {
 			5);
 }
 
+void render_movie(
+		std::string const& src_dir,
+		std::string const& res_dir,
+		std::string const& out_dir) {
+
+//	for (auto const& entry : std::filesystem::directory_iterator(src_dir)) {
+	for (int i = 0; i < 120; ++i) {
+//		std::string name = entry.path().filename().string();
+
+		std::stringstream file_name;
+		file_name << "frame" << std::setfill('0') << std::setw(4) << i+1 << ".sdf";
+		std::string name = file_name.str();
+
+		//checks that file has sdf extension
+		if(name.substr(name.find_last_of(".") + 1) != "sdf") {
+			continue;
+		}
+
+		//loads and renders scene
+		load_scene(src_dir + "/" + name, res_dir, out_dir);
+	}
+}
+
 int main(int argc, char** argv) {
 	generate_movie();
+	render_movie("./movie/files", "./movie/obj", "./movie/images");
 	return 0;
 }

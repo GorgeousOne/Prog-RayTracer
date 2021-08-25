@@ -56,16 +56,7 @@ install(TARGETS example DESTINATION .)
 
 # Moviemaker
 add_executable(moviemaker
-	../moviemaker/moviemaker.cpp
-	)
-
-target_link_libraries(moviemaker ${FRAMEWORK_NAME} ${LIBRARIES})
-add_dependencies(moviemaker glfw ${FRAMEWORK_NAME} ${COPY_BINARY})
-
-install(TARGETS moviemaker DESTINATION .)
-
-add_executable(movierenderer
-		../moviemaker/movierenderer.cpp
+		../moviemaker/moviemaker.cpp
 		../framework/shape.hpp ../framework/shape.cpp
 		../framework/sphere.hpp ../framework/sphere.cpp
 		../framework/box.hpp ../framework/box.cpp
@@ -86,7 +77,7 @@ add_executable(movierenderer
 		../framework/renderer.hpp ../framework/renderer.cpp
 		)
 
-target_link_libraries(movierenderer ${FRAMEWORK_NAME} ${LIBRARIES})
-add_dependencies(movierenderer glfw ${FRAMEWORK_NAME} ${COPY_BINARY})
+target_link_libraries(moviemaker ${FRAMEWORK_NAME} ${LIBRARIES})
+add_dependencies(moviemaker glfw ${FRAMEWORK_NAME} ${COPY_BINARY})
 
-install(TARGETS movierenderer DESTINATION .)
+install(TARGETS moviemaker DESTINATION .)
