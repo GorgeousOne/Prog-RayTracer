@@ -303,23 +303,6 @@ std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::stri
 	return composite;
 };
 
-void render(std::istringstream& arg_stream, Scene const& scene) {
-	std::string file_name;
-	unsigned res_x;
-	unsigned res_y;
-	unsigned AA_steps;
-	unsigned ray_bounces;
-
-	arg_stream >> file_name;
-	arg_stream >> res_x;
-	arg_stream >> res_y;
-	arg_stream >> AA_steps;
-	arg_stream >> ray_bounces;
-
-	Renderer renderer{res_x, res_y, file_name, AA_steps, ray_bounces};
-	renderer.render(scene, scene.camera);
-}
-
 void add_to_scene(std::istringstream& arg_stream, Scene& new_scene, std::string const& resource_directory) {
 	std::string token;
 	arg_stream >> token;
@@ -355,7 +338,28 @@ void add_to_scene(std::istringstream& arg_stream, Scene& new_scene, std::string 
 	}
 }
 
-Scene load_scene(std::string const& file_path, std::string const& resource_directory) {
+void render(std::istringstream& arg_stream, Scene const& scene, std::string const& output_directory) {
+	std::string file_name;
+	unsigned res_x;
+	unsigned res_y;
+	unsigned AA_steps;
+	unsigned ray_bounces;
+
+	arg_stream >> file_name;
+	arg_stream >> res_x;
+	arg_stream >> res_y;
+	arg_stream >> AA_steps;
+	arg_stream >> ray_bounces;
+
+	Renderer renderer{res_x, res_y, output_directory + "/" + file_name, AA_steps, ray_bounces};
+	renderer.render(scene, scene.camera);
+}
+
+Scene load_scene(
+		std::string const& file_path,
+		std::string const& resource_directory,
+		std::string const& output_directory) {
+
 	Scene new_scene{};
 	std::ifstream input_sdf_file(file_path);
 	std::string line_buffer;
@@ -375,7 +379,7 @@ Scene load_scene(std::string const& file_path, std::string const& resource_direc
 		} else if ("transform" == token_str) {
 			load_transformation(words_stream, new_scene);
 		} else if ("render" == token_str) {
-			render(words_stream, new_scene);
+			render(words_stream, new_scene, output_directory);
 		}
 	}
 	return new_scene;
