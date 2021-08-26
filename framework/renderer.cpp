@@ -123,30 +123,13 @@ void Renderer::write(Pixel const& p) {
 }
 
 HitPoint Renderer::get_closest_hit(Ray const& ray, Scene const& scene) const {
-	HitPoint closest_hit{};
-
-	for (auto const& it : scene.shapes) {
-		HitPoint hit = it.second->intersect(ray);
-
-		if (!hit.does_intersect) {
-			continue;
-		}
-		if (!closest_hit.does_intersect || hit.distance < closest_hit.distance) {
-			closest_hit = hit;
-		}
-	}
-	return closest_hit;
+	return scene.root->intersect(ray);
 }
 
-HitPoint Renderer::find_light_block(Ray const& light_ray, float range, Scene const& scene) const {
-	for (auto const& it : scene.shapes) {
-		HitPoint hit = it.second->intersect(light_ray);
-
-		if (hit.does_intersect && hit.distance <= range) {
-			return hit;
-		}
-	}
-	return HitPoint {};
+bool Renderer::light_is_blocked(glm::vec3 const& position, glm::vec3 light_dir, float range, Scene const& scene) const {
+	Ray light_ray {position, glm::normalize(light_dir)};
+	HitPoint light_block = scene.root->intersect(light_ray);
+	return light_block.does_intersect && light_block.distance < range;
 }
 
 Color Renderer::trace_color(Ray const& ray, Scene const& scene, unsigned ray_bounces) const {
@@ -194,13 +177,10 @@ Color Renderer::diffuse_color(HitPoint const& hitPoint, Scene const& scene) cons
 		glm::vec3 light_dir = light.position - hitPoint.position;
 		float distance = glm::length(light_dir);
 
-		Ray light_ray {hitPoint.position, glm::normalize(light_dir)};
-		HitPoint light_block = find_light_block(light_ray, distance, scene);
-
-		if (light_block.does_intersect) {
+		if (light_is_blocked(hitPoint.position, light_dir, distance, scene)) {
 			continue;
 		}
-		float cos_incidence_angle = glm::dot(hitPoint.surface_normal, glm::normalize(light_ray.direction));
+		float cos_incidence_angle = glm::dot(hitPoint.surface_normal, glm::normalize(light_dir));
 
 		if (cos_incidence_angle < 0) {
 			continue;
@@ -218,10 +198,7 @@ Color Renderer::specular_color(HitPoint const& hitPoint, Scene const& scene) con
 		glm::vec3 light_dir = light.position - hitPoint.position;
 		float distance = glm::length(light_dir);
 
-		Ray light_ray{ hitPoint.position, glm::normalize(light_dir) };
-		HitPoint light_block = find_light_block(light_ray, distance, scene);
-
-		if (light_block.does_intersect) {
+		if (light_is_blocked(hitPoint.position, light_dir, distance, scene)) {
 			continue;
 		}
 		light_dir = glm::normalize(light_dir);

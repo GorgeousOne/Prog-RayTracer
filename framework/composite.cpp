@@ -121,6 +121,10 @@ void Composite::add_child(std::shared_ptr<Shape> shape) {
 	children_.emplace(shape->get_name(), shape);
 }
 
+std::shared_ptr<Shape> Composite::find_child(std::string const& name) {
+	return children_.find(name)->second;
+}
+
 unsigned Composite::child_count() {
 	return children_.size();
 }

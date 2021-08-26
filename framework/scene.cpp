@@ -12,7 +12,7 @@ std::shared_ptr<Material> Scene::find_mat(std::string const& name) const {
 }
 
 std::shared_ptr<Shape> Scene::find_shape(std::string const& name) const {
-	return shapes.find(name)->second;
+	return root->find_child(name);
 }
 
 glm::vec3 load_vec(std::istringstream& arg_stream) {
@@ -314,19 +314,15 @@ void add_to_scene(std::istringstream& arg_stream, Scene& new_scene, std::string 
 	if ("shape" == token) {
 		arg_stream >> token;
 		if ("box" == token) {
-			auto new_box = load_box(arg_stream, new_scene.materials);
-			new_scene.shapes.emplace(new_box->get_name(), new_box);
+			new_scene.root->add_child(load_box(arg_stream, new_scene.materials));
 		} else if ("sphere" == token) {
-			auto new_sphere = load_sphere(arg_stream, new_scene.materials);
-			new_scene.shapes.emplace(new_sphere->get_name(), new_sphere);
+			new_scene.root->add_child(load_sphere(arg_stream, new_scene.materials));
 		} else if ("triangle" == token) {
-			auto new_triangle = load_triangle(arg_stream, new_scene.materials);
-			new_scene.shapes.emplace(new_triangle->get_name(), new_triangle);
+			new_scene.root->add_child(load_triangle(arg_stream, new_scene.materials));
 		} else if ("obj" == token) {
 			std::string obj_file_name;
 			arg_stream >> obj_file_name;
-			auto new_composite = load_obj(resource_directory, obj_file_name);
-			new_scene.shapes.emplace(new_composite->get_name(), new_composite);
+			new_scene.root->add_child(load_obj(resource_directory, obj_file_name));
 		}
 	} else if ("light" == token) {
 		PointLight new_light{load_point_light(arg_stream)};
@@ -382,5 +378,6 @@ Scene load_scene(
 			render(words_stream, new_scene, output_directory);
 		}
 	}
+	new_scene.root->build_octree();
 	return new_scene;
 }

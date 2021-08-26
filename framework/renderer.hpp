@@ -46,7 +46,7 @@ private:
 
 	Color trace_color(Ray const& ray, Scene const& scene, unsigned ray_bounces) const;
 	HitPoint get_closest_hit(Ray const& ray, Scene const& scene) const;
-	HitPoint find_light_block(Ray const& light_ray, float range, Scene const& scene) const;
+	bool light_is_blocked(glm::vec3 const& position, glm::vec3 light_dir, float range, Scene const& scene) const;
 
 	Color shade(HitPoint const& hitPoint, Scene const& scene, unsigned ray_bounces) const;
 	Color ambient_color(HitPoint const& , Light const& ambient) const;

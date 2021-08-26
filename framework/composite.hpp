@@ -27,9 +27,12 @@ public:
 	void build_octree();
 	unsigned int child_count();
 
+	std::shared_ptr<Shape> find_child(std::string const &name);
+
 private:
 	std::shared_ptr<Box> bounds_;
 	std::map<std::string, std::shared_ptr<Shape>> children_;
+
 };
 
 #endif //RAYTRACER_COMPOSITE_H
