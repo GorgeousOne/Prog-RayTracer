@@ -21,7 +21,7 @@
 
 class Renderer {
 public:
-	Renderer(unsigned w, unsigned h, std::string const& file, unsigned AA_steps, unsigned max_ray_bounces);
+	Renderer(unsigned w, unsigned h, std::string const& file_name, unsigned AA_steps, unsigned max_ray_bounces);
 
 	void render();
 	void render(Scene const& scene, Camera const& cam);

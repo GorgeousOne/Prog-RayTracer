@@ -14,11 +14,11 @@
 
 #define EPSILON 0.001f
 
-Renderer::Renderer(unsigned w, unsigned h, std::string const& file, unsigned AA_steps, unsigned max_ray_bounces):
+Renderer::Renderer(unsigned w, unsigned h, std::string const& file_name, unsigned AA_steps, unsigned max_ray_bounces):
 		width_(w),
 		height_(h),
 		color_buffer_(w * h, Color{0.0, 0.0, 0.0}),
-		filename_(file),
+		filename_(file_name),
 		ppm_(width_, height_),
 		AA_steps_(AA_steps),
 		max_ray_bounces_(max_ray_bounces) {}
