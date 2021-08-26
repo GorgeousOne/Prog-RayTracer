@@ -147,9 +147,10 @@ void generate_movie() {
 
 	// materials
 	object_map.insert({"define material white 1 1 1 1 1 1 0 0 0 1 0 1 1", {0, 2}});
+	object_map.insert({"define material yellow 1 1 0 1 1 0 1 1 0 50 1 1 1", {0, 2}});
 
 	// shapes
-	object_map.insert({"define shape sphere s 5 0 0 1 white", {0, 2}});
+	object_map.insert({"define shape sphere s1 5 0 0 1 white", {0, 2}});
 	object_map.insert({"define shape box b1 -1 -1 -1 1 1 1 white", {0, 2}});
 
 	// camera
@@ -157,12 +158,13 @@ void generate_movie() {
 	cam_animations.emplace_back(Cam_Animation{ { 0.1, 2 }, { 0, 0, 20 }, { 0, 0, -1 }, { 0, 1, 0 }, { 5, 0, 20 }, { 0, 0, -1 }, { 0, 1, 0 } });
 
 	// translations
-	//animations.emplace_back(Animation{"b", "translate", {0, 2}, 2, -5, 0, 2, 5, 0});
-	//animations.emplace_back(Animation{"s", "translate", {0, 2}, -2, 5, 0, -2, -5, 0});
+	//animations.emplace_back(Animation{"b1", "translate", {0, 2}, 2, -5, 0, 2, 5, 0});
+	//animations.emplace_back(Animation{"s1", "translate", {0, 2}, -2, 5, 0, -2, -5, 0});
 
 	// rotations
 
 	//scalings
+	animations.emplace_back(Animation{"b1", "scale", {0, 1}, 1, 1, 1, 2, 3, 1});
 
 
 	write_to_sdf(
