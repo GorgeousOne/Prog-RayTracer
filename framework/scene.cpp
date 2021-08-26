@@ -291,7 +291,7 @@ std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::stri
 			child_mat = materials.find(mat_name)->second;
 			//adds a triangle face
 		} else if ("f" == token) {
-			current_child->add_child(load_obj_face(arg_stream, vertices, normals, std::to_string(face_count), child_mat));
+			current_child->add_child(load_obj_face(arg_stream, vertices, normals, "face" + std::to_string(face_count), child_mat));
 			++face_count;
 		}
 	}

@@ -2,13 +2,14 @@
 #define RAYTRACER_COMPOSITE_H
 
 #include <vector>
+#include <map>
 #include "shape.hpp"
 #include "box.hpp"
 
 class Composite : public Shape {
 public:
 	Composite(std::string const& name = "composite", std::shared_ptr<Material> material = {});
-	Composite(std::shared_ptr<Box> bounds, std::string const& name = "composite", std::shared_ptr<Material> material = {});
+	Composite(glm::vec3 const& min, glm::vec3 const& max, std::string const& name = "composite", std::shared_ptr<Material> material = {});
 
 	float area() const override;
 	float volume() const override;
@@ -28,7 +29,7 @@ public:
 
 private:
 	std::shared_ptr<Box> bounds_;
-	std::vector<std::shared_ptr<Shape>> children_;
+	std::map<std::string, std::shared_ptr<Shape>> children_;
 };
 
 #endif //RAYTRACER_COMPOSITE_H
