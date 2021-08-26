@@ -17,14 +17,14 @@ define shape box green_wall 0 0 0 1 10 25 green
 define shape box floor 0 0 0 10 1 25 white
 define shape box ceiling 0 0 0 10 1 25 white
 define shape box back 0 0 0 10 10 1 white
-define shape box front 0 0 0 10 10 1 white
+# define shape box front 0 0 0 10 10 1 white
 
 transform red_wall translate -6 0 -5
 transform green_wall translate 5 0 -5
 transform floor translate -5 -1 -5
 transform ceiling translate -5 10 -5
 transform back translate -5 0 -6
-transform front translate -5 0 15
+# transform front translate -5 0 15
 
 define shape sphere ball1 0 1.5 0 1.5 blue
 define shape box box1 -1.5 0.01 -1.5 1.5 5.8 1.5 yellow
@@ -32,6 +32,10 @@ define shape box box1 -1.5 0.01 -1.5 1.5 5.8 1.5 yellow
 transform ball1 translate 1.5 0 2
 transform box1 translate -1.5 0 -1
 transform box1 rotate 0 0 60
+
+define shape obj superhot
+transform superhot translate 3 0 -2
+transform superhot rotate 0 0 -60
 
 # camera
 define camera eye 60.0 0 5 13.66 0 0 -1 0 1 0

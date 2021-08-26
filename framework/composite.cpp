@@ -28,29 +28,37 @@ float Composite::volume() const {
 }
 
 glm::vec3 Composite::min(glm::mat4 transformation) const {
-	if (nullptr != bounds_) {
-		return bounds_->min(transformation);
-	}
-	glm::vec3 min{};
 	transformation *= world_transformation_;
+	glm::vec3 min{};
+	bool is_first = true;
 
-	for (auto child : children_) {
+	for (auto const& child : children_) {
 		glm::vec3 child_min = child->min(transformation);
-		min = glm::min(min, child_min);
+
+		if (is_first) {
+			min = child_min;
+			is_first = false;
+		}else {
+			min = glm::min(min, child_min);
+		}
 	}
 	return min;
 }
 
 glm::vec3 Composite::max(glm::mat4 transformation) const {
-	if (nullptr != bounds_) {
-		return bounds_->max(transformation);
-	}
-	glm::vec3 max{};
 	transformation *= world_transformation_;
+	glm::vec3 max{};
+	bool is_first = true;
 
-	for (auto child : children_) {
+	for (auto const& child : children_) {
 		glm::vec3 child_max = child->max(transformation);
-		max = glm::max(max, child_max);
+
+		if (is_first) {
+			max = child_max;
+			is_first = false;
+		}else {
+			max = glm::max(max, child_max);
+		}
 	}
 	return max;
 }
@@ -80,6 +88,8 @@ void Composite::translate(float x, float y, float z) {
 }
 
 HitPoint Composite::intersect(Ray const& ray) const {
+//	return bounds_->intersect(ray);
+
 	assert(nullptr != bounds_);
 	float t;
 	bool bounds_hit = bounds_->intersect(ray, t);
@@ -116,9 +126,9 @@ unsigned Composite::child_count() {
 }
 
 void Composite::build_octree() {
-	bounds_ = nullptr;
-	bounds_ = std::make_shared<Box>(min(glm::mat4(1)), max(glm::mat4(1)));
-//	bounds_ = std::make_shared<Box>(min(), max(), "bound", std::make_shared<Material>());
+//	bounds_ = nullptr;
+//	bounds_ = std::make_shared<Box>(min(glm::mat4(1)), max(glm::mat4(1)));
+	bounds_ = std::make_shared<Box>(min(glm::mat4(1)), max(glm::mat4(1)), "bound", std::make_shared<Material>());
 
 	if (children_.size() <= 64) {
 		return;
@@ -136,22 +146,22 @@ void Composite::build_octree() {
 			}
 		}
 	}
-	for (auto oct : subdivisions) {
-		for (auto child : children_) {
+	for (auto const&  oct : subdivisions) {
+		for (auto const&  child : children_) {
 			if (oct->bounds_->intersects_bounds(child)) {
 				oct->add_child(child);
 			}
 		}
 	}
 	//stop subdividing if subdivisions have same amount of children
-	for (auto oct : subdivisions) {
+	for (auto const&  oct : subdivisions) {
 		if (oct->children_.size() == children_.size()) {
 			return;
 		}
 	}
 	children_.clear();
 
-	for (auto oct : subdivisions) {
+	for (auto const&  oct : subdivisions) {
 		if (oct->children_.size() != 0) {
 			oct->build_octree();
 			children_.push_back(oct);
