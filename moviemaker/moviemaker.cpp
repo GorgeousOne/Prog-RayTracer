@@ -123,7 +123,9 @@ void write_to_sdf(
 		sdf_file << std::endl;
 
 		for (auto const& animation : cam_animations) {
-			sdf_file << get_current_cam(animation, current_time) << std::endl;
+			if (animation.time.is_active(current_time)) {
+				sdf_file << get_current_cam(animation, current_time) << std::endl;
+			}
 		}
 		sdf_file << "render " << file_name.str() << ".ppm " << res_x << " " << res_y  << " " << aa_steps  << " " << ray_bounces << std::endl;
 		sdf_file.close();
@@ -131,7 +133,7 @@ void write_to_sdf(
 }
 
 void generate_movie() {
-	float movie_duration = 5.0f;
+	float movie_duration = 2.0f;
 	unsigned fps = 24;
 	std::string directory = "./movie/files";
 
@@ -139,15 +141,29 @@ void generate_movie() {
 	std::vector<Animation> animations;
 	std::vector<Cam_Animation> cam_animations;
 
-	object_map.insert({"define material white 1 1 1 1 1 1 0 0 0 1 0 1 1", {0, 5}});
-	object_map.insert({"define ambient amb 1 1 1 1", {0, 5}});
-	object_map.insert({"define light bulb 0 9 0 .2 .2 .2 32", {0, 5}});
-	object_map.insert({"define shape sphere s 0 0 0 1 white", {0, 5}});
-	object_map.insert({"define shape box b -1 -1 -1 1 1 1 white", {0, 5}});
-	object_map.insert({"define camera eye 60 0 0 20 0 0 -1 0 1 0", {0, 5}});
+	// lights
+	object_map.insert({ "define ambient amb 1 1 1 1", {0, 2} });
+	object_map.insert({ "define light bulb 0 9 0 .2 .2 .2 32", {0, 2} });
 
-	animations.emplace_back(Animation{"b", "translate", {0, 5}, 2, -5, 0, 2, 5, 0});
-	animations.emplace_back(Animation{"s", "translate", {0, 5}, -2, 5, 0, -2, -5, 0});
+	// materials
+	object_map.insert({"define material white 1 1 1 1 1 1 0 0 0 1 0 1 1", {0, 2}});
+
+	// shapes
+	object_map.insert({"define shape sphere s 5 0 0 1 white", {0, 2}});
+	object_map.insert({"define shape box b1 -1 -1 -1 1 1 1 white", {0, 2}});
+
+	// camera
+	object_map.insert({"define camera eye 60 0 0 20 0 0 -1 0 1 0", {0, 0.1}});
+	cam_animations.emplace_back(Cam_Animation{ { 0.1, 2 }, { 0, 0, 20 }, { 0, 0, -1 }, { 0, 1, 0 }, { 5, 0, 20 }, { 0, 0, -1 }, { 0, 1, 0 } });
+
+	// translations
+	//animations.emplace_back(Animation{"b", "translate", {0, 2}, 2, -5, 0, 2, 5, 0});
+	//animations.emplace_back(Animation{"s", "translate", {0, 2}, -2, 5, 0, -2, -5, 0});
+
+	// rotations
+
+	//scalings
+
 
 	write_to_sdf(
 			object_map,
@@ -167,7 +183,7 @@ void render_movie(
 		std::string const& out_dir) {
 
 //	for (auto const& entry : std::filesystem::directory_iterator(src_dir)) {
-	for (int i = 0; i < 120; ++i) {
+	for (int i = 0; i < 48; ++i) {
 //		std::string name = entry.path().filename().string();
 
 		std::stringstream file_name;
