@@ -188,16 +188,14 @@ void generate_movie(std::string const& res_dir) {
 	std::vector<Cam_Animation> cam_animations;
 	std::vector<BodyAnimation> body_animations;
 
-//	object_map.insert({"define material white 1 1 1 1 1 1 0 0 0 1 0 1 1", {0, 5}});
+	object_map.insert({"define material white 1 1 1 1 1 1 0 0 0 1 0 1 1", {0, 5}});
+	object_map.insert({"define material obsidian 0 0 0 .01 .01 .01 1 1 1 50 .1 1 1", {0, 5}});
+	object_map.insert({"define shape box box -300 -93 -300 300 -92.9 300 obsidian", {0, 5}});
 	object_map.insert({"define ambient amb 1 1 1 1", {0, 5}});
 	object_map.insert({"define light bulb 50 100 500 .2 .2 .2 32", {0, 5}});
-//	object_map.insert({"define shape sphere s 0 0 0 1 white", {0, 5}});
-//	object_map.insert({"define shape box b -1 -1 -1 1 1 1 white", {0, 5}});
 	object_map.insert({"define camera eye 60 0 0 400 0 0 -1 0 1 0", {0, 5}});
 
-//	animations.emplace_back(Animation{"b", "translate", {0, 5}, 2, -5, 0, 2, 5, 0});
-//	animations.emplace_back(Animation{"s", "translate", {0, 5}, -2, 5, 0, -2, -5, 0});
-//	animations.emplace_back(Animation{"chest", "rotate", {0, 5}, 0, 90, 0, 0, 90, 0});
+	animations.emplace_back(Animation{"chest", "rotate", {0, 5}, 0, 90, 0, 0, 90, 0});
 
 	std::vector<Pose> walk;
 	walk.reserve(8);
@@ -205,7 +203,6 @@ void generate_movie(std::string const& res_dir) {
 	for (int i = 0; i < 8; ++i) {
 		walk.emplace_back(read_pose(res_dir + "/poses/pose0" + std::to_string(i+1) + ".txt"));
 	}
-
 	float walk_speed = 0.3;
 	int pose_count = static_cast<int> (movie_duration / walk_speed);
 	body_animations.reserve(pose_count);
@@ -213,7 +210,6 @@ void generate_movie(std::string const& res_dir) {
 	for (unsigned i = 0; i < pose_count; ++i) {
 		body_animations.emplace_back(BodyAnimation{walk[i % walk.size()], walk[(i + 1) % walk.size()], {i * walk_speed, walk_speed}});
 	}
-
 	write_to_sdf(
 			object_map,
 			animations,
@@ -228,25 +224,17 @@ void generate_movie(std::string const& res_dir) {
 }
 
 void render_movie(
+		unsigned start_frame,
+		unsigned end_frame,
 		std::string const& src_dir,
 		std::string const& res_dir,
 		std::string const& out_dir) {
 
-//	for (auto const& entry : std::filesystem::directory_iterator(src_dir)) {
-	for (int i = 0; i < 120; ++i) {
-//		std::string name = entry.path().filename().string();
-
+	for (int i = start_frame; i < end_frame; ++i) {
 		std::stringstream file_name;
 		file_name << "frame" << std::setfill('0') << std::setw(4) << i+1 << ".sdf";
-		std::string name = file_name.str();
-		std::cout << src_dir + "/" + name << "\n";
-
-		//checks that file has sdf extension
-//		if(name.substr(name.find_last_of(".") + 1) != "sdf") {
-//			continue;
-//		}
-		//loads and renders scene
-		load_scene(src_dir + "/" + name, res_dir, out_dir);
+		load_scene(src_dir + "/" + file_name.str(), res_dir, out_dir);
+		std::cout << file_name.str() << "\n";
 	}
 }
 
@@ -254,6 +242,6 @@ int main(int argc, char** argv) {
 	std::cout << "generate sdfs\n";
 	generate_movie("./movie/obj");
 	std::cout << "render sdfs";
-	render_movie("./movie/files", "./movie/obj", "./movie/images");
+	render_movie(0, 120, "./movie/files", "./movie/obj", "./movie/images");
 	return 0;
 }
