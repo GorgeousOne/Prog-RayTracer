@@ -26,12 +26,20 @@ transform ceiling translate -5 10 -5
 transform back translate -5 0 -6
 transform front translate -5 0 15
 
-define shape sphere ball1 0 1.5 0 1.5 blue
-define shape box box1 -1.5 0.01 -1.5 1.5 5.8 1.5 yellow
+define shape sphere ball1 0 0 0 1.5 blue
+define shape box box1 -1.5 0 -1.5 1.5 5.8 1.5 yellow
 
-transform ball1 translate 1.5 0 2
+transform ball1 translate 1.5 1.5 2
 transform box1 translate -1.5 0 -1
-transform box1 rotate 0 0 60
+transform box1 rotate 0 60 0
+
+define shape obj superhot
+transform superhot translate 3 0 -2
+transform superhot rotate 0 -90 0
+
+define shape composite comp ball1 box1
+add comp superhot
+transform comp translate 0 1 0
 
 # camera
 define camera eye 60.0 0 5 13.66 0 0 -1 0 1 0

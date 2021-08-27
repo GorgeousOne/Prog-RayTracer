@@ -20,7 +20,7 @@ int main(int argc, const char** argv) {
 
 	Scene scene = load_scene(sdf_directory_path + "/cornell.sdf", sdf_directory_path, sdf_directory_path);
 	Renderer renderer{img_width, img_height, sdf_directory_path + "/img.ppm", 2, 5};
-	std::cout << "shapes " << scene.shapes.size() << "\n";
+	std::cout << "shapes " << scene.root->child_count() << "\n";
 	std::cout << "lights " << scene.lights.size() << "\n";
 
 	try {

@@ -22,14 +22,14 @@ float Sphere::volume() const {
 
 glm::vec3 Sphere::min(glm::mat4 transformation) const {
 	transformation *= world_transformation_;
-	glm::vec3 radius_trans = transform_vec3(transformation, { radius_, radius_, radius_ });
-	return center_ + glm::vec3{ transformation[3] } - radius_trans;
+	glm::vec3 radius_trans = transform_vec3(transformation, {radius_, radius_, radius_});
+	return center_ + glm::vec3{transformation[3]} - radius_trans;
 }
 
 glm::vec3 Sphere::max(glm::mat4 transformation) const {
 	transformation *= world_transformation_;
-	glm::vec3 radius_trans = transform_vec3(transformation, { radius_, radius_, radius_ });
-	return center_ + glm::vec3{ transformation[3] } + radius_trans;
+	glm::vec3 radius_trans = transform_vec3(transformation, {radius_, radius_, radius_});
+	return center_ + glm::vec3{transformation[3]} + radius_trans;
 }
 
 //Aufgabe 5.5

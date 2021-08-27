@@ -12,7 +12,7 @@ std::shared_ptr<Material> Scene::find_mat(std::string const& name) const {
 }
 
 std::shared_ptr<Shape> Scene::find_shape(std::string const& name) const {
-	return shapes.find(name)->second;
+	return root->find_child(name);
 }
 
 glm::vec3 load_vec(std::istringstream& arg_stream) {
@@ -126,26 +126,26 @@ void load_transformation(std::istringstream& arg_stream, Scene const& scene) {
 	std::string name;
 	
 	arg_stream >> name;
-	auto it = scene.find_shape(name);
+	auto shape = scene.find_shape(name);
 
 	std::string token;
 	arg_stream >> token;
 	if ("translate" == token) {
-		float d_x;
-		float d_y;
-		float d_z;
+		float dx;
+		float dy;
+		float dz;
 
-		arg_stream >> d_x >> d_y >> d_z;
-		it->translate(d_x, d_y, d_z);
+		arg_stream >> dx >> dy >> dz;
+		shape->translate(dx, dy, dz);
 	}
 	//rotation with euler angles
 	else if ("rotate" == token) {
-		float roll;
-		float yaw;
 		float pitch;
+		float yaw;
+		float roll;
 
-		arg_stream >> roll >> pitch >> yaw;
-		it->rotate(glm::radians(roll), glm::radians(pitch), glm::radians(yaw));
+		arg_stream >> pitch >> yaw >> roll;
+		shape->rotate(glm::radians(roll), glm::radians(pitch), glm::radians(yaw));
 	}
 	else if ("scale" == token) {
 		float scale_x;
@@ -153,7 +153,7 @@ void load_transformation(std::istringstream& arg_stream, Scene const& scene) {
 		float scale_z;
 
 		arg_stream >> scale_x >> scale_y >> scale_z;
-		it->scale(scale_x, scale_y, scale_z);
+		shape->scale(scale_x, scale_y, scale_z);
 	}
 }
 
@@ -257,12 +257,13 @@ std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::stri
 
 	while (std::getline(input_obj_file, line_buffer)) {
 		std::istringstream arg_stream(line_buffer);
+
+		if ('#' == arg_stream.peek()) {
+			continue;
+		}
 		std::string token;
 		arg_stream >> token;
 
-		if ("#" == token) {
-			continue;
-		}
 		//loads associated material file
 		if ("mtllib" == token) {
 			std::string mtl_file_name;
@@ -291,7 +292,7 @@ std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::stri
 			child_mat = materials.find(mat_name)->second;
 			//adds a triangle face
 		} else if ("f" == token) {
-			current_child->add_child(load_obj_face(arg_stream, vertices, normals, std::to_string(face_count), child_mat));
+			current_child->add_child(load_obj_face(arg_stream, vertices, normals, "face" + std::to_string(face_count), child_mat));
 			++face_count;
 		}
 	}
@@ -302,6 +303,42 @@ std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::stri
 	composite->build_octree();
 	return composite;
 };
+
+void create_composite(std::istringstream& arg_stream, Scene& new_scene) {
+	std::string composite_name;
+	arg_stream >> composite_name;
+	auto composite = std::make_shared<Composite>(composite_name);
+
+	while(!arg_stream.eof()) {
+		std::string child_name;
+		arg_stream >> child_name;
+		auto child_shape = new_scene.find_shape(child_name);
+		composite->add_child(child_shape);
+		new_scene.root->remove_child(child_name);
+	}
+	composite->build_octree();
+	new_scene.root->add_child(composite);
+}
+
+void add_to_composite(std::istringstream& arg_stream, Scene& new_scene) {
+	std::string composite_name;
+	arg_stream >> composite_name;
+	auto composite = std::dynamic_pointer_cast<Composite>(new_scene.find_shape(composite_name));
+	std::cout << "adding to  " << composite->get_name() << "\n";
+
+	if (nullptr == composite) {
+		std::cerr << composite_name << " cannot be cast to composite" << std::endl;
+	}
+	while(!arg_stream.eof()) {
+		std::string child_name;
+		arg_stream >> child_name;
+		auto child_shape = new_scene.find_shape(child_name);
+		composite->add_child(child_shape);
+		new_scene.root->remove_child(child_name);
+		std::cout << "added " << child_name << "\n";
+	}
+	composite->build_octree();
+}
 
 void add_to_scene(std::istringstream& arg_stream, Scene& new_scene, std::string const& resource_directory) {
 	std::string token;
@@ -314,19 +351,17 @@ void add_to_scene(std::istringstream& arg_stream, Scene& new_scene, std::string 
 	if ("shape" == token) {
 		arg_stream >> token;
 		if ("box" == token) {
-			auto new_box = load_box(arg_stream, new_scene.materials);
-			new_scene.shapes.emplace(new_box->get_name(), new_box);
+			new_scene.root->add_child(load_box(arg_stream, new_scene.materials));
 		} else if ("sphere" == token) {
-			auto new_sphere = load_sphere(arg_stream, new_scene.materials);
-			new_scene.shapes.emplace(new_sphere->get_name(), new_sphere);
+			new_scene.root->add_child(load_sphere(arg_stream, new_scene.materials));
 		} else if ("triangle" == token) {
-			auto new_triangle = load_triangle(arg_stream, new_scene.materials);
-			new_scene.shapes.emplace(new_triangle->get_name(), new_triangle);
+			new_scene.root->add_child(load_triangle(arg_stream, new_scene.materials));
 		} else if ("obj" == token) {
 			std::string obj_file_name;
 			arg_stream >> obj_file_name;
-			auto new_composite = load_obj(resource_directory, obj_file_name);
-			new_scene.shapes.emplace(new_composite->get_name(), new_composite);
+			new_scene.root->add_child(load_obj(resource_directory, obj_file_name));
+		} else if ("composite" == token) {
+			create_composite(arg_stream, new_scene);
 		}
 	} else if ("light" == token) {
 		PointLight new_light{load_point_light(arg_stream)};
@@ -342,16 +377,16 @@ void render(std::istringstream& arg_stream, Scene const& scene, std::string cons
 	std::string file_name;
 	unsigned res_x;
 	unsigned res_y;
-	unsigned AA_steps;
+	unsigned aa_steps;
 	unsigned ray_bounces;
 
 	arg_stream >> file_name;
 	arg_stream >> res_x;
 	arg_stream >> res_y;
-	arg_stream >> AA_steps;
+	arg_stream >> aa_steps;
 	arg_stream >> ray_bounces;
 
-	Renderer renderer{res_x, res_y, output_directory + "/" + file_name, AA_steps, ray_bounces};
+	Renderer renderer{res_x, res_y, output_directory + "/" + file_name, aa_steps, ray_bounces};
 	renderer.render(scene, scene.camera);
 }
 
@@ -368,19 +403,22 @@ Scene load_scene(
 	while (std::getline(input_sdf_file, line_buffer)) {
 		std::istringstream words_stream(line_buffer);
 		//streams words of each line
-		std::string token_str;
-		words_stream >> token_str;
+		std::string token;
+		words_stream >> token;
 
-		if ("#" == token_str) {
+		if ("#" == token) {
 			continue;
 		}
-		if ("define" == token_str) {
+		if ("define" == token) {
 			add_to_scene(words_stream, new_scene, resource_directory);
-		} else if ("transform" == token_str) {
+		} else if ("transform" == token) {
 			load_transformation(words_stream, new_scene);
-		} else if ("render" == token_str) {
+		} else if ("render" == token) {
 			render(words_stream, new_scene, output_directory);
+		} else if ("add" == token) {
+			add_to_composite(words_stream, new_scene);
 		}
 	}
+	new_scene.root->build_octree();
 	return new_scene;
 }
