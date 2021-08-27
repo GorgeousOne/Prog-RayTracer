@@ -14,13 +14,13 @@
 
 #define EPSILON 0.001f
 
-Renderer::Renderer(unsigned w, unsigned h, std::string const& file_name, unsigned AA_steps, unsigned max_ray_bounces):
+Renderer::Renderer(unsigned w, unsigned h, std::string const& file_name, unsigned aa_steps, unsigned max_ray_bounces):
 		width_(w),
 		height_(h),
 		color_buffer_(w * h, Color{0.0, 0.0, 0.0}),
 		filename_(file_name),
 		ppm_(width_, height_),
-		AA_steps_(AA_steps),
+		aa_steps_(aa_steps),
 		max_ray_bounces_(max_ray_bounces) {}
 
 void Renderer::render() {
@@ -80,7 +80,7 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 
 void Renderer::thread_function(Scene const& scene, float img_plane_dist, glm::mat4 const& trans_mat) {
 	//continuously picks pixels to render
-	float AA_unit = 1.0f / AA_steps_;
+	float AA_unit = 1.0f / aa_steps_;
 	while (true) {
 		unsigned current_pixel = pixel_index_++;
 		unsigned x = current_pixel % width_;
@@ -90,8 +90,8 @@ void Renderer::thread_function(Scene const& scene, float img_plane_dist, glm::ma
 			return;
 		}
 		Pixel pixel{ x, y };
-		for (int x_count = 0; x_count < AA_steps_; x_count++) {
-			for (int y_count = 0; y_count < AA_steps_; y_count++) {
+		for (int x_count = 0; x_count < aa_steps_; x_count++) {
+			for (int y_count = 0; y_count < aa_steps_; y_count++) {
 				glm::vec3 pixel_pos = glm::vec3{
 					x + x_count * AA_unit - (width_ * 0.5f),
 					y + y_count * AA_unit - (height_ * 0.5f),
@@ -102,7 +102,7 @@ void Renderer::thread_function(Scene const& scene, float img_plane_dist, glm::ma
 				pixel.color += tone_map_color(trace_color(ray, scene, 0));
 			}
 		}
-		pixel.color *= 1.0f / (AA_steps_ * AA_steps_);
+		pixel.color *= 1.0f / (aa_steps_ * aa_steps_);
 		write(pixel);
 	}
 }

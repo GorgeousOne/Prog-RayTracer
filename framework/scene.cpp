@@ -126,17 +126,17 @@ void load_transformation(std::istringstream& arg_stream, Scene const& scene) {
 	std::string name;
 	
 	arg_stream >> name;
-	auto it = scene.find_shape(name);
+	auto shape = scene.find_shape(name);
 
 	std::string token;
 	arg_stream >> token;
 	if ("translate" == token) {
-		float d_x;
-		float d_y;
-		float d_z;
+		float dx;
+		float dy;
+		float dz;
 
-		arg_stream >> d_x >> d_y >> d_z;
-		it->translate(d_x, d_y, d_z);
+		arg_stream >> dx >> dy >> dz;
+		shape->translate(dx, dy, dz);
 	}
 	//rotation with euler angles
 	else if ("rotate" == token) {
@@ -145,7 +145,7 @@ void load_transformation(std::istringstream& arg_stream, Scene const& scene) {
 		float pitch;
 
 		arg_stream >> roll >> pitch >> yaw;
-		it->rotate(glm::radians(roll), glm::radians(pitch), glm::radians(yaw));
+		shape->rotate(glm::radians(roll), glm::radians(pitch), glm::radians(yaw));
 	}
 	else if ("scale" == token) {
 		float scale_x;
@@ -153,7 +153,7 @@ void load_transformation(std::istringstream& arg_stream, Scene const& scene) {
 		float scale_z;
 
 		arg_stream >> scale_x >> scale_y >> scale_z;
-		it->scale(scale_x, scale_y, scale_z);
+		shape->scale(scale_x, scale_y, scale_z);
 	}
 }
 
@@ -303,6 +303,22 @@ std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::stri
 	return composite;
 };
 
+void create_composite(std::istringstream& arg_stream, Scene& new_scene) {
+	std::string composite_name;
+	arg_stream >> composite_name;
+	auto composite = std::make_shared<Composite>(composite_name);
+
+	while(!arg_stream.eof()) {
+		std::string child_name;
+		arg_stream >> child_name;
+		auto child_shape = new_scene.find_shape(child_name);
+		composite->add_child(child_shape);
+		new_scene.root->remove_child(child_name);
+	}
+	composite->build_octree();
+	new_scene.root->add_child(composite);
+}
+
 void add_to_scene(std::istringstream& arg_stream, Scene& new_scene, std::string const& resource_directory) {
 	std::string token;
 	arg_stream >> token;
@@ -323,6 +339,8 @@ void add_to_scene(std::istringstream& arg_stream, Scene& new_scene, std::string 
 			std::string obj_file_name;
 			arg_stream >> obj_file_name;
 			new_scene.root->add_child(load_obj(resource_directory, obj_file_name));
+		} else if ("composite" == token) {
+			create_composite(arg_stream, new_scene);
 		}
 	} else if ("light" == token) {
 		PointLight new_light{load_point_light(arg_stream)};
@@ -338,16 +356,16 @@ void render(std::istringstream& arg_stream, Scene const& scene, std::string cons
 	std::string file_name;
 	unsigned res_x;
 	unsigned res_y;
-	unsigned AA_steps;
+	unsigned aa_steps;
 	unsigned ray_bounces;
 
 	arg_stream >> file_name;
 	arg_stream >> res_x;
 	arg_stream >> res_y;
-	arg_stream >> AA_steps;
+	arg_stream >> aa_steps;
 	arg_stream >> ray_bounces;
 
-	Renderer renderer{res_x, res_y, output_directory + "/" + file_name, AA_steps, ray_bounces};
+	Renderer renderer{res_x, res_y, output_directory + "/" + file_name, aa_steps, ray_bounces};
 	renderer.render(scene, scene.camera);
 }
 

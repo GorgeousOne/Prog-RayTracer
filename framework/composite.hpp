@@ -24,10 +24,11 @@ public:
 	HitPoint intersect(Ray const& ray_inv) const override;
 
 	void add_child(std::shared_ptr<Shape> shape);
-	void build_octree();
+	void remove_child(std::string const& name);
+	std::shared_ptr<Shape> find_child(std::string const& name);
 	unsigned int child_count();
 
-	std::shared_ptr<Shape> find_child(std::string const &name);
+	void build_octree();
 
 private:
 	std::shared_ptr<Box> bounds_;

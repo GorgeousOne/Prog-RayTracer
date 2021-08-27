@@ -21,7 +21,7 @@
 
 class Renderer {
 public:
-	Renderer(unsigned w, unsigned h, std::string const& file_name, unsigned AA_steps, unsigned max_ray_bounces);
+	Renderer(unsigned w, unsigned h, std::string const& file_name, unsigned aa_steps, unsigned max_ray_bounces);
 
 	void render();
 	void render(Scene const& scene, Camera const& cam);
@@ -38,7 +38,7 @@ private:
 	std::vector<Color> color_buffer_;
 	std::string filename_;
 	PpmWriter ppm_;
-	unsigned AA_steps_;
+	unsigned aa_steps_;
 	unsigned max_ray_bounces_;
 
 	std::atomic_uint pixel_index_;

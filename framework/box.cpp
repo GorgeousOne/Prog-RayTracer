@@ -40,27 +40,27 @@ float Box::volume() const {
 
 glm::vec3 Box::min(glm::mat4 transformation) const {
 	transformation *= world_transformation_;
-	glm::vec3 min_trans = transform_vec3(transformation, min_);
+	glm::vec3 min_trans = transform_vec3(transformation, min_, true);
 	min_trans = glm::min(min_trans, transform_vec3(transformation, {min_.x, min_.y, max_.z}, true));
 	min_trans = glm::min(min_trans, transform_vec3(transformation, {max_.x, min_.y, max_.z}, true));
 	min_trans = glm::min(min_trans, transform_vec3(transformation, {min_.x, max_.y, max_.z}, true));
 	min_trans = glm::min(min_trans, transform_vec3(transformation, {max_.x, max_.y, min_.z}, true));
 	min_trans = glm::min(min_trans, transform_vec3(transformation, {max_.x, min_.y, min_.z}, true));
 	min_trans = glm::min(min_trans, transform_vec3(transformation, {min_.x, max_.y, min_.z}, true));
-	min_trans = glm::min(min_trans, transform_vec3(transformation, {max_}));
+	min_trans = glm::min(min_trans, transform_vec3(transformation, max_, true));
 	return min_trans;
 }
 
 glm::vec3 Box::max(glm::mat4 transformation) const {
 	transformation *= world_transformation_;
-	glm::vec3 max_trans = transform_vec3(transformation, min_);
+	glm::vec3 max_trans = transform_vec3(transformation, min_, true);
 	max_trans = glm::max(max_trans, transform_vec3(transformation, {min_.x, min_.y, max_.z}, true));
 	max_trans = glm::max(max_trans, transform_vec3(transformation, {max_.x, min_.y, max_.z}, true));
 	max_trans = glm::max(max_trans, transform_vec3(transformation, {min_.x, max_.y, max_.z}, true));
 	max_trans = glm::max(max_trans, transform_vec3(transformation, {max_.x, max_.y, min_.z}, true));
 	max_trans = glm::max(max_trans, transform_vec3(transformation, {max_.x, min_.y, min_.z}, true));
 	max_trans = glm::max(max_trans, transform_vec3(transformation, {min_.x, max_.y, min_.z}, true));
-	max_trans = glm::max(max_trans, transform_vec3(transformation, max_));
+	max_trans = glm::max(max_trans, transform_vec3(transformation, max_, true));
 	return max_trans;
 }
 
