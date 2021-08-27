@@ -57,6 +57,8 @@ install(TARGETS example DESTINATION .)
 # Moviemaker
 add_executable(moviemaker
 		../moviemaker/moviemaker.cpp
+        ../moviemaker/bodypart.h ../moviemaker/bodypart.cpp
+
 		../framework/shape.hpp ../framework/shape.cpp
 		../framework/sphere.hpp ../framework/sphere.cpp
 		../framework/box.hpp ../framework/box.cpp

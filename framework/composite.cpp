@@ -88,9 +88,6 @@ void Composite::translate(float x, float y, float z) {
 }
 
 HitPoint Composite::intersect(Ray const& ray) const {
-//	if (name_ != "root") {
-//		return bounds_->intersect(ray);
-//	}
 	assert(nullptr != bounds_);
 	float t;
 	bool bounds_hit = bounds_->intersect(ray, t);
@@ -113,6 +110,7 @@ HitPoint Composite::intersect(Ray const& ray) const {
 	if (min_hit.does_intersect) {
 		min_hit.position = transform_vec3(world_transformation_, min_hit.position, true);
 		min_hit.surface_normal = glm::normalize(transform_vec3(world_transformation_, min_hit.surface_normal));
+		min_hit.ray_direction = ray.direction;
 	}
 	return min_hit;
 }
