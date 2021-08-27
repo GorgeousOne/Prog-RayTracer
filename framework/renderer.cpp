@@ -14,13 +14,13 @@
 
 #define EPSILON 0.001f
 
-Renderer::Renderer(unsigned w, unsigned h, std::string const& file_name, unsigned AA_steps, unsigned max_ray_bounces):
+Renderer::Renderer(unsigned w, unsigned h, std::string const& file_name, unsigned aa_steps, unsigned max_ray_bounces):
 		width_(w),
 		height_(h),
 		color_buffer_(w * h, Color{0.0, 0.0, 0.0}),
 		filename_(file_name),
 		ppm_(width_, height_),
-		AA_steps_(AA_steps),
+		aa_steps_(aa_steps),
 		max_ray_bounces_(max_ray_bounces) {}
 
 void Renderer::render() {
@@ -80,7 +80,7 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 
 void Renderer::thread_function(Scene const& scene, float img_plane_dist, glm::mat4 const& trans_mat) {
 	//continuously picks pixels to render
-	float AA_unit = 1.0f / AA_steps_;
+	float AA_unit = 1.0f / aa_steps_;
 	while (true) {
 		unsigned current_pixel = pixel_index_++;
 		unsigned x = current_pixel % width_;
@@ -90,8 +90,8 @@ void Renderer::thread_function(Scene const& scene, float img_plane_dist, glm::ma
 			return;
 		}
 		Pixel pixel{ x, y };
-		for (int x_count = 0; x_count < AA_steps_; x_count++) {
-			for (int y_count = 0; y_count < AA_steps_; y_count++) {
+		for (int x_count = 0; x_count < aa_steps_; x_count++) {
+			for (int y_count = 0; y_count < aa_steps_; y_count++) {
 				glm::vec3 pixel_pos = glm::vec3{
 					x + x_count * AA_unit - (width_ * 0.5f),
 					y + y_count * AA_unit - (height_ * 0.5f),
@@ -102,7 +102,7 @@ void Renderer::thread_function(Scene const& scene, float img_plane_dist, glm::ma
 				pixel.color += tone_map_color(trace_color(ray, scene, 0));
 			}
 		}
-		pixel.color *= 1.0f / (AA_steps_ * AA_steps_);
+		pixel.color *= 1.0f / (aa_steps_ * aa_steps_);
 		write(pixel);
 	}
 }
@@ -123,30 +123,13 @@ void Renderer::write(Pixel const& p) {
 }
 
 HitPoint Renderer::get_closest_hit(Ray const& ray, Scene const& scene) const {
-	HitPoint closest_hit{};
-
-	for (auto const& it : scene.shapes) {
-		HitPoint hit = it.second->intersect(ray);
-
-		if (!hit.does_intersect) {
-			continue;
-		}
-		if (!closest_hit.does_intersect || hit.distance < closest_hit.distance) {
-			closest_hit = hit;
-		}
-	}
-	return closest_hit;
+	return scene.root->intersect(ray);
 }
 
-HitPoint Renderer::find_light_block(Ray const& light_ray, float range, Scene const& scene) const {
-	for (auto const& it : scene.shapes) {
-		HitPoint hit = it.second->intersect(light_ray);
-
-		if (hit.does_intersect && hit.distance <= range) {
-			return hit;
-		}
-	}
-	return HitPoint {};
+bool Renderer::light_is_blocked(glm::vec3 const& position, glm::vec3 light_dir, float range, Scene const& scene) const {
+	Ray light_ray {position, glm::normalize(light_dir)};
+	HitPoint light_block = scene.root->intersect(light_ray);
+	return light_block.does_intersect && light_block.distance < range;
 }
 
 Color Renderer::trace_color(Ray const& ray, Scene const& scene, unsigned ray_bounces) const {
@@ -194,13 +177,10 @@ Color Renderer::diffuse_color(HitPoint const& hitPoint, Scene const& scene) cons
 		glm::vec3 light_dir = light.position - hitPoint.position;
 		float distance = glm::length(light_dir);
 
-		Ray light_ray {hitPoint.position, glm::normalize(light_dir)};
-		HitPoint light_block = find_light_block(light_ray, distance, scene);
-
-		if (light_block.does_intersect) {
+		if (light_is_blocked(hitPoint.position, light_dir, distance, scene)) {
 			continue;
 		}
-		float cos_incidence_angle = glm::dot(hitPoint.surface_normal, glm::normalize(light_ray.direction));
+		float cos_incidence_angle = glm::dot(hitPoint.surface_normal, glm::normalize(light_dir));
 
 		if (cos_incidence_angle < 0) {
 			continue;
@@ -218,10 +198,7 @@ Color Renderer::specular_color(HitPoint const& hitPoint, Scene const& scene) con
 		glm::vec3 light_dir = light.position - hitPoint.position;
 		float distance = glm::length(light_dir);
 
-		Ray light_ray{ hitPoint.position, glm::normalize(light_dir) };
-		HitPoint light_block = find_light_block(light_ray, distance, scene);
-
-		if (light_block.does_intersect) {
+		if (light_is_blocked(hitPoint.position, light_dir, distance, scene)) {
 			continue;
 		}
 		light_dir = glm::normalize(light_dir);

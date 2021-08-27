@@ -21,7 +21,7 @@
 
 class Renderer {
 public:
-	Renderer(unsigned w, unsigned h, std::string const& file_name, unsigned AA_steps, unsigned max_ray_bounces);
+	Renderer(unsigned w, unsigned h, std::string const& file_name, unsigned aa_steps, unsigned max_ray_bounces);
 
 	void render();
 	void render(Scene const& scene, Camera const& cam);
@@ -38,7 +38,7 @@ private:
 	std::vector<Color> color_buffer_;
 	std::string filename_;
 	PpmWriter ppm_;
-	unsigned AA_steps_;
+	unsigned aa_steps_;
 	unsigned max_ray_bounces_;
 
 	std::atomic_uint pixel_index_;
@@ -46,7 +46,7 @@ private:
 
 	Color trace_color(Ray const& ray, Scene const& scene, unsigned ray_bounces) const;
 	HitPoint get_closest_hit(Ray const& ray, Scene const& scene) const;
-	HitPoint find_light_block(Ray const& light_ray, float range, Scene const& scene) const;
+	bool light_is_blocked(glm::vec3 const& position, glm::vec3 light_dir, float range, Scene const& scene) const;
 
 	Color shade(HitPoint const& hitPoint, Scene const& scene, unsigned ray_bounces) const;
 	Color ambient_color(HitPoint const& , Light const& ambient) const;

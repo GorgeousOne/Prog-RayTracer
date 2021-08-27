@@ -12,7 +12,7 @@
 
 struct Scene {
 	std::map<std::string, std::shared_ptr<Material>> materials{};
-	std::map<std::string, std::shared_ptr<Shape>> shapes{};
+	std::shared_ptr<Composite> root = std::make_shared<Composite>("root");
 	std::vector<PointLight> lights{};
 	Light ambient{};
 	Camera camera{};

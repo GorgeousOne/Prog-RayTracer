@@ -1,11 +1,11 @@
 /* What do we need:
 * Datenstruktur, die Strings mit Zeitintervallen speichern kann
 * Funktion sdf-writer mithilfe der Datenstruktur
-* Funktion, die in einem Zeitintervall die Transformationen für Objekte berechnet und z.B. in einer map speichert
+* Funktion, die in einem Zeitintervall die Transformationen fï¿½r Objekte berechnet und z.B. in einer map speichert
 * Klasse zur Darstellung von Superhot
-* Funktion dieser Klasse zur Bewegung von Superhot (Muss string mit Positionen zurückgeben)
-* Ostream Funktion für die Datenstrukturen zum SDF schreiben
-* Kamerabewegung und Position benötigt evtl auch eigene Datenstruktur
+* Funktion dieser Klasse zur Bewegung von Superhot (Muss string mit Positionen zurï¿½ckgeben)
+* Ostream Funktion fï¿½r die Datenstrukturen zum SDF schreiben
+* Kamerabewegung und Position benï¿½tigt evtl auch eigene Datenstruktur
 */
 
 #include <iostream>
@@ -17,6 +17,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <scene.hpp>
+#include "bodypart.h"
 
 struct Interval {
 	float start_time = 0.0f;
@@ -101,12 +102,32 @@ void write_to_sdf(
 	float frame_duration = 1.0f / fps;
 	unsigned total_frame_count = movie_duration * fps;
 
+	auto body = std::make_shared<BodyPart>(BodyPart{"chest"});
+	auto arm_left = std::make_shared<BodyPart>(BodyPart{"arm_left"});
+	auto arm_right = std::make_shared<BodyPart>(BodyPart{"arm_right"});
+	auto hand_left = std::make_shared<BodyPart>(BodyPart{"hand_left"});
+	auto hand_right = std::make_shared<BodyPart>(BodyPart{"hand_right"});
+	auto leg_left = std::make_shared<BodyPart>(BodyPart{"leg_left"});
+	auto leg_right = std::make_shared<BodyPart>(BodyPart{"leg_right"});
+	auto foot_left = std::make_shared<BodyPart>(BodyPart{"foot_left"});
+	auto foot_right = std::make_shared<BodyPart>(BodyPart{"foot_right"});
+	body->children.emplace_back(arm_left);
+	body->children.emplace_back(arm_right);
+	body->children.emplace_back(leg_left);
+	body->children.emplace_back(leg_right);
+	arm_left->children.emplace_back(hand_left);
+	arm_right->children.emplace_back(hand_right);
+	leg_left->children.emplace_back(foot_left);
+	leg_right->children.emplace_back(foot_right);
+
 	for (int frame = 0; frame < total_frame_count; ++frame) {
 		float current_time = frame * frame_duration;
 
 		std::stringstream file_name;
 		file_name << "frame" << std::setfill('0') << std::setw(4) << frame+1;
 		std::ofstream sdf_file(directory + "/" + file_name.str() + ".sdf");
+
+		sdf_file << "#body pose" << std::endl << *body;
 
 		for (auto const& object : object_map) {
 			if (object.second.is_active(current_time)) {

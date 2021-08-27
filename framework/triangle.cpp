@@ -36,19 +36,17 @@ float Triangle::volume() const {
 
 glm::vec3 Triangle::min(glm::mat4 transformation) const {
 	transformation *= world_transformation_;
-	glm::vec3 v0_trans = transform_vec3(transformation, v0_);
-	glm::vec3 v1_trans = transform_vec3(transformation, v1_);
-	glm::vec3 v2_trans = transform_vec3(transformation, v2_);
-
+	glm::vec3 v0_trans = transform_vec3(transformation, v0_, true);
+	glm::vec3 v1_trans = transform_vec3(transformation, v1_, true);
+	glm::vec3 v2_trans = transform_vec3(transformation, v2_, true);
 	return glm::min(glm::min(v0_trans, v1_trans), v2_trans);
 }
 
 glm::vec3 Triangle::max(glm::mat4 transformation) const {
 	transformation *= world_transformation_;
-	glm::vec3 v0_trans = transform_vec3(transformation, v0_);
-	glm::vec3 v1_trans = transform_vec3(transformation, v1_);
-	glm::vec3 v2_trans = transform_vec3(transformation, v2_);
-
+	glm::vec3 v0_trans = transform_vec3(transformation, v0_, true);
+	glm::vec3 v1_trans = transform_vec3(transformation, v1_, true);
+	glm::vec3 v2_trans = transform_vec3(transformation, v2_, true);
 	return glm::max(glm::max(v0_trans, v1_trans), v2_trans);
 }
 
