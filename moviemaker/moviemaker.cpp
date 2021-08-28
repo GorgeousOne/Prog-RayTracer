@@ -111,6 +111,7 @@ Pose read_pose(std::string const& file_path) {
 	}
 	return pose;
 }
+
 void apply_curren_pose(Body& body, BodyAnimation const& animation, float current_time) {
 	float progress = (current_time - animation.time.start_time) / animation.time.duration;
 	Pose current_pose{};
@@ -171,45 +172,62 @@ void write_to_sdf(
 		sdf_file << std::endl;
 
 		for (auto const& animation : cam_animations) {
-			sdf_file << get_current_cam(animation, current_time) << std::endl;
+			if (animation.time.is_active(current_time)) {
+				sdf_file << get_current_cam(animation, current_time) << std::endl;
+			}
 		}
 		sdf_file << "render " << file_name.str() << ".ppm " << res_x << " " << res_y  << " " << aa_steps  << " " << ray_bounces << std::endl;
 		sdf_file.close();
 	};
 }
 
+
 void generate_movie(std::string const& res_dir) {
-	float movie_duration = 5.0f;
+	float movie_duration = 2.0f;
 	unsigned fps = 24;
-	std::string directory = "./movie/files";
 
 	std::map<std::string, Interval> object_map;
 	std::vector<Animation> animations;
 	std::vector<Cam_Animation> cam_animations;
 	std::vector<BodyAnimation> body_animations;
 
-	object_map.insert({"define material white 1 1 1 1 1 1 0 0 0 1 0 1 1", {0, 5}});
-	object_map.insert({"define material obsidian 0 0 0 .01 .01 .01 1 1 1 50 .1 1 1", {0, 5}});
-	object_map.insert({"define shape box box -300 -93 -300 300 -92.9 300 obsidian", {0, 5}});
-	object_map.insert({"define ambient amb 1 1 1 1", {0, 5}});
-	object_map.insert({"define light bulb 50 100 500 .2 .2 .2 32", {0, 5}});
-	object_map.insert({"define camera eye 60 0 0 400 0 0 -1 0 1 0", {0, 5}});
+	// lights
+	object_map.insert({ "define ambient amb 1 1 1 1", {0, movie_duration}});
+	object_map.insert({ "define light bulb 0 9 0 .2 .2 .2 32", {0, movie_duration}});
 
+	// materials
+	object_map.insert({"define material white 1 1 1 1 1 1 0 0 0 1 0 1 1", {0, movie_duration}});
+	object_map.insert({"define material yellow 1 1 0 1 1 0 1 1 0 50 1 1 1", {0, movie_duration}});
+	object_map.insert({"define material obsidian 0 0 0 .01 .01 .01 1 1 1 50 .1 1 1", {0, movie_duration}});
+
+	// shapes
+	object_map.insert({"define shape sphere s1 5 0 0 1 white", {0, 2}});
+	object_map.insert({"define shape box b1 -1 -1 -1 1 1 1 white", {0, 2}});
+
+	// camera
+	object_map.insert({"define camera eye 60 0 0 20 0 0 -1 0 1 0", {0, 0.1}});
+	cam_animations.emplace_back(Cam_Animation{ { 0.1, 2 }, { 0, 0, 20 }, { 0, 0, -1 }, { 0, 1, 0 }, { 5, 0, 20 }, { 0, 0, -1 }, { 0, 1, 0 } });
+
+	// translations
+	//animations.emplace_back(Animation{"b1", "translate", {0, 2}, 2, -5, 0, 2, 5, 0});
+	//animations.emplace_back(Animation{"s1", "translate", {0, 2}, -2, 5, 0, -2, -5, 0});
+
+	// rotations
+
+	//scalings
+	animations.emplace_back(Animation{"b1", "scale", {0, 1}, 1, 1, 1, 2, 3, 1});
+
+	//walk animation
 	animations.emplace_back(Animation{"chest", "rotate", {0, 5}, 0, 90, 0, 0, 90, 0});
-
 	std::vector<Pose> walk;
-	walk.reserve(8);
 
 	for (int i = 0; i < 8; ++i) {
 		walk.emplace_back(read_pose(res_dir + "/poses/pose0" + std::to_string(i+1) + ".txt"));
 	}
-	float walk_speed = 0.3;
-	int pose_count = static_cast<int> (movie_duration / walk_speed);
-	body_animations.reserve(pose_count);
-
 	for (unsigned i = 0; i < pose_count; ++i) {
 		body_animations.emplace_back(BodyAnimation{walk[i % walk.size()], walk[(i + 1) % walk.size()], {i * walk_speed, walk_speed}});
 	}
+
 	write_to_sdf(
 			object_map,
 			animations,
