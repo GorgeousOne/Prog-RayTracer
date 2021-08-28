@@ -3,7 +3,7 @@ define ambient amb 1 1 1 1
 define light bulb 0 9 0 .2 .2 .2 32
 
 
-# materials name ka kd ks m glossiness
+# materials name ka kd ks m glossiness opacity ior
 define material red 1 0 0 1 0 0 0 0 0 1 0 1 1
 define material green 0 1 0 0 1 0 1 1 1 50 0 1 1
 # define material blue .8 .8 1 1 1 1 1 1 1 100 0.05 0 1.4
