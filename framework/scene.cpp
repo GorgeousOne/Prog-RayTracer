@@ -8,7 +8,8 @@
 #include "renderer.hpp"
 
 std::shared_ptr<Material> Scene::find_mat(std::string const& name) const {
-	return materials.find(name)->second;
+	auto it = materials.find(name);
+	return materials.end() == it ? nullptr : it->second;
 }
 
 std::shared_ptr<Shape> Scene::find_shape(std::string const& name) const {
@@ -40,7 +41,7 @@ std::shared_ptr<Material> load_mat(std::istringstream& arg_stream) {
 	return std::make_shared<Material>(Material{name, ka, kd, ks, m, glossy, opacity, ior});
 }
 
-std::shared_ptr<Box> load_box(std::istringstream& arg_stream, std::map<std::string, std::shared_ptr<Material>> const& materials) {
+std::shared_ptr<Box> load_box(std::istringstream& arg_stream, Scene const& scene) {
 	std::string name;
 	std::string mat_name;
 
@@ -49,11 +50,12 @@ std::shared_ptr<Box> load_box(std::istringstream& arg_stream, std::map<std::stri
 	glm::vec3 max = load_vec(arg_stream);
 	arg_stream >> mat_name;
 
-	auto it = materials.find(mat_name);
-	return std::make_shared<Box>(min, max, name, it->second);
+	auto material = scene.find_mat(mat_name);
+	assert(nullptr != material);
+	return std::make_shared<Box>(min, max, name, material);
 }
 
-std::shared_ptr<Sphere> load_sphere(std::istringstream& arg_stream, std::map<std::string, std::shared_ptr<Material>> const& materials) {
+std::shared_ptr<Sphere> load_sphere(std::istringstream& arg_stream, Scene const& scene) {
 	std::string name;
 	std::string mat_name;
 	float radius;
@@ -63,11 +65,12 @@ std::shared_ptr<Sphere> load_sphere(std::istringstream& arg_stream, std::map<std
 	arg_stream >> radius;
 	arg_stream >> mat_name;
 
-	auto it = materials.find(mat_name);
-	return std::make_shared<Sphere>(radius, center, name, it->second);
+	auto material = scene.find_mat(mat_name);
+	assert(nullptr != material);
+	return std::make_shared<Sphere>(radius, center, name, material);
 }
 
-std::shared_ptr<Triangle> load_triangle(std::istringstream& arg_stream, std::map<std::string, std::shared_ptr<Material>> const& materials) {
+std::shared_ptr<Triangle> load_triangle(std::istringstream& arg_stream, Scene const& scene) {
 	std::string name;
 	std::string mat_name;
 
@@ -77,8 +80,9 @@ std::shared_ptr<Triangle> load_triangle(std::istringstream& arg_stream, std::map
 	glm::vec3 v2 = load_vec(arg_stream);
 	arg_stream >> mat_name;
 
-	auto it = materials.find(mat_name);
-	return std::make_shared<Triangle>(v0, v1, v2, name, it->second);
+	auto material = scene.find_mat(mat_name);
+	assert(nullptr != material);
+	return std::make_shared<Triangle>(v0, v1, v2, name, material);
 }
 
 PointLight load_point_light(std::istringstream& arg_stream) {
@@ -157,25 +161,25 @@ void load_transformation(std::istringstream& arg_stream, Scene const& scene) {
 	}
 }
 
-std::map<std::string, std::shared_ptr<Material>> load_obj_materials(std::string const& file_path) {
+void add_obj_materials(std::string const& file_path, Scene& scene) {
 	std::ifstream input_mtl_file(file_path);
 	std::string line_buffer;
-
-	auto materials = std::map<std::string, std::shared_ptr<Material>>{};
 	std::shared_ptr<Material> current_mat = nullptr;
 
 	while (std::getline(input_mtl_file, line_buffer)) {
 		std::istringstream arg_stream(line_buffer);
+
+		if ('#' == arg_stream.peek()) {
+			continue;
+		}
 		std::string token;
 		arg_stream >> token;
 
-		if ("#" == token) {
-			continue;
-		}
 		if ("newmtl" == token) {
 			current_mat = std::make_shared<Material>();
 			arg_stream >> current_mat->name;
-			materials.emplace(current_mat->name, current_mat);
+			scene.materials.insert({current_mat->name, current_mat});
+
 		} else if ("Ka" == token) {
 			current_mat->ka = load_vec(arg_stream);
 		} else if ("Kd" == token) {
@@ -186,14 +190,13 @@ std::map<std::string, std::shared_ptr<Material>> load_obj_materials(std::string 
 			arg_stream >> current_mat->m;
 		}
 	}
-	return materials;
 }
 
 std::shared_ptr<Triangle> load_obj_face(
 		std::istringstream& arg_stream,
 		std::vector<glm::vec3> const& vertices,
 		std::vector<glm::vec3> const& normals,
-		std::string name,
+		std::string const& name,
 		std::shared_ptr<Material> mat) {
 	unsigned indices_v[3];
 	unsigned indices_vt[3];
@@ -242,17 +245,14 @@ std::shared_ptr<Triangle> load_obj_face(
  * @param name name of the .obj file
  * @return
  */
-std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::string const& name) {
+std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::string const& name, Scene& scene) {
 	std::ifstream input_obj_file(directory_path + "/" + name + ".obj");
 	std::string line_buffer;
 
-	std::map<std::string, std::shared_ptr<Material>> materials;
 	auto composite = std::make_shared<Composite>(name, nullptr);
-	std::shared_ptr<Composite> current_child = composite;
 	std::shared_ptr<Material> child_mat = std::make_shared<Material>();
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> normals;
-
 	int face_count = 0;
 
 	while (std::getline(input_obj_file, line_buffer)) {
@@ -268,17 +268,7 @@ std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::stri
 		if ("mtllib" == token) {
 			std::string mtl_file_name;
 			arg_stream >> mtl_file_name;
-			materials = load_obj_materials(directory_path + "/" + mtl_file_name);
-			//creates new sub object
-		} else if ("o" == token) {
-			//adds the previously composed mesh after all faces have been added so it's min max bounds are calculated correctly
-			if (composite->get_name() != current_child->get_name()) {
-				current_child->build_octree();
-				composite->add_child(current_child);
-			}
-			std::string child_name;
-			arg_stream >> child_name;
-			current_child = std::make_shared<Composite>(child_name, child_mat);
+			add_obj_materials(directory_path + "/" + mtl_file_name, scene);
 			//adds vertex
 		} else if ("v" == token) {
 			vertices.push_back(load_vec(arg_stream));
@@ -289,20 +279,17 @@ std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::stri
 		} else if ("usemtl" == token) {
 			std::string mat_name;
 			arg_stream >> mat_name;
-			child_mat = materials.find(mat_name)->second;
+			child_mat = scene.find_mat(mat_name);
+			assert(nullptr != child_mat);
 			//adds a triangle face
 		} else if ("f" == token) {
-			current_child->add_child(load_obj_face(arg_stream, vertices, normals, "face" + std::to_string(face_count), child_mat));
+			composite->add_child(load_obj_face(arg_stream, vertices, normals, "face" + std::to_string(face_count), child_mat));
 			++face_count;
 		}
 	}
-	if (composite->get_name() != current_child->get_name()) {
-		current_child->build_octree();
-		composite->add_child(current_child);
-	}
 	composite->build_octree();
 	return composite;
-};
+}
 
 void create_composite(std::istringstream& arg_stream, Scene& new_scene) {
 	std::string composite_name;
@@ -313,6 +300,7 @@ void create_composite(std::istringstream& arg_stream, Scene& new_scene) {
 		std::string child_name;
 		arg_stream >> child_name;
 		auto child_shape = new_scene.find_shape(child_name);
+		assert(nullptr != child_shape);
 		composite->add_child(child_shape);
 		new_scene.root->remove_child(child_name);
 	}
@@ -324,7 +312,6 @@ void add_to_composite(std::istringstream& arg_stream, Scene& new_scene) {
 	std::string composite_name;
 	arg_stream >> composite_name;
 	auto composite = std::dynamic_pointer_cast<Composite>(new_scene.find_shape(composite_name));
-	std::cout << "adding to  " << composite->get_name() << "\n";
 
 	if (nullptr == composite) {
 		std::cerr << composite_name << " cannot be cast to composite" << std::endl;
@@ -335,7 +322,6 @@ void add_to_composite(std::istringstream& arg_stream, Scene& new_scene) {
 		auto child_shape = new_scene.find_shape(child_name);
 		composite->add_child(child_shape);
 		new_scene.root->remove_child(child_name);
-		std::cout << "added " << child_name << "\n";
 	}
 	composite->build_octree();
 }
@@ -351,15 +337,15 @@ void add_to_scene(std::istringstream& arg_stream, Scene& new_scene, std::string 
 	if ("shape" == token) {
 		arg_stream >> token;
 		if ("box" == token) {
-			new_scene.root->add_child(load_box(arg_stream, new_scene.materials));
+			new_scene.root->add_child(load_box(arg_stream, new_scene));
 		} else if ("sphere" == token) {
-			new_scene.root->add_child(load_sphere(arg_stream, new_scene.materials));
+			new_scene.root->add_child(load_sphere(arg_stream, new_scene));
 		} else if ("triangle" == token) {
-			new_scene.root->add_child(load_triangle(arg_stream, new_scene.materials));
+			new_scene.root->add_child(load_triangle(arg_stream, new_scene));
 		} else if ("obj" == token) {
 			std::string obj_file_name;
 			arg_stream >> obj_file_name;
-			new_scene.root->add_child(load_obj(resource_directory, obj_file_name));
+			new_scene.root->add_child(load_obj(resource_directory, obj_file_name, new_scene));
 		} else if ("composite" == token) {
 			create_composite(arg_stream, new_scene);
 		}
@@ -396,27 +382,29 @@ Scene load_scene(
 		std::string const& output_directory) {
 
 	Scene new_scene{};
-	std::ifstream input_sdf_file(file_path);
+	std::ifstream sdf_file_stream(file_path);
 	std::string line_buffer;
 
 	//writes sdf file line by line into line_buffer
-	while (std::getline(input_sdf_file, line_buffer)) {
-		std::istringstream words_stream(line_buffer);
-		//streams words of each line
-		std::string token;
-		words_stream >> token;
+	while (std::getline(sdf_file_stream, line_buffer)) {
+		std::istringstream arg_stream(line_buffer);
 
-		if ("#" == token) {
+		if ('#' == arg_stream.peek()) {
 			continue;
 		}
+		//streams words of each line
+		std::string token;
+		arg_stream >> token;
+
 		if ("define" == token) {
-			add_to_scene(words_stream, new_scene, resource_directory);
+			add_to_scene(arg_stream, new_scene, resource_directory);
 		} else if ("transform" == token) {
-			load_transformation(words_stream, new_scene);
+			load_transformation(arg_stream, new_scene);
 		} else if ("render" == token) {
-			render(words_stream, new_scene, output_directory);
+			new_scene.root->build_octree();
+			render(arg_stream, new_scene, output_directory);
 		} else if ("add" == token) {
-			add_to_composite(words_stream, new_scene);
+			add_to_composite(arg_stream, new_scene);
 		}
 	}
 	new_scene.root->build_octree();

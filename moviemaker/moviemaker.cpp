@@ -4,8 +4,8 @@
 * Funktion, die in einem Zeitintervall die Transformationen f�r Objekte berechnet und z.B. in einer map speichert
 * Klasse zur Darstellung von Superhot
 * Funktion dieser Klasse zur Bewegung von Superhot (Muss string mit Positionen zur�ckgeben)
-* Ostream Funktion f�r die Datenstrukturen zum SDF schreiben
-* Kamerabewegung und Position ben�tigt evtl auch eigene Datenstruktur
+* Ostream Funktion für die Datenstrukturen zum SDF schreiben
+* Kamerabewegung und Position benütigt evtl auch eigene Datenstruktur
 */
 
 #include <iostream>
@@ -87,10 +87,48 @@ std::string get_current_cam(Cam_Animation const& cam, float current_time) {
 	return current_transform.str();
 }
 
+struct BodyAnimation {
+	Pose pose0;
+	Pose pose1;
+	Interval time;
+};
+
+Pose read_pose(std::string const& file_path) {
+	Pose pose{};
+	std::ifstream pose_file_stream(file_path);
+	std::string line_buffer;
+
+	while (std::getline(pose_file_stream, line_buffer)) {
+		std::string name;
+		float pitch;
+		float yaw;
+		float roll;
+
+		std::istringstream arg_stream(line_buffer);
+		arg_stream >> name;
+		arg_stream >> pitch >> yaw >> roll;
+		pose.rotations.insert({name, glm::vec3{pitch, yaw, roll}});
+	}
+	return pose;
+}
+void apply_curren_pose(Body& body, BodyAnimation const& animation, float current_time) {
+	float progress = (current_time - animation.time.start_time) / animation.time.duration;
+	Pose current_pose{};
+
+	for (auto const& entry : animation.pose0.rotations) {
+		glm::vec3 rot0 = entry.second;
+		glm::vec3 rot1 = animation.pose1.rotations.find(entry.first)->second;
+		glm::vec3 current_rotation = (1 - progress) * rot0 + progress * rot1;
+		current_pose.rotations.insert({entry.first, current_rotation});
+	}
+	body.apply_pose(current_pose);
+}
+
 void write_to_sdf(
 		std::map<std::string, Interval> const& object_map,
 		std::vector<Animation> const& animations,
 		std::vector<Cam_Animation> const& cam_animations,
+		std::vector<BodyAnimation> const& body_animations,
 		unsigned fps,
 		float movie_duration,
 		std::string const& directory,
@@ -101,24 +139,7 @@ void write_to_sdf(
 
 	float frame_duration = 1.0f / fps;
 	unsigned total_frame_count = movie_duration * fps;
-
-	auto body = std::make_shared<BodyPart>(BodyPart{"chest"});
-	auto arm_left = std::make_shared<BodyPart>(BodyPart{"arm_left"});
-	auto arm_right = std::make_shared<BodyPart>(BodyPart{"arm_right"});
-	auto hand_left = std::make_shared<BodyPart>(BodyPart{"hand_left"});
-	auto hand_right = std::make_shared<BodyPart>(BodyPart{"hand_right"});
-	auto leg_left = std::make_shared<BodyPart>(BodyPart{"leg_left"});
-	auto leg_right = std::make_shared<BodyPart>(BodyPart{"leg_right"});
-	auto foot_left = std::make_shared<BodyPart>(BodyPart{"foot_left"});
-	auto foot_right = std::make_shared<BodyPart>(BodyPart{"foot_right"});
-	body->children.emplace_back(arm_left);
-	body->children.emplace_back(arm_right);
-	body->children.emplace_back(leg_left);
-	body->children.emplace_back(leg_right);
-	arm_left->children.emplace_back(hand_left);
-	arm_right->children.emplace_back(hand_right);
-	leg_left->children.emplace_back(foot_left);
-	leg_right->children.emplace_back(foot_right);
+						Body body{};
 
 	for (int frame = 0; frame < total_frame_count; ++frame) {
 		float current_time = frame * frame_duration;
@@ -127,7 +148,13 @@ void write_to_sdf(
 		file_name << "frame" << std::setfill('0') << std::setw(4) << frame+1;
 		std::ofstream sdf_file(directory + "/" + file_name.str() + ".sdf");
 
-		sdf_file << "#body pose" << std::endl << *body;
+		for (auto const& animation : body_animations) {
+			if (animation.time.is_active(current_time)) {
+				apply_curren_pose(body, animation, current_time);
+				sdf_file << body;
+			}
+		}
+		sdf_file << std::endl;
 
 		for (auto const& object : object_map) {
 			if (object.second.is_active(current_time)) {
@@ -153,21 +180,20 @@ void write_to_sdf(
 	};
 }
 
-void generate_movie() {
-	float movie_duration = 2.0f;
+void generate_movie(std::string const& res_dir) {
+	float movie_duration = 5.0f;
 	unsigned fps = 24;
 	std::string directory = "./movie/files";
 
 	std::map<std::string, Interval> object_map;
 	std::vector<Animation> animations;
 	std::vector<Cam_Animation> cam_animations;
+	std::vector<BodyAnimation> body_animations;
+
 
 	// lights
-	object_map.insert({ "define ambient amb 1 1 1 1", {0, 2} });
-	object_map.insert({ "define light bulb 0 9 0 .2 .2 .2 32", {0, 2} });
 
 	// materials
-	object_map.insert({"define material white 1 1 1 1 1 1 0 0 0 1 0 1 1", {0, 2}});
 	object_map.insert({"define material yellow 1 1 0 1 1 0 1 1 0 50 1 1 1", {0, 2}});
 
 	// shapes
@@ -175,7 +201,6 @@ void generate_movie() {
 	object_map.insert({"define shape box b1 -1 -1 -1 1 1 1 white", {0, 2}});
 
 	// camera
-	object_map.insert({"define camera eye 60 0 0 20 0 0 -1 0 1 0", {0, 0.1}});
 	cam_animations.emplace_back(Cam_Animation{ { 0.1, 2 }, { 0, 0, 20 }, { 0, 0, -1 }, { 0, 1, 0 }, { 5, 0, 20 }, { 0, 0, -1 }, { 0, 1, 0 } });
 
 	// translations
@@ -188,10 +213,33 @@ void generate_movie() {
 	animations.emplace_back(Animation{"b1", "scale", {0, 1}, 1, 1, 1, 2, 3, 1});
 
 
+	object_map.insert({"define material white 1 1 1 1 1 1 0 0 0 1 0 1 1", {0, 5}});
+	object_map.insert({"define material obsidian 0 0 0 .01 .01 .01 1 1 1 50 .1 1 1", {0, 5}});
+	object_map.insert({"define shape box box -300 -93 -300 300 -92.9 300 obsidian", {0, 5}});
+	object_map.insert({"define ambient amb 1 1 1 1", {0, 5}});
+	object_map.insert({"define light bulb 50 100 500 .2 .2 .2 32", {0, 5}});
+	object_map.insert({"define camera eye 60 0 0 400 0 0 -1 0 1 0", {0, 5}});
+
+	animations.emplace_back(Animation{"chest", "rotate", {0, 5}, 0, 90, 0, 0, 90, 0});
+
+	std::vector<Pose> walk;
+	walk.reserve(8);
+
+	for (int i = 0; i < 8; ++i) {
+		walk.emplace_back(read_pose(res_dir + "/poses/pose0" + std::to_string(i+1) + ".txt"));
+	}
+	float walk_speed = 0.3;
+	int pose_count = static_cast<int> (movie_duration / walk_speed);
+	body_animations.reserve(pose_count);
+
+	for (unsigned i = 0; i < pose_count; ++i) {
+		body_animations.emplace_back(BodyAnimation{walk[i % walk.size()], walk[(i + 1) % walk.size()], {i * walk_speed, walk_speed}});
+	}
 	write_to_sdf(
 			object_map,
 			animations,
 			cam_animations,
+			body_animations,
 			fps,
 			movie_duration,
 			directory,
@@ -201,30 +249,26 @@ void generate_movie() {
 }
 
 void render_movie(
+		unsigned start_frame,
+		unsigned end_frame,
 		std::string const& src_dir,
 		std::string const& res_dir,
 		std::string const& out_dir) {
 
-//	for (auto const& entry : std::filesystem::directory_iterator(src_dir)) {
-	for (int i = 0; i < 48; ++i) {
-//		std::string name = entry.path().filename().string();
 
+
+	for (int i = start_frame; i < end_frame; ++i) {
 		std::stringstream file_name;
 		file_name << "frame" << std::setfill('0') << std::setw(4) << i+1 << ".sdf";
-		std::string name = file_name.str();
-
-		//checks that file has sdf extension
-		if(name.substr(name.find_last_of(".") + 1) != "sdf") {
-			continue;
-		}
-
-		//loads and renders scene
-		load_scene(src_dir + "/" + name, res_dir, out_dir);
+		load_scene(src_dir + "/" + file_name.str(), res_dir, out_dir);
+		std::cout << file_name.str() << "\n";
 	}
 }
 
 int main(int argc, char** argv) {
-	generate_movie();
-	render_movie("./movie/files", "./movie/obj", "./movie/images");
+	std::cout << "generate sdfs\n";
+	generate_movie("./movie/obj");
+	std::cout << "render sdfs";
+	render_movie(0, 120, "./movie/files", "./movie/obj", "./movie/images");
 	return 0;
 }
