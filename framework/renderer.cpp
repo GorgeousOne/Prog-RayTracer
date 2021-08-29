@@ -80,7 +80,8 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 
 void Renderer::thread_function(Scene const& scene, float img_plane_dist, glm::mat4 const& trans_mat) {
 	//continuously picks pixels to render
-	float AA_unit = 1.0f / aa_steps_;
+	float aa_unit = 1.0f / aa_steps_;
+
 	while (true) {
 		unsigned current_pixel = pixel_index_++;
 		unsigned x = current_pixel % width_;
@@ -90,15 +91,16 @@ void Renderer::thread_function(Scene const& scene, float img_plane_dist, glm::ma
 			return;
 		}
 		Pixel pixel{ x, y };
+
 		for (int x_count = 0; x_count < aa_steps_; x_count++) {
 			for (int y_count = 0; y_count < aa_steps_; y_count++) {
 				glm::vec3 pixel_pos = glm::vec3{
-					x + x_count * AA_unit - (width_ * 0.5f),
-					y + y_count * AA_unit - (height_ * 0.5f),
-					-img_plane_dist };
+						x + x_count * aa_unit - (width_ * 0.5f),
+						y + y_count * aa_unit - (height_ * 0.5f),
+						-img_plane_dist };
 
 				glm::vec4 trans_ray_dir = trans_mat * glm::vec4{ glm::normalize(pixel_pos), 0 };
-				Ray ray{ glm::vec3{trans_mat[3]}, glm::vec3{trans_ray_dir} };
+				Ray ray{ glm::vec3{trans_mat[3]}, glm::vec3{trans_ray_dir}};
 				pixel.color += tone_map_color(trace_color(ray, scene, 0));
 			}
 		}

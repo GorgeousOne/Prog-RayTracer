@@ -124,7 +124,8 @@ void Composite::remove_child(std::string const& name) {
 }
 
 std::shared_ptr<Shape> Composite::find_child(std::string const& name) {
-	return children_.find(name)->second;
+	auto it = children_.find(name);
+	return children_.end() == it ? nullptr : it->second;
 }
 
 unsigned Composite::child_count() {
@@ -132,8 +133,8 @@ unsigned Composite::child_count() {
 }
 
 void Composite::build_octree() {
-//	bounds_ = std::make_shared<Box>(min(glm::mat4(1)), max(glm::mat4(1)));
-	bounds_ = std::make_shared<Box>(min(glm::mat4(1)), max(glm::mat4(1)), "bounds", std::make_shared<Material>());
+	bounds_ = std::make_shared<Box>(min(glm::mat4(1)), max(glm::mat4(1)));
+//	bounds_ = std::make_shared<Box>(min(glm::mat4(1)), max(glm::mat4(1)), "bounds", std::make_shared<Material>());
 
 	if (children_.size() <= 64) {
 		return;
