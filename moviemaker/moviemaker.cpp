@@ -127,7 +127,7 @@ void write_to_sdf(
 		file_name << "frame" << std::setfill('0') << std::setw(4) << frame+1;
 		std::ofstream sdf_file(directory + "/" + file_name.str() + ".sdf");
 
-		sdf_file << "#body pose" << std::endl << *body;
+		//sdf_file << "#body pose" << std::endl << *body;
 
 		for (auto const& object : object_map) {
 			if (object.second.is_active(current_time)) {
@@ -154,7 +154,7 @@ void write_to_sdf(
 }
 
 void generate_movie() {
-	float movie_duration = 2.0f;
+	float movie_duration = 8.0f;
 	unsigned fps = 24;
 	std::string directory = "./movie/files";
 
@@ -163,29 +163,36 @@ void generate_movie() {
 	std::vector<Cam_Animation> cam_animations;
 
 	// lights
-	object_map.insert({ "define ambient amb 1 1 1 1", {0, 2} });
-	object_map.insert({ "define light bulb 0 9 0 .2 .2 .2 32", {0, 2} });
+	object_map.insert({ "define ambient amb 1 1 1 2", {0, 8} });
+	object_map.insert({ "define light bulb 0 9 0 .2 .2 .2 32", {0, 8} });
 
-	// materials
-	object_map.insert({"define material white 1 1 1 1 1 1 0 0 0 1 0 1 1", {0, 2}});
-	object_map.insert({"define material yellow 1 1 0 1 1 0 1 1 0 50 1 1 1", {0, 2}});
+	// materials: name, ka, kd, ks, m, glossiness, opacity, ior
+	object_map.insert({"define material white 1 1 1 1 1 1 0 0 0 1 0 1 1", {0, 8}});
+	object_map.insert({"define material blue_glass .8 .8 1 .6 .6 1 .6 .6 1 500 0.028 0.1 1.4", {0, 8}});
+	object_map.insert({"define material green_mirror .8 1 .8 .6 1 .6 .6 1 .6 500 1 1 1", {0, 8}});
 
 	// shapes
-	object_map.insert({"define shape sphere s1 5 0 0 1 white", {0, 2}});
-	object_map.insert({"define shape box b1 -1 -1 -1 1 1 1 white", {0, 2}});
+	object_map.insert({ "define shape obj superhot", {0, 8} });
+	object_map.insert({"define shape sphere s1 0 0 0 75 blue_glass", {0, 5}});
+	object_map.insert({"define shape box b1 -30 -30 -30 30 30 30 green_mirror", {0, 5}});
 
 	// camera
-	object_map.insert({"define camera eye 60 0 0 20 0 0 -1 0 1 0", {0, 0.1}});
-	cam_animations.emplace_back(Cam_Animation{ { 0.1, 2 }, { 0, 0, 20 }, { 0, 0, -1 }, { 0, 1, 0 }, { 5, 0, 20 }, { 0, 0, -1 }, { 0, 1, 0 } });
+	object_map.insert({"define camera eye 60 0 0 600 0 0 -1 0 1 0", {0, 0.1}});
+	cam_animations.emplace_back(Cam_Animation{ { 0.1, 5 }, { 0, 0, 600 }, { 0, 0, -1 }, { 0, 1, 0 }, { 600, 0, 600 }, { 0, 0, -1 }, { 0, 1, 0 } });
+	cam_animations.emplace_back(Cam_Animation{ { 5, 8 }, { 600, 0, 600 }, { 0, 0, -1 }, { 0, 1, 0 }, { 600, 0, 0 }, { 1, 0, 0 }, { 0, 1, 0 } });
 
 	// translations
-	//animations.emplace_back(Animation{"b1", "translate", {0, 2}, 2, -5, 0, 2, 5, 0});
-	//animations.emplace_back(Animation{"s1", "translate", {0, 2}, -2, 5, 0, -2, -5, 0});
+	animations.emplace_back(Animation{ "superhot", "translate", {0, 8}, 0, -75, 0, 960, -75, 0 });
+
+	animations.emplace_back(Animation{"b1", "translate", {0, 5}, 0, 0, -200, 0, 0, -200});
+
+	animations.emplace_back(Animation{"s1", "translate", {0, 5}, 400, 0, 100, 400, 0, 100});
 
 	// rotations
+	animations.emplace_back(Animation{ "superhot", "rotate", {0, 8}, 0, 90, 0, 0, 90, 0 });
 
 	//scalings
-	animations.emplace_back(Animation{"b1", "scale", {0, 1}, 1, 1, 1, 2, 3, 1});
+	animations.emplace_back(Animation{"b1", "scale", {0, 5}, 3, 5, 1, 3, 5, 1});
 
 
 	write_to_sdf(
@@ -206,7 +213,7 @@ void render_movie(
 		std::string const& out_dir) {
 
 //	for (auto const& entry : std::filesystem::directory_iterator(src_dir)) {
-	for (int i = 0; i < 48; ++i) {
+	for (int i = 0; i < 192; ++i) {
 //		std::string name = entry.path().filename().string();
 
 		std::stringstream file_name;

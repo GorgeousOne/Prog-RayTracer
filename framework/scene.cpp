@@ -414,6 +414,7 @@ Scene load_scene(
 		} else if ("transform" == token) {
 			load_transformation(words_stream, new_scene);
 		} else if ("render" == token) {
+			new_scene.root->build_octree();
 			render(words_stream, new_scene, output_directory);
 		} else if ("add" == token) {
 			add_to_composite(words_stream, new_scene);
