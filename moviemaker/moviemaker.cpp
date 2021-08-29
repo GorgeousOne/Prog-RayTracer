@@ -171,7 +171,9 @@ void write_to_sdf(
 		sdf_file << std::endl;
 
 		for (auto const& animation : cam_animations) {
-			sdf_file << get_current_cam(animation, current_time) << std::endl;
+			if (animation.time.is_active(current_time)) {
+				sdf_file << get_current_cam(animation, current_time) << std::endl;
+			}
 		}
 		sdf_file << "render " << file_name.str() << ".ppm " << res_x << " " << res_y  << " " << aa_steps  << " " << ray_bounces << std::endl;
 		sdf_file.close();
@@ -187,6 +189,29 @@ void generate_movie(std::string const& res_dir) {
 	std::vector<Animation> animations;
 	std::vector<Cam_Animation> cam_animations;
 	std::vector<BodyAnimation> body_animations;
+
+
+	// lights
+
+	// materials
+	object_map.insert({"define material yellow 1 1 0 1 1 0 1 1 0 50 1 1 1", {0, 2}});
+
+	// shapes
+	object_map.insert({"define shape sphere s1 5 0 0 1 white", {0, 2}});
+	object_map.insert({"define shape box b1 -1 -1 -1 1 1 1 white", {0, 2}});
+
+	// camera
+	cam_animations.emplace_back(Cam_Animation{ { 0.1, 2 }, { 0, 0, 20 }, { 0, 0, -1 }, { 0, 1, 0 }, { 5, 0, 20 }, { 0, 0, -1 }, { 0, 1, 0 } });
+
+	// translations
+	//animations.emplace_back(Animation{"b1", "translate", {0, 2}, 2, -5, 0, 2, 5, 0});
+	//animations.emplace_back(Animation{"s1", "translate", {0, 2}, -2, 5, 0, -2, -5, 0});
+
+	// rotations
+
+	//scalings
+	animations.emplace_back(Animation{"b1", "scale", {0, 1}, 1, 1, 1, 2, 3, 1});
+
 
 	object_map.insert({"define material white 1 1 1 1 1 1 0 0 0 1 0 1 1", {0, 5}});
 	object_map.insert({"define material obsidian 0 0 0 .01 .01 .01 1 1 1 50 .1 1 1", {0, 5}});
@@ -229,6 +254,8 @@ void render_movie(
 		std::string const& src_dir,
 		std::string const& res_dir,
 		std::string const& out_dir) {
+
+
 
 	for (int i = start_frame; i < end_frame; ++i) {
 		std::stringstream file_name;
