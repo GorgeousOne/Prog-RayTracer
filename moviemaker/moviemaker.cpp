@@ -73,7 +73,6 @@ void write_to_sdf(
 		sdf_file << "render " << file_name.str() << ".ppm " << res_x << " " << res_y  << " " << aa_steps  << " " << ray_bounces << std::endl;
 		sdf_file.close();
 	};
-	std::cout << out_directory + "/" + "whateversdf";
 }
 
 void generate_movie(
@@ -127,8 +126,8 @@ void generate_movie(
 	for (unsigned i = 0; i < pose_count; ++i) {
 		body_animations.emplace_back(BodyAnimation{walk[i % walk.size()], walk[(i + 1) % walk.size()], {i * walk_speed, walk_speed}});
 	}
-	animations.emplace_back(Animation{"chest", "translate", {0, movie_duration}, 0, 100, 0, velocity * movie_duration, 100, 0});
-	animations.emplace_back(Animation{"chest", "rotate", {0, movie_duration}, 0, 90, 0, 0, 90, 0});
+	animations.emplace_back(Animation{"body", "translate", {0, movie_duration}, 0, 100, 0, velocity * movie_duration, 100, 0});
+	animations.emplace_back(Animation{"body", "rotate", {0, movie_duration}, 0, 90, 0, 0, 90, 0});
 	cam_animations.emplace_back(CamAnimation{{0, movie_duration},
 											 {0, 100, 500}, {0, 0, -1}, {0, 1, 0},
 											 {velocity * movie_duration, 100, 500}});
