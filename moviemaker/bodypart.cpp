@@ -71,6 +71,7 @@ void Body::apply_pose(Pose const& pose) {
 
 std::ostream& Body::print(std::ostream& os) const {
 	os << *find_part("chest");
+	os << "define shape composite body chest" << std::endl;
 	return os;
 }
 
