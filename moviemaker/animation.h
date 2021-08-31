@@ -4,7 +4,15 @@
 #include <sstream>
 #include <fstream>
 #include <glm/glm.hpp>
+#include <functional>
 #include "bodypart.h"
+#define PI 3.14159265f
+
+float ease_linear(float percent);
+
+float ease_sin_in(float percent);
+
+float ease_cos_out(float percent);
 
 struct Interval {
 	float start_time = 0.0f;
@@ -19,22 +27,17 @@ struct Animation {
 	std::string name = "undefined";
 	std::string type = "translate";
 	Interval time{};
-	float start1 = 0;
-	float start2 = 0;
-	float start3 = 0;
-	float end1 = start1;
-	float end2 = start2;
-	float end3 = start3;
+	glm::vec3 start{};
+	glm::vec3 end = start;
 };
 
 struct CamAnimation {
 	Interval time{};
 	glm::vec3 pos_start{};
 	glm::vec3 dir_start{};
-	glm::vec3 up_start{};
 	glm::vec3 pos_end = pos_start;
 	glm::vec3 dir_end = dir_start;
-	glm::vec3 up_end = up_start;
+	std::function<float(float)> ease = ease_linear;
 	float fov = 60.0f;
 };
 

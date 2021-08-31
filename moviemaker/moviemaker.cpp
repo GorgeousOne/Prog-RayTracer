@@ -71,6 +71,7 @@ void write_to_sdf(
 		for (auto const& animation : cam_animations) {
 			if (animation.time.is_active(current_time)) {
 				sdf_file << get_current_cam(animation, current_time) << std::endl;
+				break;
 			}
 		}
 		sdf_file << "render " << file_name.str() << ".ppm " << res_x << " " << res_y  << " " << aa_steps  << " " << ray_bounces << std::endl;
@@ -81,7 +82,7 @@ void write_to_sdf(
 void generate_movie(
 		std::string const& res_dir,
 		std::string const& out_dir) {
-	float movie_duration = 10.0f;
+	float movie_duration = 15.0f;
 	unsigned fps = 20;
 
 	std::map<std::string, Interval> object_map;
@@ -90,7 +91,7 @@ void generate_movie(
 	std::vector<BodyAnimation> body_animations;
 
 	float walk_speed = 0.3f;
-	float velocity =70;
+	float velocity = 60;
 	int pose_count = ceilf(movie_duration / walk_speed);
 
 	//walking
@@ -106,40 +107,54 @@ void generate_movie(
 			walk[(i + 1) % walk.size()],
 			{i * walk_speed, walk_speed}});
 	}
-	animations.emplace_back(Animation{"body", "translate", {0, movie_duration}, 0, -100, 0, velocity * movie_duration, -100, 0});
-	animations.emplace_back(Animation{"body", "rotate", {0, movie_duration}, 0, 90, 0, 0, 90, 0});
+	animations.emplace_back(Animation{"body", "translate", {0, movie_duration}, {0, 95, 0}, {velocity * movie_duration, 95, 0}});
+	animations.emplace_back(Animation{"body", "rotate", {0, movie_duration}, {0, 90, 0}});
 
 	// lights
 	object_map.insert({"define ambient amb 1 1 1 1", {0, movie_duration}});
-	object_map.insert({"define light bulb 50 100 500 .2 .2 .2 32", {0, movie_duration}});
+	object_map.insert({"define light bulb -20000 100000 30000 1 1 1 6", {0, movie_duration}});
 
 	// materials: name, ka, kd, ks, m, glossiness, opacity, ior
-	object_map.insert({"define material obsidian 0 0 0 .01 .01 .01 1 1 1 50 .1 1 1", {0, movie_duration}});
-	object_map.insert({"define material blue_glass .8 .8 1 .6 .6 1 .6 .6 1 500 0.028 0.1 1.4", {0, movie_duration}});
-	object_map.insert({"define material green_mirror .8 1 .8 .6 1 .6 .6 1 .6 500 1 1 1", {0, movie_duration}});
+	object_map.insert({"define material blue_glass .8 .8 1 .6 .6 1 .6 .6 1 100 0.028 0.1 1.4", {0, movie_duration}});
+	object_map.insert({"define material green_mirror .8 1 .8 .6 1 .6 .6 1 .6 100 1 1 1", {0, movie_duration}});
 	object_map.insert({"define material white 1 1 1 1 1 1 0 0 0 1 0 1 1", {0, movie_duration}});
-	object_map.insert({"define material yellow 1 1 0 1 1 0 1 1 0 50 1 1 1", {0, movie_duration}});
+	object_map.insert({"define material white_glaze 1 1 1 1 1 1 1 1 1 500 .1 1 1", {0, movie_duration}});
 
 	// shapes
-	object_map.insert({"define shape sphere s1 0 0 0 75 blue_glass", {0, movie_duration}});
-	object_map.insert({"define shape box b1 -30 -30 -30 30 30 30 green_mirror", {0, movie_duration}});
-//	object_map.insert({ "define shape obj superhot", {0, movie_duration}});
+	object_map.insert({"define shape box floor 0 0 0 10000 1000 1000 white", {0, movie_duration}});
+
+	object_map.insert({"define shape box wb1 -15 0 -15 15 30 15 white", {0, movie_duration}});
+	object_map.insert({"define shape box wb2 -25 -25 -25 25 80 25 white", {0, movie_duration}});
+	object_map.insert({"define shape box wb3 -10 -10 -10 10 60 10 white", {0, movie_duration}});
+
+	object_map.insert({"define shape sphere ws1 0 10 0 10 white_glaze", {0, movie_duration}});
+	object_map.insert({"define shape sphere ws2 0 35 0 35 white_glaze", {0, movie_duration}});
+	object_map.insert({"define shape sphere ws3 0 20 0 20 white_glaze", {0, movie_duration}});
 
 	// camera
-	object_map.insert({"define camera eye 60 0 0 600 0 0 -1 0 1 0", {0, 0.1}});
-	cam_animations.emplace_back(CamAnimation{ { 0.1, 5 }, { 0, 0, 600 }, { 0, 0, -1 }, { 0, 1, 0 }, { 5*velocity, 0, 600 }, { 0, 0, -1 }, { 0, 1, 0 } });
-	cam_animations.emplace_back(CamAnimation{ { 5, 8 }, { 5*velocity, 0, 600 }, { 0, 0, -1 }, { 0, 1, 0 }, { 5*velocity, 0, 0 }, { 1, 0, 0 }});
+	cam_animations.emplace_back(CamAnimation{{0, 3}, {0, 50, 300}, {0, 0, -1}, {3*velocity, 130, 600}, {0, 0, -1}, ease_sin_in});
+	cam_animations.emplace_back(CamAnimation{{3, 12}, {3*velocity, 130, 600}, {0, 0, -1}, {15*velocity, 130, 600}});
+//	cam_animations.emplace_back(CamAnimation{{5, 5}, {5*velocity, 130, 600}, {0, 0, -1}, {0, 1, 0}, {5*velocity, 130, 0}, {1, 0, 0}});
+//	cam_animations.emplace_back(CamAnimation{{10, 5}, {5*velocity, 130, 0}, {1, 0, 0}, {0, 1, 0}, {15*velocity, 130, -600}, {0, 0, 1}});
 
 	// translations
-//	animations.emplace_back(Animation{ "superhot", "translate", {0, 8}, 0, -75, 0, 960, -75, 0 });
-	animations.emplace_back(Animation{"b1", "translate", {0, 5}, 0, 0, -200, 0, 0, -200});
-	animations.emplace_back(Animation{"s1", "translate", {0, 5}, 400, 0, 100, 400, 0, 100});
+	animations.emplace_back(Animation{"floor", "translate", {0, movie_duration}, {-1000, -1000, -800}});
+
+	animations.emplace_back(Animation{"wb1", "translate", {0, movie_duration}, {380, 0, -100}});
+	animations.emplace_back(Animation{"wb2", "translate", {0, movie_duration}, {450, 0, -100}});
+	animations.emplace_back(Animation{"wb3", "translate", {0, movie_duration}, {500, 0, -100}});
+
+	animations.emplace_back(Animation{"ws1", "translate", {0, movie_duration}, {700, 0, 120}});
+	animations.emplace_back(Animation{"ws2", "translate", {0, movie_duration}, {750, 0, 100}});
+	animations.emplace_back(Animation{"ws3", "translate", {0, movie_duration}, {800, 0, 130}});
+
+	animations.emplace_back(Animation{"wb1", "rotate", {0, movie_duration}, {0, 35, 0}});
+	animations.emplace_back(Animation{"wb2", "rotate", {0, movie_duration}, {0, -15, 10}});
+	animations.emplace_back(Animation{"wb3", "rotate", {0, movie_duration}, {0, 10, -5}});
 
 	// rotations
-//	animations.emplace_back(Animation{ "superhot", "rotate", {0, 8}, 0, 90, 0, 0, 90, 0 });
 
 	//scalings
-	animations.emplace_back(Animation{"b1", "scale", {0, 5}, 3, 5, 1, 3, 5, 1});
 
 	write_to_sdf(
 			object_map,
@@ -149,8 +164,8 @@ void generate_movie(
 			fps,
 			movie_duration,
 			out_dir,
-			720, 480,
-			2,
+			854, 480, 1,
+//			1280, 720, 2,
 			5);
 }
 
@@ -160,7 +175,7 @@ void render_movie(
 		std::string const& src_dir,
 		std::string const& res_dir,
 		std::string const& out_dir) {
-	
+
 	for (int i = start_frame; i < end_frame; ++i) {
 		std::stringstream file_name;
 		file_name << "frame" << std::setfill('0') << std::setw(4) << i+1 << ".sdf";
@@ -174,6 +189,6 @@ int main(int argc, char** argv) {
 	generate_movie("./movie/obj", "./movie/files");
 
 	std::cout << "render sdfs";
-	render_movie(0, 200, "./movie/files", "./movie/obj", "./movie/images");
+	render_movie(0, 300, "./movie/files", "./movie/obj", "./movie/images");
 	return 0;
 }
