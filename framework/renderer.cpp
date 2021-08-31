@@ -60,7 +60,7 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 	std::vector<std::thread> threads;
 	threads.resize(core_count);
 
-	auto start = std::chrono::steady_clock::now();
+//	auto start = std::chrono::steady_clock::now();
 	pixel_index_ = 0;
 
 	//starts parallel threads all doing the same task
@@ -71,9 +71,9 @@ void Renderer::render(Scene const& scene, Camera const& cam) {
 	for (std::thread& t : threads) {
 		t.join();
 	}
-	auto end = std::chrono::steady_clock::now();
-	std::chrono::duration<double> elapsed_seconds = end-start;
-	std::cout << elapsed_seconds.count() << "s rendering\n";
+//	auto end = std::chrono::steady_clock::now();
+//	std::chrono::duration<double> elapsed_seconds = end-start;
+//	std::cout << elapsed_seconds.count() << "s rendering\n";
 
 	ppm_.save(filename_);
 }

@@ -8,11 +8,11 @@
 #include "bodypart.h"
 #define PI 3.14159265f
 
-float ease_linear(float percent);
+float ease_linear(float percent, float exp);
 
-float ease_sin_in(float percent);
+float ease_cos_in(float percent, float exp);
 
-float ease_cos_out(float percent);
+float ease_cos_out(float percent, float exp);
 
 struct Interval {
 	float start_time = 0.0f;
@@ -37,7 +37,8 @@ struct CamAnimation {
 	glm::vec3 dir_start{};
 	glm::vec3 pos_end = pos_start;
 	glm::vec3 dir_end = dir_start;
-	std::function<float(float)> ease = ease_linear;
+	std::function<float(float, float)> ease = ease_linear;
+	float ease_exp = 1;
 	float fov = 60.0f;
 };
 

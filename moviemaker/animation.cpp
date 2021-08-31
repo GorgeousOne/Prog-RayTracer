@@ -1,16 +1,16 @@
 #include "animation.h"
 #define PI 3.14159265f
 
-float ease_linear(float percent) {
+float ease_linear(float percent, float exp) {
 	return percent;
 };
 
-float ease_sin_in(float percent) {
-	return sinf(percent * PI * 0.5f);
+float ease_cos_in(float percent, float exp) {
+	return powf(1.0f - cosf(percent * PI * 0.5f), exp);
 };
 
-float ease_cos_out(float percent) {
-	return cosf(percent * PI * 0.5f);
+float ease_cos_out(float percent, float exp) {
+	return powf(cosf(percent * PI * 0.5f), exp);
 };
 
 std::string get_current_transform(Animation const& animation, float current_time) {
@@ -27,7 +27,7 @@ std::string get_current_transform(Animation const& animation, float current_time
 
 std::string get_current_cam(CamAnimation const& animation, float current_time) {
 	float progress = (current_time - animation.time.start_time) / animation.time.duration;
-	progress = animation.ease(progress);
+	progress = animation.ease(progress, animation.ease_exp);
 
 	glm::vec3 position = (animation.pos_end - animation.pos_start) * progress;
 	glm::vec3 direction = (animation.dir_end - animation.dir_start) * progress;

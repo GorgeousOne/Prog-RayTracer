@@ -33,7 +33,7 @@ void write_to_sdf(
 
 	float frame_duration = 1.0f / fps;
 	unsigned total_frame_count = movie_duration * fps;
-						Body body{};
+	Body body{};
 
 	for (int frame = 0; frame < total_frame_count; ++frame) {
 		float current_time = frame * frame_duration;
@@ -82,7 +82,7 @@ void write_to_sdf(
 void generate_movie(
 		std::string const& res_dir,
 		std::string const& out_dir) {
-	float movie_duration = 15.0f;
+	float movie_duration = 20;
 	unsigned fps = 20;
 
 	std::map<std::string, Interval> object_map;
@@ -90,8 +90,8 @@ void generate_movie(
 	std::vector<CamAnimation> cam_animations;
 	std::vector<BodyAnimation> body_animations;
 
-	float walk_speed = 0.3f;
-	float velocity = 60;
+	float velocity = 80;
+	float walk_speed = 18 / velocity;
 	int pose_count = ceilf(movie_duration / walk_speed);
 
 	//walking
@@ -115,44 +115,63 @@ void generate_movie(
 	object_map.insert({"define light bulb -20000 100000 30000 1 1 1 6", {0, movie_duration}});
 
 	// materials: name, ka, kd, ks, m, glossiness, opacity, ior
-	object_map.insert({"define material blue_glass .8 .8 1 .6 .6 1 .6 .6 1 100 0.028 0.1 1.4", {0, movie_duration}});
-	object_map.insert({"define material green_mirror .8 1 .8 .6 1 .6 .6 1 .6 100 1 1 1", {0, movie_duration}});
 	object_map.insert({"define material white 1 1 1 1 1 1 0 0 0 1 0 1 1", {0, movie_duration}});
-	object_map.insert({"define material white_glaze 1 1 1 1 1 1 1 1 1 500 .1 1 1", {0, movie_duration}});
+	object_map.insert({"define material white_glaze 1 1 1 1 1 1 1 1 1 200 .1 1 1", {0, movie_duration}});
+	object_map.insert({"define material silver 1 1 .9 1 1 .9 1 1 .9 200 .5 1 1", {0, movie_duration}});
+	object_map.insert({"define material gold 1 .76 0 1 .76 0 1 .76 0 200 .5 1 1", {0, movie_duration}});
+	object_map.insert({"define material bronze .64 .28 .15 .64 .28 .15 .96 .14 .08 200 .5 1 1", {0, movie_duration}});
+	object_map.insert({"define material lapis .05 0 1 .05 0 1 1 1 1 200 .05 1 1", {0, movie_duration}});
 
+	Interval wb_time{1, 11};
+	Interval ws_time{3, 18};
+	Interval rb_time{6, 16};
 	// shapes
-	object_map.insert({"define shape box floor 0 0 0 10000 1000 1000 white", {0, movie_duration}});
+	object_map.insert({"define shape box floor 0 0 0 10000 1 2000 white", {0, movie_duration}});
 
-	object_map.insert({"define shape box wb1 -15 0 -15 15 30 15 white", {0, movie_duration}});
-	object_map.insert({"define shape box wb2 -25 -25 -25 25 80 25 white", {0, movie_duration}});
-	object_map.insert({"define shape box wb3 -10 -10 -10 10 60 10 white", {0, movie_duration}});
+	object_map.insert({"define shape box wb1 -20 0 -20 20 40 20 white",wb_time});
+	object_map.insert({"define shape box wb2 -30 -30 -30 30 100 30 white", wb_time});
+	object_map.insert({"define shape box wb3 -15 -15 -15 15 70 15 white", wb_time});
 
-	object_map.insert({"define shape sphere ws1 0 10 0 10 white_glaze", {0, movie_duration}});
-	object_map.insert({"define shape sphere ws2 0 35 0 35 white_glaze", {0, movie_duration}});
-	object_map.insert({"define shape sphere ws3 0 20 0 20 white_glaze", {0, movie_duration}});
+	object_map.insert({"define shape sphere ws1 0 10 0 10 white_glaze", ws_time});
+	object_map.insert({"define shape sphere ws2 0 35 0 35 white_glaze", ws_time});
+	object_map.insert({"define shape sphere ws3 0 20 0 20 white_glaze", ws_time});
 
+	object_map.insert({"define shape box rb1 -40 0 -40 40 160 40 silver", rb_time});
+	object_map.insert({"define shape box rb2 -40 0 -40 40 160 40 gold", rb_time});
+	object_map.insert({"define shape box rb3 -40 0 -40 40 160 40 bronze", rb_time});
+	object_map.insert({"define shape box rb4 -40 0 -40 40 160 40 lapis", rb_time});
+
+	float chest_height = 100;
+	float cam_dist = 550;
 	// camera
-	cam_animations.emplace_back(CamAnimation{{0, 3}, {0, 50, 300}, {0, 0, -1}, {3*velocity, 130, 600}, {0, 0, -1}, ease_sin_in});
-	cam_animations.emplace_back(CamAnimation{{3, 12}, {3*velocity, 130, 600}, {0, 0, -1}, {15*velocity, 130, 600}});
-//	cam_animations.emplace_back(CamAnimation{{5, 5}, {5*velocity, 130, 600}, {0, 0, -1}, {0, 1, 0}, {5*velocity, 130, 0}, {1, 0, 0}});
-//	cam_animations.emplace_back(CamAnimation{{10, 5}, {5*velocity, 130, 0}, {1, 0, 0}, {0, 1, 0}, {15*velocity, 130, -600}, {0, 0, 1}});
+	cam_animations.emplace_back(CamAnimation{{0, 3}, {50, 20, 150}, {0, -.1, -1}, {3*velocity, chest_height, cam_dist}, {0, 0, -1}, ease_cos_in, 0.7});
+	cam_animations.emplace_back(CamAnimation{{3, 17}, {3*velocity, chest_height, cam_dist}, {0, 0, -1}, {20*velocity, chest_height, cam_dist}});
 
 	// translations
-	animations.emplace_back(Animation{"floor", "translate", {0, movie_duration}, {-1000, -1000, -800}});
+	animations.emplace_back(Animation{"floor", "translate", {0, movie_duration}, {-1000, -1, -800}});
 
-	animations.emplace_back(Animation{"wb1", "translate", {0, movie_duration}, {380, 0, -100}});
-	animations.emplace_back(Animation{"wb2", "translate", {0, movie_duration}, {450, 0, -100}});
-	animations.emplace_back(Animation{"wb3", "translate", {0, movie_duration}, {500, 0, -100}});
+	animations.emplace_back(Animation{"wb1", "translate", wb_time, {370, 0, -110}});
+	animations.emplace_back(Animation{"wb2", "translate", wb_time, {450, 0, -100}});
+	animations.emplace_back(Animation{"wb3", "translate", wb_time, {510, 0, -110}});
 
-	animations.emplace_back(Animation{"ws1", "translate", {0, movie_duration}, {700, 0, 120}});
-	animations.emplace_back(Animation{"ws2", "translate", {0, movie_duration}, {750, 0, 100}});
-	animations.emplace_back(Animation{"ws3", "translate", {0, movie_duration}, {800, 0, 130}});
+	animations.emplace_back(Animation{"ws1", "translate", ws_time, {600, 0, 60}});
+	animations.emplace_back(Animation{"ws2", "translate", ws_time, {650, 0, 40}});
+	animations.emplace_back(Animation{"ws3", "translate", ws_time, {700, 0, 70}});
 
-	animations.emplace_back(Animation{"wb1", "rotate", {0, movie_duration}, {0, 35, 0}});
-	animations.emplace_back(Animation{"wb2", "rotate", {0, movie_duration}, {0, -15, 10}});
-	animations.emplace_back(Animation{"wb3", "rotate", {0, movie_duration}, {0, 10, -5}});
+	animations.emplace_back(Animation{"rb1", "translate", rb_time, {950, 0, -100}});
+	animations.emplace_back(Animation{"rb2", "translate", rb_time, {1080, 0, -120}});
+	animations.emplace_back(Animation{"rb3", "translate", rb_time, {1210, 0, -110}});
+	animations.emplace_back(Animation{"rb4", "translate", rb_time, {1340, 0, -100}});
 
 	// rotations
+	animations.emplace_back(Animation{"wb1", "rotate", wb_time, {0, 35, 0}});
+	animations.emplace_back(Animation{"wb2", "rotate", wb_time, {0, -15, 15}});
+	animations.emplace_back(Animation{"wb3", "rotate", wb_time, {0, 10, -10}});
+
+	animations.emplace_back(Animation{"rb1", "rotate", rb_time, {0, -40, 0}});
+	animations.emplace_back(Animation{"rb2", "rotate", rb_time, {0, 20, 0}});
+	animations.emplace_back(Animation{"rb3", "rotate", rb_time, {0, 35, 0}});
+	animations.emplace_back(Animation{"rb4", "rotate", rb_time, {0, 25, 0}});
 
 	//scalings
 
@@ -166,7 +185,7 @@ void generate_movie(
 			out_dir,
 			854, 480, 1,
 //			1280, 720, 2,
-			5);
+			3);
 }
 
 void render_movie(
@@ -188,7 +207,7 @@ int main(int argc, char** argv) {
 	std::cout << "generate sdfs\n";
 	generate_movie("./movie/obj", "./movie/files");
 
-	std::cout << "render sdfs";
-	render_movie(0, 300, "./movie/files", "./movie/obj", "./movie/images");
+	std::cout << "render sdfs\n";
+	render_movie(0, 200, "./movie/files", "./movie/obj", "./movie/images");
 	return 0;
 }
