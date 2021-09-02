@@ -9,8 +9,8 @@ float ease_cos_in(float percent, float exp) {
 	return powf(1.0f - cosf(percent * PI * 0.5f), exp);
 };
 
-float ease_cos_out(float percent, float exp) {
-	return powf(cosf(percent * PI * 0.5f), exp);
+float ease_sin_in(float percent, float exp) {
+	return powf(sinf(percent * PI * 0.5f), exp);
 };
 
 std::string get_current_transform(Animation const& animation, float current_time) {

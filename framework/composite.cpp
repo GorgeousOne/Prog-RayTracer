@@ -2,7 +2,7 @@
 #include <iomanip>
 #include "composite.hpp"
 
-#define EPSILON 0.001f
+#define EPSILON 0.1f
 
 Composite::Composite(std::string const &name, std::shared_ptr<Material> material) :
 	Shape(name, material), bounds_{nullptr} {}

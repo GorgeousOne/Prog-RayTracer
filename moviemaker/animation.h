@@ -12,14 +12,14 @@ float ease_linear(float percent, float exp);
 
 float ease_cos_in(float percent, float exp);
 
-float ease_cos_out(float percent, float exp);
+float ease_sin_in(float percent, float exp);
 
 struct Interval {
 	float start_time = 0.0f;
 	float duration = 1.0f;
 
 	bool is_active(float current_time) const {
-		return current_time >= start_time - .01f && current_time < start_time + duration + .01f;
+		return current_time >= start_time && current_time < start_time + duration;
 	}
 };
 

@@ -12,7 +12,7 @@
 #include <glm/gtx/string_cast.hpp>
 #include "renderer.hpp"
 
-#define EPSILON 0.001f
+#define EPSILON 0.1f
 
 Renderer::Renderer(unsigned w, unsigned h, std::string const& file_name, unsigned aa_steps, unsigned max_ray_bounces):
 		width_(w),

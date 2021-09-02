@@ -179,15 +179,27 @@ void add_obj_materials(std::string const& file_path, Scene& scene) {
 			current_mat = std::make_shared<Material>();
 			arg_stream >> current_mat->name;
 			scene.materials.insert({current_mat->name, current_mat});
-
+		//ambient
 		} else if ("Ka" == token) {
 			current_mat->ka = load_vec(arg_stream);
+		//diffuse
 		} else if ("Kd" == token) {
 			current_mat->kd = load_vec(arg_stream);
+		//specular
 		} else if ("Ks" == token) {
 			current_mat->ks = load_vec(arg_stream);
+		//specularity
 		} else if ("Ns" == token) {
 			arg_stream >> current_mat->m;
+		//opacity
+		} else if ("d" == token) {
+			arg_stream >> current_mat->opacity;
+		//index of refraction and therefore reflectance
+		} else if ("Ni" == token) {
+			float ior;
+			arg_stream >> ior;
+			current_mat->ior = ior;
+			current_mat->glossy = powf((1 - ior) / (1 + ior), 2);
 		}
 	}
 }
