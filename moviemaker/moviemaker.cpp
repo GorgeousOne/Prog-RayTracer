@@ -73,7 +73,7 @@ void write_to_sdf(
 void generate_movie(
 		std::string const& res_dir,
 		std::string const& out_dir) {
-	float movie_duration = 35;
+	float movie_duration = 36;
 	unsigned fps = 20;
 
 	std::map<std::string, Interval> object_map;
@@ -112,11 +112,17 @@ void generate_movie(
 				{29 + i * halt_speed, halt_speed}});
 	}
 	//stand still
-	body_animations.emplace_back(BodyAnimation{halt[4], halt[4], {30, 5}});
+	body_animations.emplace_back(BodyAnimation{halt[4], halt[4], {30, 6}});
 
-	animations.emplace_back(Animation{"body", "translate", {0, 29}, {0, 95, 0}, {29 * velocity, 95, 0}});
-	animations.emplace_back(Animation{"body", "translate", {29, 1}, {29 * velocity, 95, 0}, {29.25 * velocity, 95, 0}});
-	animations.emplace_back(Animation{"body", "translate", {30, 5}, {29.25 * velocity, 95, 0}});
+	//walk movement
+	animations.emplace_back(Animation{"body", "translate", {0, 29}, {0, 0, 0}, {29 * velocity, 0, 0}});
+	//halting movement
+	animations.emplace_back(Animation{"body", "translate", {29, 1}, {29 * velocity, 0, 0}, {29.25 * velocity, 0, 0}});
+	//standing
+	animations.emplace_back(Animation{"body", "translate", {30, 2}, {29.25 * velocity, 0, 0}});
+	//standing closer to the diamond
+	animations.emplace_back(Animation{"body", "translate", {32, 4}, {2520 - 100, 0, 0}});
+	//continuous sidewards facing
 	animations.emplace_back(Animation{"body", "rotate", {0, movie_duration}, {0, 90, 0}});
 
 	// lights
@@ -139,7 +145,7 @@ void generate_movie(
 	Interval ws_time{3, 18};
 	Interval rb_time{6, 16};
 	Interval ts_time{13, 16};
-	Interval td_time{24, 15};
+	Interval td_time{24, 12};
 
 	// shapes
 	object_map.insert({"define shape box floor 0 0 0 10000 1 2000 white", {0, movie_duration}});
@@ -161,7 +167,7 @@ void generate_movie(
 	object_map.insert({"define shape sphere ts2 0 75 0 75 red_glass", ts_time});
 	object_map.insert({"define shape sphere ts3 0 80 0 80 blue_glass", ts_time});
 	//transparent dodecahedron
-	object_map.insert({"define shape box socle -15 0 -15 15 60 15 white", td_time});
+	object_map.insert({"define shape box socle -15 0 -15 15 70 15 white", td_time});
 	object_map.insert({"define shape obj dodecahedron", td_time});
 
 	float chest_height = 100;
@@ -181,8 +187,8 @@ void generate_movie(
 			{29*velocity, chest_height, cam_dist}, {0, 0, -1},
 			{30.5*velocity, chest_height, cam_dist}, {0, 0, -1},
 			ease_sin_in, 1});
-//	cam_animations.emplace_back(CamAnimation{{30, 2}, {29*velocity, chest_height, cam_dist}, {0, 0, -1}});
-	cam_animations.emplace_back(CamAnimation{{31, 4}, {30.5*velocity, chest_height, cam_dist}, {0, 0, -1}});
+	cam_animations.emplace_back(CamAnimation{{31, 1}, {30.5*velocity, chest_height, cam_dist}, {0, 0, -1}});
+	cam_animations.emplace_back(CamAnimation{{32, 4}, {2520 + 150, 110, 0}, {-1, 0, 0}});
 
 	// translations
 	animations.emplace_back(Animation{"floor", "translate", {0, movie_duration}, {-1000, -1, -800}});
@@ -205,7 +211,7 @@ void generate_movie(
 	animations.emplace_back(Animation{"ts3", "translate", ts_time, {2000, 0, 200}});
 
 	animations.emplace_back(Animation{"socle", "translate", td_time, {2520, 0, 0}});
-	animations.emplace_back(Animation{"dodecahedron", "translate", td_time, {2520, 100, 0}});
+	animations.emplace_back(Animation{"dodecahedron", "translate", td_time, {2520, 110, 0}});
 
 	// rotations
 	animations.emplace_back(Animation{"wb1", "rotate", wb_time, {0, 35, 0}});
@@ -217,7 +223,7 @@ void generate_movie(
 	animations.emplace_back(Animation{"rb3", "rotate", rb_time, {0, 35, 0}});
 	animations.emplace_back(Animation{"rb4", "rotate", rb_time, {0, 25, 0}});
 
-	animations.emplace_back(Animation{"dodecahedron", "rotate", td_time, {25, 0 ,0}, {25, 720, 0}});
+	animations.emplace_back(Animation{"dodecahedron", "rotate", td_time, {25, 0 ,0}, {25, 360, 0}});
 
 
 	//scales
@@ -233,6 +239,7 @@ void generate_movie(
 			out_dir,
 			854, 480, 1,
 //			1280, 720, 2,
+//			1920, 1080, 2,
 			3);
 }
 
@@ -256,6 +263,6 @@ int main(int argc, char** argv) {
 	generate_movie("./movie/obj", "./movie/files");
 
 	std::cout << "render sdfs\n";
-	render_movie(0, 700, "./movie/files", "./movie/obj", "./movie/images");
+	render_movie(0, 720, "./movie/files", "./movie/obj", "./movie/images");
 	return 0;
 }

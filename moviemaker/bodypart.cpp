@@ -21,7 +21,7 @@ std::ostream &operator<<(std::ostream &os, BodyPart const& part) {
 }
 
 Body::Body() : offset_() {
-	auto body = std::make_shared<BodyPart>(BodyPart{"chest", {0, 97.4361, 0}});
+	auto body = std::make_shared<BodyPart>(BodyPart{"chest"});
 	auto head = std::make_shared<BodyPart>(BodyPart{"head", {-2.6547f, 63.9209f, 2.93762f}});
 	auto arm_left = std::make_shared<BodyPart>(BodyPart{"arm-left", {-25.1092f, 48.3269f, 3.80979f}});
 	auto arm_right = std::make_shared<BodyPart>(BodyPart{"arm-right", {16.7486, 50.3349, 5.91147}});
@@ -72,6 +72,7 @@ void Body::apply_pose(Pose const& pose) {
 std::ostream& Body::print(std::ostream& os) const {
 	os << *find_part("chest");
 	os << "define shape composite body chest" << std::endl;
+	os << "transform body translate 0 97.4361 0" << std::endl;
 	return os;
 }
 
