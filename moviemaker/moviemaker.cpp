@@ -73,7 +73,7 @@ void write_to_sdf(
 void generate_movie(
 		std::string const& res_dir,
 		std::string const& out_dir) {
-	float movie_duration = 36;
+	float movie_duration = 37;
 	unsigned fps = 20;
 
 	std::map<std::string, Interval> object_map;
@@ -84,11 +84,14 @@ void generate_movie(
 	float velocity = 80;
 	float walk_speed = 18.125f / velocity;
 	float halt_speed = 0.25f;
+	float steal_speed = 0.8;
 	int walk_pose_count = ceilf(29.0f / walk_speed);
 
 	//walking
 	std::vector<Pose> walk;
 	std::vector<Pose> halt;
+	std::vector<Pose> steal;
+
 	//load 8 walking poses
 	for (int i = 0; i < 8; ++i) {
 		walk.emplace_back(read_pose(res_dir + "/walk/pose0" + std::to_string(i+1) + ".txt"));
@@ -96,15 +99,17 @@ void generate_movie(
 	for (int i = 0; i < 5; ++i) {
 		halt.emplace_back(read_pose(res_dir + "/halt/pose0" + std::to_string(i+1) + ".txt"));
 	}
-
-	//cycle poses throughout whole animation
+	for (int i = 0; i < 6; ++i) {
+		steal.emplace_back(read_pose(res_dir + "/steal/pose0" + std::to_string(i+1) + ".txt"));
+	}
+	//cycle walk poses throughout animation
 	for (unsigned i = 0; i < walk_pose_count; ++i) {
 		body_animations.emplace_back(BodyAnimation{
 			walk[i % walk.size()],
 			walk[(i + 1) % walk.size()],
 			{i * walk_speed, walk_speed}});
 	}
-	//halt
+	//halt in front of diamond
 	for (unsigned i = 0; i < 4; ++i) {
 		body_animations.emplace_back(BodyAnimation{
 				halt[i],
@@ -112,7 +117,15 @@ void generate_movie(
 				{29 + i * halt_speed, halt_speed}});
 	}
 	//stand still
-	body_animations.emplace_back(BodyAnimation{halt[4], halt[4], {30, 6}});
+	body_animations.emplace_back(BodyAnimation{halt[4], halt[4], {30, 2}});
+	//grab diamond
+	for (unsigned i = 0; i < 5; ++i) {
+		body_animations.emplace_back(BodyAnimation{
+				steal[i],
+				steal[i + 1],
+				{32 + i * steal_speed, steal_speed}});
+	}
+	body_animations.emplace_back(BodyAnimation{steal[5], steal[5], {36, 1}});
 
 	//walk movement
 	animations.emplace_back(Animation{"body", "translate", {0, 29}, {0, 0, 0}, {29 * velocity, 0, 0}});
@@ -121,7 +134,7 @@ void generate_movie(
 	//standing
 	animations.emplace_back(Animation{"body", "translate", {30, 2}, {29.25 * velocity, 0, 0}});
 	//standing closer to the diamond
-	animations.emplace_back(Animation{"body", "translate", {32, 4}, {2520 - 100, 0, 0}});
+	animations.emplace_back(Animation{"body", "translate", {32, 10}, {2520 - 50, 0, 5}});
 	//continuous sidewards facing
 	animations.emplace_back(Animation{"body", "rotate", {0, movie_duration}, {0, 90, 0}});
 
@@ -145,7 +158,7 @@ void generate_movie(
 	Interval ws_time{3, 18};
 	Interval rb_time{6, 16};
 	Interval ts_time{13, 16};
-	Interval td_time{24, 12};
+	Interval td_time{24, 15};
 
 	// shapes
 	object_map.insert({"define shape box floor 0 0 0 10000 1 2000 white", {0, movie_duration}});
@@ -188,7 +201,8 @@ void generate_movie(
 			{30.5*velocity, chest_height, cam_dist}, {0, 0, -1},
 			ease_sin_in, 1});
 	cam_animations.emplace_back(CamAnimation{{31, 1}, {30.5*velocity, chest_height, cam_dist}, {0, 0, -1}});
-	cam_animations.emplace_back(CamAnimation{{32, 4}, {2520 + 150, 110, 0}, {-1, 0, 0}});
+	cam_animations.emplace_back(CamAnimation{{32, 5}, {2520 + 150, 110, 0}, {-1, 0, 0}, {2520 + 150, 100, 0}, {-1, 0.1, 0}});
+//	cam_animations.emplace_back(CamAnimation{{32, 4}, {2520, 110, 150}, {0, 0, -1}});
 
 	// translations
 	animations.emplace_back(Animation{"floor", "translate", {0, movie_duration}, {-1000, -1, -800}});
@@ -263,6 +277,6 @@ int main(int argc, char** argv) {
 	generate_movie("./movie/obj", "./movie/files");
 
 	std::cout << "render sdfs\n";
-	render_movie(0, 720, "./movie/files", "./movie/obj", "./movie/images");
+	render_movie(0, 740, "./movie/files", "./movie/obj", "./movie/images");
 	return 0;
 }
