@@ -15,6 +15,7 @@ float ease_sin_in(float percent, float exp) {
 
 std::string get_current_transform(Animation const& animation, float current_time) {
 	float progress = (current_time - animation.time.start_time) / animation.time.duration;
+	progress = animation.ease(progress, animation.ease_exp);
 
 	glm::vec3 delta = (animation.end - animation.start) * progress;
 	glm::vec3 new_state = animation.start + delta;

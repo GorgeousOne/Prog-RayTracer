@@ -33,8 +33,6 @@ void write_to_sdf(
 		file_name << "frame" << std::setfill('0') << std::setw(4) << frame+1;
 		std::ofstream sdf_file(out_directory + "/" + file_name.str() + ".sdf");
 
-		//sdf_file << "#body pose" << std::endl << *body;
-
 		for (auto const& animation : body_animations) {
 			if (animation.time.is_active(current_time)) {
 				apply_curren_pose(body, animation, current_time);
@@ -43,7 +41,6 @@ void write_to_sdf(
 			}
 		}
 		sdf_file << std::endl;
-
 
 		for (auto const& object : object_map) {
 			if (object.second.is_active(current_time)) {
@@ -73,8 +70,8 @@ void write_to_sdf(
 void generate_movie(
 		std::string const& res_dir,
 		std::string const& out_dir) {
-	float movie_duration = 37;
-	unsigned fps = 20;
+	float movie_duration = 41;
+	unsigned fps = 24;
 
 	std::map<std::string, Interval> object_map;
 	std::vector<Animation> animations;
@@ -84,7 +81,7 @@ void generate_movie(
 	float velocity = 80;
 	float walk_speed = 18.125f / velocity;
 	float halt_speed = 0.25f;
-	float steal_speed = 0.8;
+	float steal_speed = 1;
 	int walk_pose_count = ceilf(29.0f / walk_speed);
 
 	//walking
@@ -99,8 +96,10 @@ void generate_movie(
 	for (int i = 0; i < 5; ++i) {
 		halt.emplace_back(read_pose(res_dir + "/halt/pose0" + std::to_string(i+1) + ".txt"));
 	}
-	for (int i = 0; i < 6; ++i) {
-		steal.emplace_back(read_pose(res_dir + "/steal/pose0" + std::to_string(i+1) + ".txt"));
+	for (int i = 0; i < 10; ++i) {
+		std::stringstream file_name;
+		file_name << "pose" << std::setfill('0') << std::setw(2) << (i+1) << ".txt";
+		steal.emplace_back(read_pose(res_dir + "/steal/" + file_name.str()));
 	}
 	//cycle walk poses throughout animation
 	for (unsigned i = 0; i < walk_pose_count; ++i) {
@@ -119,14 +118,12 @@ void generate_movie(
 	//stand still
 	body_animations.emplace_back(BodyAnimation{halt[4], halt[4], {30, 2}});
 	//grab diamond
-	for (unsigned i = 0; i < 5; ++i) {
+	for (unsigned i = 0; i < 9; ++i) {
 		body_animations.emplace_back(BodyAnimation{
 				steal[i],
 				steal[i + 1],
 				{32 + i * steal_speed, steal_speed}});
 	}
-	body_animations.emplace_back(BodyAnimation{steal[5], steal[5], {36, 1}});
-
 	//walk movement
 	animations.emplace_back(Animation{"body", "translate", {0, 29}, {0, 0, 0}, {29 * velocity, 0, 0}});
 	//halting movement
@@ -155,10 +152,10 @@ void generate_movie(
 	object_map.insert({"define material blue_glass 0 0 0 .6 .6 1 1 1 1 500 .01 0.1 1.1", {0, movie_duration}});
 
 	Interval wb_time{1, 11};
-	Interval ws_time{3, 18};
+	Interval ws_time{3, 18.5};
 	Interval rb_time{6, 16};
 	Interval ts_time{13, 16};
-	Interval td_time{24, 15};
+	Interval td_time{24, 20};
 
 	// shapes
 	object_map.insert({"define shape box floor 0 0 0 10000 1 2000 white", {0, movie_duration}});
@@ -201,8 +198,8 @@ void generate_movie(
 			{30.5*velocity, chest_height, cam_dist}, {0, 0, -1},
 			ease_sin_in, 1});
 	cam_animations.emplace_back(CamAnimation{{31, 1}, {30.5*velocity, chest_height, cam_dist}, {0, 0, -1}});
-	cam_animations.emplace_back(CamAnimation{{32, 5}, {2520 + 150, 110, 0}, {-1, 0, 0}, {2520 + 150, 100, 0}, {-1, 0.1, 0}});
-//	cam_animations.emplace_back(CamAnimation{{32, 4}, {2520, 110, 150}, {0, 0, -1}});
+	cam_animations.emplace_back(CamAnimation{{32, 4}, {2520 + 155, 105, 0}, {-1, 0, 0}, {2520 + 155, 95, 0}, {-1, .2f, 0}});
+	cam_animations.emplace_back(CamAnimation{{36, 5}, {2520 + 155, 95, 0}, {-1, .2f, 0}, {2520 + 155, 80, 0}, {-1, .5f, 0}});
 
 	// translations
 	animations.emplace_back(Animation{"floor", "translate", {0, movie_duration}, {-1000, -1, -800}});
@@ -226,6 +223,7 @@ void generate_movie(
 
 	animations.emplace_back(Animation{"socle", "translate", td_time, {2520, 0, 0}});
 	animations.emplace_back(Animation{"dodecahedron", "translate", td_time, {2520, 110, 0}});
+	animations.emplace_back(Animation{"dodecahedron", "translate", {36, 5}, {0, 0, 0}, {0, 70, 0}, ease_cos_in, 1 });
 
 	// rotations
 	animations.emplace_back(Animation{"wb1", "rotate", wb_time, {0, 35, 0}});
@@ -238,7 +236,6 @@ void generate_movie(
 	animations.emplace_back(Animation{"rb4", "rotate", rb_time, {0, 25, 0}});
 
 	animations.emplace_back(Animation{"dodecahedron", "rotate", td_time, {25, 0 ,0}, {25, 360, 0}});
-
 
 	//scales
 	animations.emplace_back(Animation{"dodecahedron", "scale", td_time, glm::vec3(2.5)});
@@ -266,7 +263,7 @@ void render_movie(
 
 	for (int i = start_frame; i < end_frame; ++i) {
 		std::stringstream file_name;
-		file_name << "frame" << std::setfill('0') << std::setw(4) << i+1 << ".sdf";
+		file_name << "frame" << std::setfill('0') << std::setw(4) << 2*i << ".sdf";
 		load_scene(src_dir + "/" + file_name.str(), res_dir, out_dir);
 		std::cout << file_name.str() << "\n";
 	}
@@ -277,6 +274,6 @@ int main(int argc, char** argv) {
 	generate_movie("./movie/obj", "./movie/files");
 
 	std::cout << "render sdfs\n";
-	render_movie(0, 740, "./movie/files", "./movie/obj", "./movie/images");
+	render_movie(0, 984, "./movie/files", "./movie/obj", "./movie/images");
 	return 0;
 }

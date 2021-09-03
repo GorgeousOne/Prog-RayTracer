@@ -29,6 +29,8 @@ struct Animation {
 	Interval time{};
 	glm::vec3 start{};
 	glm::vec3 end = start;
+	std::function<float(float, float)> ease = ease_linear;
+	float ease_exp = 1;
 };
 
 struct CamAnimation {
