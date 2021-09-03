@@ -30,7 +30,7 @@ void write_to_sdf(
 		float current_time = frame * frame_duration;
 
 		std::stringstream file_name;
-		file_name << "frame" << std::setfill('0') << std::setw(4) << frame+1;
+		file_name << "frame" << std::setfill('0') << std::setw(4) << frame;
 		std::ofstream sdf_file(out_directory + "/" + file_name.str() + ".sdf");
 
 		for (auto const& animation : body_animations) {
@@ -131,9 +131,9 @@ void generate_movie(
 	//standing
 	animations.emplace_back(Animation{"body", "translate", {30, 2}, {29.25 * velocity, 0, 0}});
 	//standing closer to the diamond
-	animations.emplace_back(Animation{"body", "translate", {32, 10}, {2520 - 50, 0, 5}});
+	animations.emplace_back(Animation{"body", "translate", {32, 10}, {2520 - 50, 0, 0}});
 	//continuous sidewards facing
-	animations.emplace_back(Animation{"body", "rotate", {0, movie_duration}, {0, 90, 0}});
+	animations.emplace_back(Animation{"body", "rotate", {0, movie_duration}, {0, -90, 0}});
 
 	// lights
 	object_map.insert({"define ambient amb 1 1 1 1", {0, movie_duration}});
@@ -226,16 +226,16 @@ void generate_movie(
 	animations.emplace_back(Animation{"dodecahedron", "translate", {36, 5}, {0, 0, 0}, {0, 70, 0}, ease_cos_in, 1 });
 
 	// rotations
-	animations.emplace_back(Animation{"wb1", "rotate", wb_time, {0, 35, 0}});
-	animations.emplace_back(Animation{"wb2", "rotate", wb_time, {0, -15, 15}});
-	animations.emplace_back(Animation{"wb3", "rotate", wb_time, {0, 10, -10}});
+	animations.emplace_back(Animation{"wb1", "rotate", wb_time, {0, -35, 0}});
+	animations.emplace_back(Animation{"wb2", "rotate", wb_time, {0, 15, 15}});
+	animations.emplace_back(Animation{"wb3", "rotate", wb_time, {0, -10, -10}});
 
-	animations.emplace_back(Animation{"rb1", "rotate", rb_time, {0, -30, 0}});
-	animations.emplace_back(Animation{"rb2", "rotate", rb_time, {0, 20, 0}});
-	animations.emplace_back(Animation{"rb3", "rotate", rb_time, {0, 35, 0}});
-	animations.emplace_back(Animation{"rb4", "rotate", rb_time, {0, 25, 0}});
+	animations.emplace_back(Animation{"rb1", "rotate", rb_time, {0, 30, 0}});
+	animations.emplace_back(Animation{"rb2", "rotate", rb_time, {0, -20, 0}});
+	animations.emplace_back(Animation{"rb3", "rotate", rb_time, {0, -35, 0}});
+	animations.emplace_back(Animation{"rb4", "rotate", rb_time, {0, -25, 0}});
 
-	animations.emplace_back(Animation{"dodecahedron", "rotate", td_time, {25, 0 ,0}, {25, 360, 0}});
+	animations.emplace_back(Animation{"dodecahedron", "rotate", td_time, {25, 0 ,0}, {25, -360, 0}});
 
 	//scales
 	animations.emplace_back(Animation{"dodecahedron", "scale", td_time, glm::vec3(2.5)});
@@ -248,10 +248,10 @@ void generate_movie(
 			fps,
 			movie_duration,
 			out_dir,
-			854, 480, 1,
+//			854, 480, 1,
 //			1280, 720, 2,
-//			1920, 1080, 2,
-			3);
+			1920, 1080, 2,
+			4);
 }
 
 void render_movie(
@@ -261,9 +261,9 @@ void render_movie(
 		std::string const& res_dir,
 		std::string const& out_dir) {
 
-	for (int i = start_frame; i < end_frame; ++i) {
+	for (unsigned i = start_frame; i <= end_frame; ++i) {
 		std::stringstream file_name;
-		file_name << "frame" << std::setfill('0') << std::setw(4) << 2*i << ".sdf";
+		file_name << "frame" << std::setfill('0') << std::setw(4) << i << ".sdf";
 		load_scene(src_dir + "/" + file_name.str(), res_dir, out_dir);
 		std::cout << file_name.str() << "\n";
 	}
