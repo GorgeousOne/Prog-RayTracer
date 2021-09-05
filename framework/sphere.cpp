@@ -5,7 +5,7 @@
 #include <glm/gtx/intersect.hpp>
 
 #define PI 3.14159265f
-#define EPSILON 0.001f
+#define EPSILON 0.1f
 
 Sphere::Sphere(float radius, glm::vec3 const& center, std::string const& name, std::shared_ptr<Material> material) :
 		Shape(name, material),
@@ -54,7 +54,7 @@ HitPoint Sphere::intersect(Ray const& ray) const {
 		t -= EPSILON;
 		glm::vec3 surface_normal_inv = get_surface_normal(ray_inv.point(t));
 		glm::vec3 surface_normal = transform_vec3(world_transformation_, surface_normal_inv);
-		return HitPoint{ true, t, name_, material_, ray.point(t), ray.direction, glm::normalize(surface_normal) };
+		return HitPoint{ true, t, name_, material_, ray.point(t), ray.direction, glm::normalize(surface_normal)};
 	}else {
 		return {};
 	}

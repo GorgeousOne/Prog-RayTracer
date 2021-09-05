@@ -1,0 +1,8 @@
+# create/overwrite video from single images
+ffmpeg -y -r 24 -i images/frame%4d.ppm -vf format=yuv420p video.mp4
+
+# create/overwrite video with specific frames
+ffmpeg -y -r 24 -start_number 640 -i images/frame%4d.ppm -vf format=yuv420p video.mp4
+
+# add audio file to video
+ffmpeg -i video.mp4 -i audio.mp3 -c:v copy -c:a aac final-video.mp4

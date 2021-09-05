@@ -1,6 +1,6 @@
 #include "box.hpp"
 
-#define EPSILON 0.001f
+#define EPSILON 0.1f
 
 Box::Box(
 		glm::vec3 const& min,

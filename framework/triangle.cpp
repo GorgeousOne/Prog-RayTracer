@@ -1,7 +1,7 @@
 #include "triangle.hpp"
 #include <glm/gtx/intersect.hpp>
 
-#define EPSILON 0.001f
+#define EPSILON 0.1f
 
 Triangle::Triangle(
 		glm::vec3 const& v0,
@@ -87,7 +87,11 @@ HitPoint Triangle::intersect(Ray const& ray) const {
 		return {};
 	}else {
 		t -= EPSILON;
+
 		glm::vec3 surface_normal = transform_vec3(world_transformation_, n_);
+		if (glm::dot(surface_normal, ray_inv.direction) > 0) {
+			surface_normal *= -1;
+		}
 		return {true, t, name_, material_, ray.point(t), ray.direction, glm::normalize(surface_normal)};
 	}
 }

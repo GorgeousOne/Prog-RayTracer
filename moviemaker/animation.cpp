@@ -1,38 +1,46 @@
 #include "animation.h"
+#define PI 3.14159265f
+
+float ease_linear(float percent, float exp) {
+	return percent;
+};
+
+float ease_cos_in(float percent, float exp) {
+	return powf(1.0f - cosf(percent * PI * 0.5f), exp);
+};
+
+float ease_sin_in(float percent, float exp) {
+	return powf(sinf(percent * PI * 0.5f), exp);
+};
 
 std::string get_current_transform(Animation const& animation, float current_time) {
 	float progress = (current_time - animation.time.start_time) / animation.time.duration;
+	progress = animation.ease(progress, animation.ease_exp);
 
-	float change_1 = (animation.end1 - animation.start1) * progress;
-	float change_2 = (animation.end2 - animation.start2) * progress;
-	float change_3 = (animation.end3 - animation.start3) * progress;
-
-	float new_v1 = animation.start1 + change_1;
-	float new_v2 = animation.start2 + change_2;
-	float new_v3 = animation.start3 + change_3;
+	glm::vec3 delta = (animation.end - animation.start) * progress;
+	glm::vec3 new_state = animation.start + delta;
 
 	std::stringstream current_transform;
 	current_transform << "transform " << animation.name << " " << animation.type << " ";
-	current_transform << new_v1 << " " << new_v2 << " " << new_v3;
+	current_transform << new_state.x << " " << new_state.y << " " << new_state.z;
 	return current_transform.str();
 }
 
-std::string get_current_cam(CamAnimation const& cam, float current_time) {
-	float progress = (current_time - cam.time.start_time) / cam.time.duration;
+std::string get_current_cam(CamAnimation const& animation, float current_time) {
+	float progress = (current_time - animation.time.start_time) / animation.time.duration;
+	progress = animation.ease(progress, animation.ease_exp);
 
-	glm::vec3 position = (cam.pos_end - cam.pos_start) * progress;
-	glm::vec3 direction = (cam.dir_end - cam.dir_start) * progress;
-	glm::vec3 up = (cam.up_end - cam.up_start) * progress;
+	glm::vec3 position = (animation.pos_end - animation.pos_start) * progress;
+	glm::vec3 direction = (animation.dir_end - animation.dir_start) * progress;
 
-	glm::vec3 new_pos = cam.pos_start + position;
-	glm::vec3 new_dir = cam.dir_start + direction;
-	glm::vec3 new_up = cam.up_start + up;
+	glm::vec3 new_pos = animation.pos_start + position;
+	glm::vec3 new_dir = animation.dir_start + direction;
 
 	std::stringstream current_transform;
-	current_transform << "define camera eye " << cam.fov << " ";
+	current_transform << "define camera eye " << animation.fov << " ";
 	current_transform << new_pos.x << " " << new_pos.y << " " << new_pos.z << " ";
 	current_transform << new_dir.x << " " << new_dir.y << " " << new_dir.z << " ";
-	current_transform << new_up.x << " " << new_up.y << " " << new_up.z;
+	current_transform << "0 1 0";
 	return current_transform.str();
 }
 

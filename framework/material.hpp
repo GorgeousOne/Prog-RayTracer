@@ -16,8 +16,8 @@ struct Material {
 	glm::vec3 ks = {};
 	//specular reflection exponent
 	float m = 0;
-	//glossiness coefficient
-	float glossy = 0.01;
+	//reflectance
+	float glossy = 0;
 
 	float opacity = 1;
 	//index of refraction

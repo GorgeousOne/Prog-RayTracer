@@ -38,8 +38,8 @@ void Shape::rotate(float roll, float pitch, float yaw) {
 
 	glm::mat4 rotation_y(1);
 	rotation_y[0][0] =  cosf(yaw);
-	rotation_y[0][2] =  sinf(yaw);
-	rotation_y[2][0] = -sinf(yaw);
+	rotation_y[0][2] = -sinf(yaw);
+	rotation_y[2][0] =  sinf(yaw);
 	rotation_y[2][2] =  cosf(yaw);
 
 	world_transformation_ = world_transformation_ * rotation_y * rotation_x * rotation_z;
