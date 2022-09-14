@@ -13,6 +13,7 @@
 #include <string>
 #include <thread>
 #include <atomic>
+#include <random>
 #include <glm/glm.hpp>
 #include "color.hpp"
 #include "pixel.hpp"
@@ -21,9 +22,8 @@
 
 class Renderer {
 public:
-	Renderer(unsigned w, unsigned h, std::string const& file_name, unsigned aa_steps, unsigned max_ray_bounces);
+	Renderer(unsigned w, unsigned h, std::string const& file_name, unsigned aa_steps, unsigned max_ray_bounces, unsigned int samples);
 
-	void render();
 	void render(Scene const& scene, Camera const& cam);
 	void write(Pixel const& p);
 
@@ -40,26 +40,26 @@ private:
 	PpmWriter ppm_;
 	unsigned aa_steps_;
 	unsigned max_ray_bounces_;
+	unsigned samples_;
 
 	std::atomic_uint pixel_index_;
+	std::atomic<float> progress;
+	std::minstd_rand gen_;
+	std::uniform_real_distribution<float> dist_;
 	void thread_function(Scene const& scene, float img_plane_dist, glm::mat4 const& trans_mat);
 
-	Color trace_color(Ray const& ray, Scene const& scene, unsigned ray_bounces) const;
+	Color primary_trace(Ray const& ray, Scene const& scene);
+	Color trace(Ray const& ray, Scene const& scene, unsigned samples, unsigned ray_bounces);
 	HitPoint get_closest_hit(Ray const& ray, Scene const& scene) const;
-	bool light_is_blocked(glm::vec3 const& position, glm::vec3 light_dir, float range, Scene const& scene) const;
+	Color shade(HitPoint const &hit_point, Scene const &scene, unsigned int samples, unsigned ray_bounces);
 
-	Color shade(HitPoint const& hitPoint, Scene const& scene, unsigned ray_bounces) const;
-	Color ambient_color(HitPoint const& , Light const& ambient) const;
-	Color diffuse_color(HitPoint const& hitPoint, Scene const& scene) const;
-	Color specular_color(HitPoint const& hitPoint, Scene const& scene) const;
-
-	Color reflection_color(const HitPoint &hitPoint, const Scene &scene, unsigned int ray_bounces) const;
-	Color refraction_color(HitPoint const& hit_point, const Scene &scene, unsigned int ray_bounces) const;
-	float schlick_reflection_ratio(glm::vec3 const& ray_dir, glm::vec3 const& normal, float ior, float min_reflectance) const;
-
-	Color normal_color(HitPoint const& hitPoint);
 	Color tone_map_color(Color color) const;
+	Color diffuse(HitPoint const &hit_point, Scene const &scene, unsigned int samples, unsigned int ray_bounces);
+	Color reflection(HitPoint const &point, Scene const &scene, unsigned samples, unsigned bounces);
+	Color refraction(HitPoint const &hit_point, Scene const &scene, unsigned samples, unsigned ray_bounces);
+	float schlick_reflection_ratio(glm::vec3 const &ray_dir, glm::vec3 const &normal, float const &ior) const;
 
+	Color primary_trace(Ray const &ray, Scene const &scene, unsigned int samples);
 };
 
 #endif // #ifndef BUW_RENDERER_HPP

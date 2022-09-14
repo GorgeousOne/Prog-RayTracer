@@ -1,45 +1,56 @@
-# light
+# materials
+# kd ks glossiness opacity emittance ior
 define ambient amb 1 1 1 1
-define light bulb 0 9 0 .2 .2 .2 32
+define material light_bulb 1 1 1 1 1 1 0 1 12000 1
+define material glass .6 .6 1 .6 .6 1  .01 0 0 1.15
 
+define material red  1 .2 .2  1 .2 .2  0 1 0 1
+define material green .2 1 .2  .2 1 .2  0 1 0 1
+define material white 1 1 1  1 1 1  0 1 0 1
 
-# materials name ka kd ks m glossiness opacity ior
-define material red 1 0 0 1 0 0 0 0 0 1 0 1 1
-define material green 0 1 0 0 1 0 1 1 1 50 0 1 1
-# define material blue .8 .8 1 1 1 1 1 1 1 100 0.05 0 1.4
-define material blue .8 .8 1 .6 .6 1 .6 .6 1 500 .028 0.1 1.4
-define material yellow 1 1 0 1 1 0 1 1 0 50 1 1 1
-define material white 1 1 1 1 1 1 0 0 0 1 0 1 1
+define material red_refl 1 .2 .2  1 .2 .2  1 1 0 1
+define material blue_refl .2 .2 1  .2 .2 1  1 1 0 1
+define material perf_mirr 1 1 1  1 1 1  .99 1 1 1
+define material yellow_glass 1 1 .2  1 1 .2  0.1 0 0 1.15
 
 # geometry
-define shape box red_wall 0 0 0 1 10 25 red
-define shape box green_wall 0 0 0 1 10 25 green
-define shape box floor 0 0 0 10 1 25 white
-define shape box ceiling 0 0 0 10 1 25 white
-define shape box back 0 0 0 10 10 1 white
-define shape box front 0 0 0 10 10 1 white
+# geometry
+define shape box lwall 0 0 0 10 10 10 red
+define shape box rwall 0 0 0 10 10 10 green
+define shape box bwall -1 -1 0 11 11 10 perf_mirr
+define shape box floor 0 0 0 10 10 10 white
+# define shape box ceil 0 0 0 10 10 10 white
+define shape box ceil1 0 0 0 10 10 2.5 white
+define shape box ceil2 0 0 0 10 10 2.5 white
+define shape box ceil3 0 0 0 2.5 10 5 white
+define shape box ceil4 0 0 0 2.5 10 5 white
+define shape box lamp 0 0 0 5 1 5 light_bulb
 
-transform red_wall translate -6 0 -5
-transform green_wall translate 5 0 -5
-transform floor translate -5 -1 -5
-transform ceiling translate -5 10 -5
-transform back translate -5 0 -6
-transform front translate -5 0 15
+define shape sphere mid1 0 0 0 1.5 red_refl
+define shape sphere mid2 0 0 0 1.5 blue_refl
+define shape box mid3 -1.25 -1.25 -1.25 1.25 1.25 1.25 yellow_glass
 
-define shape sphere ball1 0 0 0 1.5 blue
-define shape box box1 -1.5 0 -1.5 1.5 5.8 1.5 yellow
+# define shape sphere world 0 0 0 30 white
 
-transform ball1 translate 1.5 1.5 2
-transform box1 translate -1.5 0 -1
-transform box1 rotate 0 60 0
+transform lwall translate -10 10 0
+transform rwall translate 10 10 0
+transform bwall translate 0 10 -10
+# transform ceil translate 0 20 0
+transform ceil1 translate 0 20 0
+transform ceil2 translate 0 20 7.5
+transform ceil3 translate 0 20 2.5
+transform ceil4 translate 7.5 20 2.5
+transform lamp translate 2.5 20 2.5
 
-define shape obj superhot
-transform superhot translate 3 0 -2
-transform superhot rotate 0 -90 0
+transform mid1 translate 2.5 15 5
+transform mid2 translate 7.5 15 5
+transform mid3 translate 5 15 10
+transform mid3 rotate 0 45 0
 
-define shape composite comp ball1 box1
-add comp superhot
-transform comp translate 0 1 0
-
+define composite ceil ceil1 ceil2 ceil3 ceil4
 # camera
-define camera eye 60.0 0 5 13.66 0 0 -1 0 1 0
+# define camera eye 60.0 0 5 13.66 0 0 0
+define camera eye 45.0 5 15 20 0 0 0
+
+# render ../../sdf/cornellbox 400 400 100 3 5
+# render ../../sdf/cornellbox 800 800 10000 3 5

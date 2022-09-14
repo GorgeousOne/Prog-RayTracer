@@ -41,10 +41,10 @@ struct Color {
 		return *this;
 	}
 
-	Color &operator*=(glm::vec3 const& coefficient) {
-		r *= coefficient.x;
-		g *= coefficient.y;
-		b *= coefficient.z;
+	Color &operator*=(Color const& coefficient) {
+		r *= coefficient.r;
+		g *= coefficient.g;
+		b *= coefficient.b;
 		return *this;
 	}
 
@@ -66,7 +66,7 @@ struct Color {
 		return tmp;
 	}
 
-	friend Color operator*(Color const& a, glm::vec3 const& coefficient) {
+	friend Color operator*(Color const& a, Color const& coefficient) {
 		auto tmp(a);
 		tmp *= coefficient;
 		return tmp;

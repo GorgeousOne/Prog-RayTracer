@@ -3,9 +3,12 @@
 #include <algorithm>
 #include <string>
 
+#include <glm/gtx/euler_angles.hpp>
+
 #include "scene.hpp"
 #include "sphere.hpp"
 #include "renderer.hpp"
+#include "ray.hpp"
 
 std::shared_ptr<Material> Scene::find_mat(std::string const& name) const {
 	auto it = materials.find(name);
@@ -22,23 +25,35 @@ glm::vec3 load_vec(std::istringstream& arg_stream) {
 	return v;
 }
 
+Color load_color(std::istringstream& arg_stream) {
+	Color c;
+	arg_stream >> c.r >> c.g >> c.b;
+	return c;
+}
+
 std::shared_ptr<Material> load_mat(std::istringstream& arg_stream) {
 	std::string name;
-	float m;
-	float glossy;
+	float glossiness;
+//	float glossy;
 	float opacity;
+	float emittance;
 	float ior;
 
 	arg_stream >> name;
-	glm::vec3 ka = load_vec(arg_stream);
-	glm::vec3 kd = load_vec(arg_stream);
-	glm::vec3 ks = load_vec(arg_stream);
-	arg_stream >> m;
-	arg_stream >> glossy;
+//	glm::vec3 ka = load_vec(arg_stream);
+//	glm::vec3 kd = load_vec(arg_stream);
+//	glm::vec3 ks = load_vec(arg_stream);
+//	Color ka = load_color(arg_stream);
+	Color kd = load_color(arg_stream);
+	Color ks = load_color(arg_stream);
+//	arg_stream >> glossy;
+	arg_stream >> glossiness;
 	arg_stream >> opacity;
+	arg_stream >> emittance;
 	arg_stream >> ior;
 
-	return std::make_shared<Material>(Material{name, ka, kd, ks, m, glossy, opacity, ior});
+//	return std::make_shared<Material>(Material{name, ka, kd, ks, m, glossy, opacity, ior});
+	return std::make_shared<Material>(Material{name, kd, ks, glossiness, opacity, emittance, ior});
 }
 
 std::shared_ptr<Box> load_box(std::istringstream& arg_stream, Scene const& scene) {
@@ -113,17 +128,17 @@ Light load_ambient(std::istringstream& arg_stream) {
 Camera load_camera(std::istringstream& arg_stream) {
 	std::string name;
 	float fov_x;
-	glm::vec3 pos;
-	glm::vec3 dir;
-	glm::vec3 up;
+	float yaw;
+	float pitch;
+	float roll;
 
 	arg_stream >> name;
 	arg_stream >> fov_x;
-	arg_stream >> pos.x >> pos.y >> pos.z;
-	arg_stream >> dir.x >> dir.y >> dir.z;
-	arg_stream >> up.x >> up.y >> up.z;
+	glm::vec3 pos = load_vec(arg_stream);
+	arg_stream >> yaw >> pitch >> roll;
 
-	return {name, fov_x, pos, glm::normalize(dir), glm::normalize(up)};
+	glm::mat4 cam_rotation = glm::eulerAngleYXZ(glm::radians(yaw), glm::radians(pitch), glm::radians(roll));
+	return {name, glm::radians(fov_x), pos, transform_vec3(cam_rotation, {0, 0, -1}, false), transform_vec3(cam_rotation, {0, 1, 0}, false)};
 }
 
 void load_transformation(std::istringstream& arg_stream, Scene const& scene) {
@@ -161,48 +176,48 @@ void load_transformation(std::istringstream& arg_stream, Scene const& scene) {
 	}
 }
 
-void add_obj_materials(std::string const& file_path, Scene& scene) {
-	std::ifstream input_mtl_file(file_path);
-	std::string line_buffer;
-	std::shared_ptr<Material> current_mat = nullptr;
-
-	while (std::getline(input_mtl_file, line_buffer)) {
-		std::istringstream arg_stream(line_buffer);
-
-		if ('#' == arg_stream.peek()) {
-			continue;
-		}
-		std::string token;
-		arg_stream >> token;
-
-		if ("newmtl" == token) {
-			current_mat = std::make_shared<Material>();
-			arg_stream >> current_mat->name;
-			scene.materials.insert({current_mat->name, current_mat});
-		//ambient
-		} else if ("Ka" == token) {
-			current_mat->ka = load_vec(arg_stream);
-		//diffuse
-		} else if ("Kd" == token) {
-			current_mat->kd = load_vec(arg_stream);
-		//specular
-		} else if ("Ks" == token) {
-			current_mat->ks = load_vec(arg_stream);
-		//specularity
-		} else if ("Ns" == token) {
-			arg_stream >> current_mat->m;
-		//opacity
-		} else if ("d" == token) {
-			arg_stream >> current_mat->opacity;
-		//index of refraction and therefore reflectance
-		} else if ("Ni" == token) {
-			float ior;
-			arg_stream >> ior;
-			current_mat->ior = ior;
-			current_mat->glossy = powf((1 - ior) / (1 + ior), 2);
-		}
-	}
-}
+//void add_obj_materials(std::string const& file_path, Scene& scene) {
+//	std::ifstream input_mtl_file(file_path);
+//	std::string line_buffer;
+//	std::shared_ptr<Material> current_mat = nullptr;
+//
+//	while (std::getline(input_mtl_file, line_buffer)) {
+//		std::istringstream arg_stream(line_buffer);
+//
+//		if ('#' == arg_stream.peek()) {
+//			continue;
+//		}
+//		std::string token;
+//		arg_stream >> token;
+//
+//		if ("newmtl" == token) {
+//			current_mat = std::make_shared<Material>();
+//			arg_stream >> current_mat->name;
+//			scene.materials.insert({current_mat->name, current_mat});
+//		//ambient
+////		} else if ("Ka" == token) {
+////			current_mat->ka = load_vec(arg_stream);
+//		//diffuse
+//		} else if ("Kd" == token) {
+//			current_mat->kd = load_vec(arg_stream);
+//		//specular
+//		} else if ("Ks" == token) {
+//			current_mat->ks = load_vec(arg_stream);
+//		//specularity
+//		} else if ("Ns" == token) {
+//			arg_stream >> current_mat->m;
+//		//opacity
+//		} else if ("d" == token) {
+//			arg_stream >> current_mat->opacity;
+//		//index of refraction and therefore reflectance
+//		} else if ("Ni" == token) {
+//			float ior;
+//			arg_stream >> ior;
+//			current_mat->ior = ior;
+//			current_mat->glossy = powf((1 - ior) / (1 + ior), 2);
+//		}
+//	}
+//}
 
 std::shared_ptr<Triangle> load_obj_face(
 		std::istringstream& arg_stream,
@@ -280,7 +295,7 @@ std::shared_ptr<Composite> load_obj(std::string const& directory_path, std::stri
 		if ("mtllib" == token) {
 			std::string mtl_file_name;
 			arg_stream >> mtl_file_name;
-			add_obj_materials(directory_path + "/" + mtl_file_name, scene);
+//			add_obj_materials(directory_path + "/" + mtl_file_name, scene);
 			//adds vertex
 		} else if ("v" == token) {
 			vertices.push_back(load_vec(arg_stream));
@@ -384,7 +399,7 @@ void render(std::istringstream& arg_stream, Scene const& scene, std::string cons
 	arg_stream >> aa_steps;
 	arg_stream >> ray_bounces;
 
-	Renderer renderer{res_x, res_y, output_directory + "/" + file_name, aa_steps, ray_bounces};
+	Renderer renderer{res_x, res_y, output_directory + "/" + file_name, aa_steps, ray_bounces, 100};
 	renderer.render(scene, scene.camera);
 }
 

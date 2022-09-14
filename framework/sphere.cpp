@@ -5,7 +5,7 @@
 #include <glm/gtx/intersect.hpp>
 
 #define PI 3.14159265f
-#define EPSILON 0.1f
+#define EPSILON 0.001f
 
 Sphere::Sphere(float radius, glm::vec3 const& center, std::string const& name, std::shared_ptr<Material> material) :
 		Shape(name, material),

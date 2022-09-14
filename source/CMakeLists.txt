@@ -19,7 +19,7 @@ add_executable(example
 
         ../framework/pixel.hpp ../framework/pixel.cpp
         ../framework/pixel.hpp ../framework/ppmwriter.cpp
-        ../framework/renderer.hpp ../framework/renderer.cpp
+		../framework/renderer.hpp ../framework/renderer.cpp
 	)
 
 target_link_libraries(example ${FRAMEWORK_NAME} ${LIBRARIES})

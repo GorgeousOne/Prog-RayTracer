@@ -1,6 +1,6 @@
 #include "box.hpp"
 
-#define EPSILON 0.1f
+#define EPSILON 0.001f
 
 Box::Box(
 		glm::vec3 const& min,
@@ -164,15 +164,15 @@ bool Box::intersect(Ray const& ray_inv, float &t) const {
 }
 
 glm::vec3 Box::get_surface_normal(glm::vec3 const& intersection_inv) const {
-	if (intersection_inv.x <= min_.x) {
+	if (intersection_inv.x <= min_.x + EPSILON) {
 		return glm::vec3{-1, 0, 0};
-	} else if (intersection_inv.y <= min_.y) {
+	} else if (intersection_inv.y <= min_.y + EPSILON) {
 		return glm::vec3{0, -1, 0};
-	} else if (intersection_inv.z <= min_.z) {
+	} else if (intersection_inv.z <= min_.z + EPSILON) {
 		return glm::vec3{0, 0, -1};
-	} else if (intersection_inv.x >= max_.x) {
+	} else if (intersection_inv.x >= max_.x - EPSILON) {
 		return glm::vec3{1, 0, 0};
-	} else if (intersection_inv.y >= max_.y) {
+	} else if (intersection_inv.y >= max_.y - EPSILON) {
 		return glm::vec3{0, 1, 0};
 	} else {
 		return glm::vec3{0, 0, 1};
